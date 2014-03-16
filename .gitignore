@@ -9,5 +9,6 @@ log
 pid
 backup/*
 todo.org
+\#*
 
 
