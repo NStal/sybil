@@ -1,0 +1,11 @@
+{
+    "name":"memomeme-client"
+    ,"main":"static/index.html"  
+    ,"window": {
+	"toolbar": true
+	,"frame":false
+	,"kiosk":true
+    }
+    
+}
+    

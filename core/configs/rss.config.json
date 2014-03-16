@@ -1,0 +1,30 @@
+{
+    "name": "rss",
+    "proxy": {
+        "host": "puff",
+        "port": "12222"
+    },
+    "rsses": [
+        {
+            "url": "http://www.null-hypothesis.co.uk/rss/rss_default.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Null Hypothesis",
+            "description": "The Journal of Unlikely Science",
+            "fetchFrequency": 1,
+            "nextInterval": 43200000,
+            "failCount": 0,
+            "lastUpdate": 1383764599807,
+            "lastArchiveIds": [
+                "rss_http://www.null-hypothesis.co.uk/science/interactive//Geek_Pop_09_music_festival?from=rss",
+                "rss_http://www.null-hypothesis.co.uk/science/strange-but-true//Doctor_Bacteria_Cat_Scratch_Fever?from=rss",
+                "rss_http://www.null-hypothesis.co.uk/science/strange-but-true//Doctor_Post_Nasal_Drip_Nose?from=rss",
+                "rss_http://www.null-hypothesis.co.uk/science/strange-but-true//Doctor_Tetanus_Lockjaw_Rusty_Nails?from=rss",
+                "rss_http://www.null-hypothesis.co.uk/science/news//chef_toxic_stinking_deadly_nightshade?from=rss",
+                "rss_http://www.null-hypothesis.co.uk/science/strange-but-true//mobile_phone_cellphone_addiction_chat?from=rss",
+                "rss_http://www.null-hypothesis.co.uk/science/strange-but-true//Doctor_Hydrophobia_Rabies_Bite_Virus?from=rss",
+                "rss_http://www.null-hypothesis.co.uk/science/straight-talking//history_of_vibrator_orgasm_female?from=rss"
+            ]
+        }
+    ]
+}

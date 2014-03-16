@@ -1,0 +1,3 @@
+#!/bin/bash
+./util/service.sh $@
+

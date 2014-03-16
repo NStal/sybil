@@ -1,0 +1,103 @@
+@import "./html5reset.less";
+@import "./css3function.less";
+@import "./colors.less";
+@import "./common.less";
+@import "./font-awesome.less";
+@import "./animation.less";
+html{
+    width:100%;
+    margin:0; 
+}
+body{
+    margin:0 auto;
+    width:100%;
+    height:100%;
+}
+.block{
+    width:100%;
+    .box-sizing;
+    padding:20px;
+    font-size:24px;
+    line-height:28px;
+    color:@comfortable-black;
+    position:relative;
+    .wrapper{
+        width:760px;
+        margin:0 auto;
+        padding:30px 40px;
+    }
+}
+.slogan{
+    color:@light-black;
+    background-color:@dark-white;
+    padding-bottom:60px;
+    overflow:hidden;
+    .content{
+	font-size:32px;
+        width:550px;
+        padding-top:35px;
+        margin-left:50px;
+        line-height:44px;
+    }
+    img,.content{
+        float:left;
+    }
+    .amendment{
+        opacity:0;
+        position:absolute;
+        .transition(opacity,200ms);
+        bottom:0;
+        left:0;
+        width:100%;
+	font-size:24px;
+        height:36px;
+	color:white;
+	background-color:rgba(0,0,0,0.6);
+        text-align:center;
+    }
+    .content:hover .amendment{
+        opacity:1;
+        display:block;
+    }
+}
+.explain{
+    font-size:18px;
+    border-top:1px solid @light-grey;
+    .that-is-you{
+        color:@comfortable-black;
+    }
+    .word{
+        margin-top:40px;
+    }
+    ul li{
+	list-style:none;
+	line-height:50px;
+	color:@light-black;
+    }
+    .word-fit{
+        
+        color:@clear-grey;
+        span{
+            opacity:0;
+            display:none;
+            .transition(all,200ms);
+            position:absolute;
+            bottom:0;
+            left:0;
+            width:100%;
+            text-align:center;
+            background-color:rgba(0,0,0,0.6);
+	    font-size:24px;
+            height:36px;
+	    color:white;
+        }
+        &:hover span{
+            opacity:1;
+            display:block;
+        }
+    }
+}
+.feature{
+    border-top:1px solid @light-grey;
+    background-color:@dark-white;
+}

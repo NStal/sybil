@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script type="text/javascript" src="js/lib/leaf.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.js"></script>
+    <script type="text/javascript" src="js/lib/sanitizer.js"></script>
+    <script type="text/javascript" src="js/lib/moment.js"></script>
+    <script type="text/javascript" src="js/lib/async.js"></script>
+    <script type="text/javascript" src="js/lib/lodash.js"></script>
+    <script type="text/javascript" src="js/lib/parseUri.js"></script>
+    <script type="text/javascript" src="js/lib/md5.js"></script>
+    <script type="text/javascript" src="js/lib/hammer.min.js"></script>
+    
+    <script type="text/javascript" src="js/util/messageCenter.js"></script>
+    <script type="text/javascript" src="js/util/serverConnection.js"></script> 
+    <script type="text/javascript" src="js/util/task.js"></script>
+    <script type="text/javascript" src="js/util/dragContext.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/i18n.js"></script>
+    <script type="text/javascript" src="js/model.js"></script>
+    <script type="text/javascript" src="js/view.js"></script>
+    <script type="text/javascript" src="js/contextMenu.js"></script> 
+    <script type="text/javascript" src="js/archiveDisplayer.js"></script>
+    
+    <script type="text/javascript" src="js/sourceView.js"></script> 
+    <script type="text/javascript" src="js/sourceList.js"></script>
+    <script type="text/javascript" src="js/archiveList.js"></script>
+    
+    <script type="text/javascript" src="js/searchView.js"></script>
+    <script type="text/javascript" src="js/listView.js"></script>
+    <script type="text/javascript" src="js/p2pView.js"></script>
+    
+    <script type="text/javascript" src="js/addSourcePopup.js"></script>
+    <script type="text/javascript" src="js/enhancement.js"></script>
+    <script type="text/javascript" src="js/offlineHinter.js"></script>
+
+    <script type="text/javascript" src="js/mobile.js"></script>
+    <script type="text/javascript" src="js/test.js"></script>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="app-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="css/mobile.css" media="screen and (max-width: 701px )">
+    
+  </head> 
+  <body class="fancy-scroll">
+    
+    <div class="view-switcher">
+      <div class="option">
+        <span class="icon fa fa-caret-right" data-id="directionIcon" ></span>
+        <span class="title clickable" data-id="title"></span>
+      </div>
+      <ul class="view-selector" data-id="viewSelector"></ul>
+    </div>
+    <!--div class="view custom-view">
+      <widget data-widget="customSourceList"></widget>
+      <widget data-widget="customArchiveList"></widget>
+    </div>
+    <div class="view tag-view">
+      <widget data-widget="tagList"></widget>
+      <widget data-widget="tagArchiveList"></widget>
+    </div-->
+    <div class="view list-view">
+      <widget data-widget="list"></widget>
+      <widget data-widget="archives"></widget> 
+    </div>
+    <div class="view source-view"> 
+      <widget data-widget="sourceList"></widget>
+      <div class="source-list-overlay" data-id="sourceListOverlay"></div>
+      <widget data-widget="archiveList"></widget>
+    </div>
+    <div class="view search-view fancy-scroll">
+      <widget data-widget="searchList"></widget>
+      <widget data-widget="archiveDisplayer"></widget>
+    </div>
+    <div class="view p2p-view">
+      <div class="debug-info"> 
+        <span>This view is now only for p2p network debug use.</span>
+        <span>You can view p2p share at source view.</span>
+      </div>
+      <widget data-widget="p2pList"></widget>
+      <div class="p2p-info-displayer">
+        <widget data-widget="p2pNodeInfoDisplayer"></widget>
+        <widget data-widget="p2pFriendInfoDisplayer"></widget>
+      </div>
+    </div>
+    <div class="offline-hinter show">
+      <span class="text">connection lost, trying to recover...</span>
+    </div>
+  </body>
+</html>

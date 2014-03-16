@@ -1,0 +1,561 @@
+{
+    "name": "rss",
+    "proxy": {
+        "host": "puff",
+        "port": "12222"
+    },
+    "rsses": [
+        {
+            "url": "http://revlonpc.blog.fc2.com/?xml",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 9
+        },
+        {
+            "url": "http://martha0620.tumblr.com/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "naruhodo",
+            "descript": "いろいろのせていきます。my pictsmyspacemixisoundcloud",
+            "failCount": 2
+        },
+        {
+            "url": "http://still.kipi.lomo.jp/index.rdf",
+            "encoding": "utf-8",
+            "state": "checked",
+            "failCount": 1,
+            "name": "Kipi-Blog「＊STILL＊」",
+            "descript": null
+        },
+        {
+            "url": "http://heru3.com/?feed=rss2",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Heruheru3",
+            "descript": "Cosplay Photo & Arranged Game Music.",
+            "failCount": 1
+        },
+        {
+            "url": "http://mathslinux.org/?feed=rss2",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Cogito ergo sum",
+            "descript": "a linux geek's page",
+            "failCount": 0
+        },
+        {
+            "url": "http://feeds.feedburner.com/JavascriptJabber",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 6
+        },
+        {
+            "url": "http://scturtle.is-programmer.com/posts.rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "scturtle's 渣代码集散地",
+            "descript": null,
+            "failCount": 0
+        },
+        {
+            "url": "http://www.iswdesigning.com/feed",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "I.S.W DESIGNING",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://scturtle.me/atom.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "ScTurtle's Pool",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://feeds.igvita.com/igvita",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "igvita.com",
+            "descript": "a goal is a dream with a deadline",
+            "failCount": 1
+        },
+        {
+            "url": "http://www.isnowfy.com/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "isnowfy",
+            "descript": "isnowfy的随心记",
+            "failCount": 2
+        },
+        {
+            "url": "http://www.soimort.org/atom.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Mort Yao",
+            "descript": null,
+            "failCount": 1,
+            "fetchFrequency": 43200000
+        },
+        {
+            "url": "https://nipponsei.minglong.org/tracker/rss.php",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Nipponsei",
+            "descript": "Music fresh from Japan",
+            "failCount": 2
+        },
+        {
+            "url": "http://lyric.im/atom.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Lyric.im",
+            "descript": null,
+            "failCount": 2
+        },
+        {
+            "url": "http://bt.ktxp.com/rss-sort-28.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "完整动画 - 动漫下载-BT-漫画-动画-游戏 - 极影动漫",
+            "descript": "极影动漫下载站是目前国内最大的动漫资源自由分享平台！提供动画，漫画，电子书，动漫音乐，动漫游戏等资源下载。动漫资源，尽在极影动漫BT下载频道",
+            "failCount": 1
+        },
+        {
+            "url": "http://www.v2ex.com/index.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "V2EX",
+            "descript": "way to explore",
+            "failCount": 0
+        },
+        {
+            "url": "http://pineapple.io/resources.atom",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Recent Resources - Pineapple",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://mikespook.com/feed",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Gopher beyond Eliphants",
+            "descript": "As Golang beyond PHP",
+            "failCount": 2
+        },
+        {
+            "url": "http://blog.sina.com.cn/rss/2159773370.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "お姫様の自己満足BLOG",
+            "descript": null,
+            "failCount": 4
+        },
+        {
+            "url": "http://www.hexieshe.com/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "和邪社",
+            "descript": "文不在长.内涵则明 图不在色.意淫则灵",
+            "failCount": 2
+        },
+        {
+            "url": "http://danqingdani.blog.163.com/rss/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "碳基体",
+            "descript": "http://weibo.com/u/1093935355",
+            "failCount": 1
+        },
+        {
+            "url": "http://blog.csdn.net/v_JULY_v/rss/list",
+            "encoding": "utf-8",
+            "state": "checked",
+            "failCount": 13,
+            "name": "结构之法 算法之道",
+            "descript": "Google或baidu搜索：“结构之法”，进入本博客"
+        },
+        {
+            "url": "http://www.huxiu.com/rss/0.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "虎嗅网",
+            "descript": "虎嗅网RSS订阅",
+            "failCount": 1
+        },
+        {
+            "url": "http://heliang.me/blog/?feed=rss2",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "RoBa's blog",
+            "descript": "Life is NP hard.",
+            "failCount": 10
+        },
+        {
+            "url": "http://johanbrook.com/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Johan Brook",
+            "descript": "is a designer and developer with taste",
+            "failCount": 1
+        },
+        {
+            "url": "http://kavinyao.tumblr.com/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Zoom Len",
+            "descript": "Kavin’s Random Translations",
+            "failCount": 1
+        },
+        {
+            "url": "http://hackab.it/atom.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "hack a bit",
+            "descript": null,
+            "failCount": 3
+        },
+        {
+            "url": "http://rdc.taobao.com/blog/cs/?feed=rss2",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 2
+        },
+        {
+            "url": "http://wing2south.com/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "翼未图南",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://kkeys.me/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Seven",
+            "descript": "之所以描绘影，是为了描绘光",
+            "failCount": 1
+        },
+        {
+            "url": "http://zhezhexiong.com/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "聊聊设计",
+            "descript": "聊聊设计",
+            "failCount": 1
+        },
+        {
+            "url": "http://acg-jp.blog.sohu.com/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "日本ACG新闻馆",
+            "descript": "诸君！每日更新 尽请关注！",
+            "failCount": 3
+        },
+        {
+            "url": "http://apple4.us/feed",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Apple4us",
+            "descript": "我们报道未来",
+            "failCount": 14
+        },
+        {
+            "url": "http://www.freebuf.com/feed",
+            "encoding": "utf-8",
+            "state": "checked",
+            "failCount": 9,
+            "name": "FreebuF.COM",
+            "descript": "关注黑客与极客"
+        },
+        {
+            "url": "http://feeds.feedburner.com/html5rocks",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 8
+        },
+        {
+            "url": "http://feeds.feedburner.com/initiative",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 13
+        },
+        {
+            "url": "http://mescoda.com/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Mescoda's Blog",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://blog.necoco.net/?mode=rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "NECOCO＊Net",
+            "descript": "コスプレ／猫子(ねここ)",
+            "failCount": 3,
+            "fetchFrequency": 43200000
+        },
+        {
+            "url": "http://tgideas.qq.com/?feed=rss2",
+            "encoding": "gb2312",
+            "state": "checked",
+            "name": "TGideas",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://galeki.is-programmer.com/posts.rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Today's the day",
+            "descript": "一觉睡到天黑!",
+            "failCount": 0
+        },
+        {
+            "url": "http://predatorrat.tumblr.com/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Ushijima Iiniku Tumblr",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://bitinn.net/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "比特客栈的文艺复兴",
+            "descript": "We don't choose who we are, but we do choose who we become.",
+            "failCount": 1
+        },
+        {
+            "url": "http://blog.binux.me/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Binuxの杂货铺",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://blackpawn.com/blog/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": null,
+            "descript": null,
+            "failCount": 2
+        },
+        {
+            "url": "http://www.hiwebgl.com/?feed=rss2",
+            "encoding": "utf-8",
+            "state": "uncheck",
+            "failCount": 3
+        },
+        {
+            "url": "http://blog.jjgod.org/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "jjgod / blog",
+            "descript": "Random notes & thoughts.",
+            "failCount": 1
+        },
+        {
+            "url": "http://www.kadrmasconcepts.com/blog/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "KadrmasConcepts Blog",
+            "descript": "Design / Create / Innovate",
+            "failCount": 1
+        },
+        {
+            "url": "http://feeds.feedburner.com/linuxtoy",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 12
+        },
+        {
+            "url": "http://mikepultz.com/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "mike pultz",
+            "descript": "personal and professional blog of mike pultz, technology specialist and serial entrepreneur.",
+            "failCount": 2
+        },
+        {
+            "url": "http://blog.laobubu.net/feed",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "laobubu博客",
+            "descript": "自己的博客，写自己的东西",
+            "failCount": 4
+        },
+        {
+            "url": "http://www.realtimerendering.com/blog/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Real-Time Rendering",
+            "descript": "Tracking the latest developments in interactive rendering techniques",
+            "failCount": 13
+        },
+        {
+            "url": "http://liruqi.info/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "Ruqi's Log",
+            "descript": "李如其的博客.  关于我\n\n  var _gaq = _gaq || [];\n  _gaq.push([‘_setAccount’, ‘UA-7404902-9’]);\n  _gaq.push([‘_trackPageview’]);\n\n  (function() {\n    var ga = document.createElement(‘script’); ga.type = ‘text/javascript’; ga.async = true;\n    ga.src = (‘https:’ == document.location.protocol ? ‘https://ssl’ : ‘http://www’) + ‘.google-analytics.com/ga.js’;\n    var s = document.getElementsByTagName(‘script’)[0]; s.parentNode.insertBefore(ga, s);\n  })();",
+            "failCount": 2
+        },
+        {
+            "url": "http://thomasdiewald.com/blog/?feed=rss2",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 2
+        },
+        {
+            "url": "http://thomasdiewald.com/blog/?feed=rss2",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 1
+        },
+        {
+            "url": "http://uni3orns.blog.51cto.com/rss.php?uid=3207497",
+            "encoding": "gbk",
+            "state": "checked",
+            "name": "Uni3orns-51CTO技术博客",
+            "descript": "Latest 20 blogs of uni3orns",
+            "failCount": 1
+        },
+        {
+            "url": "http://gdata.youtube.com/feeds/base/users/Diginfonews/uploads?alt=rss&v=2&orderby=published&client=ytapi-youtube-profile",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 3
+        },
+        {
+            "url": "http://feed.cnblogs.com/blog/u/22107/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "博客园_Cat in dotNET",
+            "descript": null,
+            "failCount": 2
+        },
+        {
+            "url": "http://feed.cnblogs.com/blog/u/66551/rss",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "博客园_Milo的游戏开发",
+            "descript": null,
+            "failCount": 1
+        },
+        {
+            "url": "http://www.panlilu.com/feed",
+            "encoding": "utf-8",
+            "state": "uncheck",
+            "failCount": 22
+        },
+        {
+            "url": "http://localhost-8080.com/feed/",
+            "encoding": "utf-8",
+            "state": "checked",
+            "failCount": 2,
+            "name": "考据癖",
+            "descript": "好奇心 | 冷知识"
+        },
+        {
+            "url": "http://feeds.feedburner.com/ruanyifeng",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 13
+        },
+        {
+            "url": "http://fred-zone.blogspot.com/feeds/posts/default",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 11
+        },
+        {
+            "url": "http://blog.sina.com.cn/rss/1907350525.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "老薛-一起亲手做科学",
+            "descript": null,
+            "failCount": 4
+        },
+        {
+            "url": "http://cg-sky.com/elf/feed.asp",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "* CG Sky *",
+            "descript": "Remember, Hope is a good thing, maybe the best of things, and no good thing ever dies.",
+            "failCount": 2
+        },
+        {
+            "url": "http://www.white-datura.com/blog/feed.asp",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "+WHITE DATURA+",
+            "descript": "不可預知的死亡與愛",
+            "failCount": 3
+        },
+        {
+            "url": "http://animenz.wordpress.com/feed/",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 10
+        },
+        {
+            "url": "http://janemere.blog126.fc2.com/?xml",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 7
+        },
+        {
+            "url": "http://cestbien.blog.shinobi.jp/RSS",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "pppppupps",
+            "descript": "puppsの落書き置き場",
+            "failCount": 15
+        },
+        {
+            "url": "http://www.blogger.com/feeds/65356445818769150/posts/default",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 1
+        },
+        {
+            "url": "http://rss.rssad.jp/rss/sonetrss/000226979434_236926_index.xml",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "XSI de NUDE",
+            "descript": "お仕事募集しております☆ ooo.digitalgraffiti.ooo@gmail.com",
+            "failCount": 10
+        },
+        {
+            "url": "http://feeds.feedburner.com/mattgemmell/rss2",
+            "encoding": "utf-8",
+            "state": "network error",
+            "failCount": 9
+        },
+        {
+            "url": "http://2chcn.com/feed",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "2ch中文网",
+            "descript": "认真你就输了",
+            "failCount": 3
+        },
+        {
+            "url": "http://www.mikeash.com/pyblog/rss.py?mode=fulltext",
+            "encoding": "utf-8",
+            "state": "checked",
+            "name": "NSBlog",
+            "descript": "Mac OS X and Cocoa programming",
+            "failCount": 0
+        }
+    ]
+}
