@@ -1,0 +1,144 @@
+html,body{
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
+    font-family:verdana;
+}
+.box-sizing{
+    box-sizing:border-box; 
+}
+.clickable{
+    cursor:pointer;
+}
+@slight-gray:#ccc;
+@light-gray:#666;
+@deep-gray:#444;
+@light-black:#222;
+@left-panel-width:400px;
+.hide-empty-rss .empty{
+    display:none;
+}
+.rss-list{
+    height:100%;
+    width:@left-panel-width;
+    background-color:white;
+    float:left;
+    overflow:hidden;
+    position:relative;
+    .action{
+	position:absolute;
+	height:42px;
+	line-height:42px;
+	background-color:white;
+	overflow:hidden;
+	padding-left:20px;
+	z-index:100;
+	width:100%;
+	.box-sizing;
+	box-shadow:0 0 3px 0 grey;
+    }
+    .list-container{
+	padding-top:42px;
+	.box-sizing;
+	width:100%;
+	height:100%;
+	overflow:auto;
+    }
+    .focus {
+	background-color:@light-gray;
+    }
+    .rss-list-item{
+	.box-sizing;
+	width:100%;
+	text-overflow:ellipsis;
+	overflow:hidden;
+	white-space:nowrap;
+	margin: 3px 0;
+	padding:0 20px;
+	line-height:24px;
+	position:relative;
+	.clickable;
+	&:hover{
+	    background-color:@light-black;
+	    color:white;
+	}
+	.name{
+	
+	}
+	.count{
+	    border-radius:6px;
+	    font-size:12px;
+	    background-color:@light-gray;
+	    font-weight:800;
+	    position:absolute;
+	    right:5px;
+	    padding:0px 3px;
+	    color:white;
+	}
+    }
+}
+@feed-list-width:800px;
+.feed-list{
+    margin-left:@left-panel-width;
+    height:100%;
+    overflow:auto;
+    .list-container{
+	padding:42px;
+    }
+    .header{
+	position:fixed;
+	background-color:white;
+	width:100%;
+	height:42px;
+	h2{
+	    display:inline;
+	    line:height42px;
+	    padding:0 10px;
+	}
+	button{
+	    display:inline;
+	}
+	box-shadow:0 0 4px 0 grey;
+    }
+    .current{
+	border-left:4px solid @light-black;
+    }
+    .read{
+	background-color:@slight-gray;
+    }
+    .feed-list-item{
+	border-left:4px solid white;
+	width:@feed-list-width;
+	padding:20px 50px; 
+	box-shadow:0 1px 3px 0 @light-gray;
+	overflow:hidden;
+	.box-sizing;
+	.title{
+	    font-size:24px;
+	    margin:15px;
+	}
+	.date{
+	    color:@light-gray;
+	}
+	img{
+	    display:block;
+	    max-width:@feed-list-width - 100px;
+	    text-align:center;
+	    padding:10px;
+	    box-shadow:0 0 3px 0 @deep-gray;
+	    border-radius:5px;
+	    margin:5px auto;
+	    display:block;
+	}
+	p{
+	    padding:0px 0px;
+	}
+    }
+    
+    .unread{
+	border-left:4px solid grey;
+	border-bottom:1px solid white;
+	margin-bottom:4px;
+    }
+}

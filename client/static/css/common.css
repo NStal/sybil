@@ -1,0 +1,157 @@
+.gray-gradient {
+  color: #444;
+  border: solid 1px #bbb;
+  background: #white;
+  background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#ededed));
+  background: -moz-linear-gradient(top, #ffffff, #ededed);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#ededed');
+}
+.black-gradient {
+  color: #f2f2f2;
+  background: #white;
+  background: -webkit-gradient(linear, left top, left bottom, from(#555555), to(#333333));
+  background: -moz-linear-gradient(top, #555555, #333333);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#555', endColorstr='#333');
+}
+.black-gradient-horizental {
+  color: #f2f2f2;
+  background: #white;
+  background: -webkit-gradient(linear, left top, right top, from(#555555), to(#333333));
+  background: -moz-linear-gradient(left, #555555, #333333);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#555', endColorstr='#333');
+}
+.black-gradient-horizental-right {
+  color: #f2f2f2;
+  background: #white;
+  background: -webkit-gradient(linear, right top, left top, from(#555555), to(#333333));
+  background: -moz-linear-gradient(right, #555555, #333333);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#555', endColorstr='#333');
+}
+.light-shadow {
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
+}
+.blue-glow {
+  box-shadow: 0 0 5px 0 #00ccfc, 0 0 4px 0 rgba(256, 256, 256, 0.8), 0 0 2px 0 #ffffff;
+}
+.box-sizing {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+.flex-box {
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexflex;
+}
+.flex {
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexflex;
+  -webkit-flex-flow: column;
+  -moz-flex-flow: column;
+  flex-flow: column;
+  flex-direction: column;
+}
+.flex-row {
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexflex;
+  -webkit-flex-flow: row;
+  -moz-flex-flow: row;
+  flex-flow: row;
+  flex-direction: row;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.has-select {
+  -webkit-touch-callout: auto;
+  -webkit-user-select: auto;
+  -khtml-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  user-select: auto;
+}
+.clickable {
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.clear-float {
+  clear: both;
+  float: none;
+}
+.button {
+  padding: 3px 6px;
+  margin: 4px 6px;
+  border-radius: 5px;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border: 1px solid #888;
+}
+.round-border {
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+.round-button {
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  display: block;
+  height: 32px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  outline: none;
+  line-height: 30px;
+  width: 100px;
+  text-align: center;
+  border-color: #ccc;
+  color: #444;
+  border: solid 1px #bbb;
+  background: #white;
+  background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#ededed));
+  background: -moz-linear-gradient(top, #ffffff, #ededed);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#ededed');
+  transition: all 200ms ease;
+  -moz-transition: all 200ms ease;
+  -webkit-transition: all 200ms ease;
+  -o-transition: all 200ms ease;
+}
+.round-button:hover {
+  text-shadow: 0 0 4px #bbb;
+  box-shadow: 0px 0px 3px 0px #444;
+  border-color: white;
+}
+.readable {
+  word-wrap: break-word;
+  text-align: justify;
+  text-justify: inter-ideograph;
+  hypens: auto;
+}

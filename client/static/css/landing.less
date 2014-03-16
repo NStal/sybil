@@ -1,0 +1,130 @@
+#landing-box{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background-color:#eee;
+    position:absolute;
+    display:none;
+    top:0;
+    left:0;
+    font-size:16px; 
+    line-height:16px;
+    z-index:@page-index;
+    .slide-container{
+	overflow:hidden;
+	
+    }
+    .wrapper{
+	width:700px;
+	height:550px; 
+	position:absolute;
+	top:50%;
+	left:50%;
+	margin-left:-350px;
+	margin-top:-275px;
+    } 
+    .logo{
+	float:left;
+    }
+    #sign-form{
+	width:100%;
+	height:460px;
+	overflow:hidden;
+	position:relative;
+    } 
+    
+    .s2,.second .s1{
+	opacity:0;
+    }
+    .s1,.second .s2{
+	opacity:1;
+    }
+    .slide-container{
+	.transition(left,250ms);
+	position:absolute;
+	left:0;
+	top:0;
+	width:2000px;
+	height:100%;
+	.slide{
+	    position:relative;
+	    .transition(opacity,150ms);
+	    float:left;
+	    width:700px;
+	    height:100%;
+	}
+    }
+    
+    .second{
+	left:-700px;
+    }
+    .logo-banner{
+	overflow:hidden;
+	h1{
+	    text-shadow: -1px -1px #ccc;
+	    font-size:72px;
+	    line-height:148px;
+	    display:block;
+	    float:left;
+	    padding-left:15px;
+	    color:white;
+	    span{
+		font-size:16px;
+		color:orange;
+		position:relative;
+		bottom:40px;
+		right:5px;
+		text-shadow:none;
+	    }
+	}
+	
+    } 
+    .goto-signin-button{
+	.clickable;
+	border-radius:5px 0 0 5px;
+	position:absolute;
+	height:125px;
+	width:30px;
+	left:90px;
+	top:30px;
+	background-image: url("../site-image/pointerLeft.png");
+	background-repeat:no-repeat;
+	background-position:center;
+	text-indent:-99999px; 
+	.transition(all,200ms);
+	&:hover{
+	    left:50px; 
+	    padding-right:40px;
+	}
+    }
+
+    input {
+	width:380px;
+	padding:0 10px;
+	margin:30px auto;
+	display:block;
+	color:#444;
+	height:42px;
+	font-size:100%;
+	border:1px solid #ccc;
+	&:-moz-placeholder {
+	    color:#ccc;
+	}
+	&:-webkit-input-placeholder{
+	    color:#ccc;
+	}
+	.round-border;
+	box-shadow:0px 1px 0px 0px #fff,inset 1px 1px 4px 0px #c0c0c0;
+	transition:all 250ms;
+	&:focus{
+	    box-shadow:    0px 0px 3px 0px orange,inset 1px 1px 4px 0px #ddd;
+	    outline:none;
+	}
+    }
+    .button{
+	width:380px;
+	padding:0 10px;
+	margin:30px auto;
+	display:block; 
+    }
+}

@@ -1,0 +1,67 @@
+@import "./colors.less";
+@import "./css3function.less";
+
+.no-select{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.has-select{
+    -webkit-touch-callout: auto;
+    -webkit-user-select: auto;
+    -khtml-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+
+.clickable{
+    cursor:pointer;
+    .no-select;
+}
+.clear-float{
+    clear:both;
+    float:none;
+}
+.button{
+    padding:3px 6px;
+    margin:4px 6px;
+    border-radius:5px;
+    .light-shadow;
+    .clickable;
+    border:1px solid #888;
+    
+}
+.round-border{
+    border-radius:5px;
+    border:1px solid #ddd;
+    outline:none;
+}
+.round-button{
+    .clickable;
+    display:block;
+    height:32px;
+    background-color:white;
+    .round-border;
+    line-height:30px;
+    width:100px;
+    text-align:center;
+    border-color:#ccc;
+    color:#444;
+    .gray-gradient;
+    .transition(all,200ms);
+    &:hover{
+	text-shadow:0 0 4px #bbb;
+	box-shadow:0px 0px 3px 0px #444;
+	border-color:white;
+    }
+}
+.readable{
+    word-wrap:break-word;
+    text-align:justify;
+    text-justify:inter-ideograph;
+    hypens:auto;
+}

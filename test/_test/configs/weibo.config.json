@@ -1,0 +1,12 @@
+{
+    "appKey": "2360067346",
+    "appSecret": "9e5590ce0f149217036143798dcbf97e",
+    "name": "weibo collector",
+    "callbackUrl": "http://nstal.me/callback",
+    "accounts": [
+        {
+            "code": "78bc41e19886a05a7c9d2a421bc9b19c",
+            "accessToken": "2.00eVS8ID31biZCe6bdf6a80f0SNTTk"
+        }
+    ]
+}
