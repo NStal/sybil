@@ -1,2 +1,0 @@
-#!/bin/bash
-mocha -R spec -b --compilers .coffee:coffee-script ./p2pTest.coffee
