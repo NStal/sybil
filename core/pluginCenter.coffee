@@ -6,6 +6,7 @@ class PluginCenter extends EventEmitter
         @sybil = sybil
         path = require "path"
         @loadAvailablePlugins()
+        @pluginSettings = []
     loadAvailablePlugins:()->
         @pluginAvailable = []
         @pluginMap = {}
@@ -57,6 +58,22 @@ class PluginCenter extends EventEmitter
                     console.error err
                     return
                 console.debug "plugin loads: #{loaded.join(',')}"
+    prepareSetting:(name,module,callback)->
+        console.debug "prepare setting for module #{name}"
+        settings = @sybil.settingManager.createSettings(name)
+        defines = module.settings or {}
+        for prop of defines
+            if not defines[prop]
+                settings.define(prop)
+                continue
+            settings.define(prop,defines[prop].type,defines[prop].validator,defines[prop].description)
+            if typeof defines[prop].default isnt "undefined"
+                console.log "define default",prop,defines[prop].default
+                settings._set(prop,defines[prop].default)
+        settings.restore (err)->
+            settings.save ()->
+                console.log "safe default yes!"
+                callback err,settings
     _loadPlugin:(name,callback)->
         #console.debug @pluginMap
         depends = @pluginMap[name].dependencies
@@ -80,17 +97,22 @@ class PluginCenter extends EventEmitter
                 if err
                     callback err
                     return
-                
                 @_assignGlobalModel(dependsMap)
-                current.module.register dependsMap,(err,me)->
+                @prepareSetting name,current.module,(err,settings)=>
                     if err
                         callback err
                         return
-                    current.provide = me
-                    callback err,me
+                    dependsMap.settings = settings
+                    current.module.register dependsMap,(err,me)->
+                        if err
+                            callback err
+                            return
+                        current.provide = me
+                        callback err,me
     _assignGlobalModel:(map)->
         map.sybil = @sybil
         map.database = require("./db.coffee")
+        
     
         
 

@@ -1,1 +1,0 @@
-/home/wuminghan/workspace/leaf-require/leafRequire.js

@@ -51,11 +51,13 @@ Limitations:
 You are interesting in this project you may want to view the next step of it here.
 
 ## User guide
+You can post questions here https://groups.google.com/forum/#!forum/sybil-reader
 1. [Basic usage](./doc/user/basic-usage.md)
 2. [Better p2p network](./doc/user/better-p2p-network.md)
 3. [Advanced usage](./doc/user/advanced-usage.md)
 
 ## Dev guide
+
 1. [Setup dev environment](./doc/dev/setup-dev-environment.md)
 2. [Read the source code](./doc/dev/read-the-source-code.md)
 3. [Write a remote plugin](./doc/dev/write-a-remote-plugin.md)

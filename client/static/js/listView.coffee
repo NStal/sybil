@@ -14,7 +14,47 @@ class ListView extends View
         super $(".list-view")[0],"list view"
         @list.appendTo @node
         @archives.appendTo @node
-        @archiveDisplayer.appendTo @node 
+        @archiveDisplayer.appendTo @node
+
+        # mobile
+        @node.ontouchstart = (e)=>
+            @lastStartDate = Date.now()
+            @lastStartEvent = e
+        @node.ontouchmove = (e)=>
+            @lastMoveEvent = e
+            if not @lastMoveEvent or not @lastStartEvent
+                return
+            #alert Math.abs(@lastStartEvent.touches[0].clientX - @lastMoveEvent.touches[0].clientX) > 50
+            if Math.abs(@lastStartEvent.touches[0].clientY - @lastMoveEvent.touches[0].clientY) > Math.abs( @lastStartEvent.touches[0].clientY - @lastMoveEvent.touches[0].clientY)
+                @lastStartEvent.preventDefault()
+                @lastMoveEvent.preventDefault()
+        
+        Hammer(@node).on "swiperight",(ev)=>
+            ev.preventDefault()
+            @previousSlide()
+        Hammer(@node).on "swipeleft",(ev)=>
+            ev.preventDefault()
+            @nextSlide();
+        @currentSlide = 0
+    nextSlide:()->
+        if @currentSlide > 1
+            return
+        @currentSlide++
+        @applySlide()
+    previousSlide:()->
+        if @currentSlide <= 0
+            return
+        @currentSlide--
+        @applySlide()
+    applySlide:()->
+        if @currentSlide is 0
+            @node$.removeClass("slide-col2").removeClass("slide-col3")
+        else if @currentSlide is 1
+            @node$.addClass("slide-col2").removeClass("slide-col3")
+        else
+            @node$.addClass("slide-col2").addClass("slide-col3")
+        
+
 class List extends Leaf.Widget
     constructor:()->
         super App.templates["list-view-list"]
@@ -71,6 +111,7 @@ class ArchiveList extends Leaf.Widget.List
             @length  = 0
             for archive in archives
                 @push new ArchiveListItem(archive)
+            @[0].select()
         list = @currentList
         @currentList.on "add",@addArchive
         @currentList.on "remove",@removeArchive

@@ -16,16 +16,15 @@ sortArchive = (archives,what)->
         return a.createDate.getTime() - b.createDate.getTime()
 
 class WebApiServer extends EventEmitter
-    constructor:(sybil)->
+    constructor:(sybil,@settings)->
         # I can get data from sybil directly
         # every sybil interaction should be done via method
         # so sybil can watch what's happend and setup/optimize things
         @sybil = sybil
-        @host = @sybil.settings.webApiHost or "localhost"
-        @httpPort = @sybil.settings.webApiPort or 3007
+        @host = @settings.get("host") or @sybil.settings.webApiHost or "localhost"
+        @httpPort = @settings.get("port") or @sybil.settings.webApiPort or 3007
         @setupHttpServer()
         @setupWebsocketApi()
-        @username = @sybil.settings.webApiAuthToken or "sybil"
         @sybil.on "archive",@pushArchive.bind this
         @sybil.on "source",@pushSource.bind this
         @sybil.on "readLater",@pushReadLater.bind this

@@ -28,19 +28,19 @@
           if (!_this.lastMoveEvent || !_this.lastStartEvent) {
             return;
           }
-          if (Math.abs(_this.lastStartEvent.touches[0].clientX - _this.lastMoveEvent.touches[0].clientX) > 30) {
+          if (Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY) > Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY)) {
             _this.lastStartEvent.preventDefault();
             return _this.lastMoveEvent.preventDefault();
           }
         };
       })(this);
-      Hammer(document.body).on("swiperight", (function(_this) {
+      Hammer(this.node).on("swiperight", (function(_this) {
         return function(ev) {
           ev.preventDefault();
           return _this.node$.addClass("show-list");
         };
       })(this));
-      Hammer(document.body).on("swipeleft", (function(_this) {
+      Hammer(this.node).on("swipeleft", (function(_this) {
         return function(ev) {
           ev.preventDefault();
           return _this.node$.removeClass("show-list");

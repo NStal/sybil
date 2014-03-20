@@ -6,8 +6,8 @@ module.exports = {
     dbOption:{}
     collectors:["rss","#pageWatcher"]
     # plugin name start with # won't be load, this can be used as a easy toggler
-    ,proxies:[]
-    ,plugins:[
+    proxies:[]
+    plugins:[
         "webApi"
         "sybilP2pNetwork"
         "resourceProxy"
@@ -33,6 +33,7 @@ module.exports = {
     logPath:"./sybil.log"
     logWithColor:false
     p2pSharePullInterval:5 * 60 * 1000
+    pluginSettingsPath:require("path").join(__dirname,"./settings/")
 }
 
 dynamic = {}

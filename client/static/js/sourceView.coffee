@@ -13,14 +13,13 @@ class SourceView extends View
             if not @lastMoveEvent or not @lastStartEvent
                 return
             #alert Math.abs(@lastStartEvent.touches[0].clientX - @lastMoveEvent.touches[0].clientX) > 50
-            if Math.abs(@lastStartEvent.touches[0].clientX - @lastMoveEvent.touches[0].clientX) > 30
+            if Math.abs(@lastStartEvent.touches[0].clientY - @lastMoveEvent.touches[0].clientY) > Math.abs( @lastStartEvent.touches[0].clientY - @lastMoveEvent.touches[0].clientY)
                 @lastStartEvent.preventDefault()
                 @lastMoveEvent.preventDefault()
-        
-        Hammer(document.body).on "swiperight",(ev)=>
+        Hammer(@node).on "swiperight",(ev)=>
             ev.preventDefault()
             @node$.addClass "show-list"
-        Hammer(document.body).on "swipeleft",(ev)=>
+        Hammer(@node).on "swipeleft",(ev)=>
             ev.preventDefault()
             @node$.removeClass "show-list"
         @UI.sourceListOverlay$.click ()=>

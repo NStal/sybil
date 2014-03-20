@@ -5,7 +5,8 @@ class Sybil extends (require "events").EventEmitter
     constructor:()->
         Collector = require "../collector/collector.coffee"
         @collectorClub = new Collector.CollectorClub()
-        @pluginCenter = new (require "./pluginCenter").PluginCenter(this)
+        @pluginCenter = new (require "./pluginCenter.coffee").PluginCenter(this)
+        @settingManager = new (require("./settingManager.coffee")).SettingManager()
         @archiveProcessQueue = (require "async").queue(@handleArchive.bind(this),1)
         @initTasks = new (require "node-tasks")("dbInit","collectorInit")
     init:()->
@@ -14,6 +15,7 @@ class Sybil extends (require "events").EventEmitter
         # 3.init collectors
         # 4.init plugins (won't check)
         @settings = require("../settings.coffee")
+        @settingManager.setDefaultSettingFolder @settings.pluginSettingsPath or require("path").join(__dirname,"../settings/")
         @collectorClub.on "archive",(archive)=>
             #console.log "archive",archive.guid
             @archiveProcessQueue.push archive
@@ -287,7 +289,7 @@ process.on "uncaughtException",(err)->
     console.error err.stack
     console.error "fatal error"
     if not sybil.settings.preventCrash
-        console.error "uncaughtException not allowed"
+        console.error "uncaughtException not acceptable"
         console.error "exit"
         process.exit(1)
 module.exports = sybil

@@ -1742,6 +1742,33 @@ html {
   box-shadow: none;
   border: 1px solid #aaa;
 }
+.list-view {
+  position: relative;
+  left: 0px;
+  transition: left 300ms ease;
+  -moz-transition: left 300ms ease;
+  -webkit-transition: left 300ms ease;
+  -o-transition: left 300ms ease;
+}
+.list-view .list-view-list {
+  min-width: 70%;
+  width: 70%;
+  max-width: 70%;
+}
+.list-view .list-view-archive-list {
+  min-width: 70%;
+}
+.list-view .archive-displayer {
+  float: none;
+  width: 100%;
+  min-width: 100%;
+}
+.list-view.slide-col2 {
+  left: -70%;
+}
+.list-view.slide-col3 {
+  left: -140%;
+}
 .fancy-scroll ::-webkit-scrollbar {
   width: auto;
 }

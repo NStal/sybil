@@ -1,9 +1,5 @@
 class ArchiveList extends Leaf.Widget
     constructor:(template)->
-        @archiveFilter = new ArchiveFilter()
-        @archiveFilter.on "change",()=>
-            @clear()
-            @load(@archiveInfo)
         super(template or App.templates["archive-list"])
         @_appendQueue = async.queue(((item,done)=>
             if item._queueId isnt @_queueTaskId
@@ -59,6 +55,7 @@ class ArchiveList extends Leaf.Widget
         # so the rest task in the queue won't be append
         # becase the id changed
         @_queueTaskId++
+        @loadedGuids = []
         @isLoadingMore = false
         @noMore = false
         @offset = null
@@ -83,7 +80,7 @@ class ArchiveList extends Leaf.Widget
             @offset = undefined
         sourceGuids = @archiveInfo.sourceGuids
         _taskId = @_queueTaskId
-        query = @archiveFilter.buildQuery() or {}
+        query = {}
         query.sourceGuids = sourceGuids
         console.log query
         @UI.loadingHint$.show()
@@ -92,6 +89,7 @@ class ArchiveList extends Leaf.Widget
             @isLoadingMore = false
             # if it's cleared during the request
             if _taskId isnt @_queueTaskId
+                console.debug("already loading archives");
                 return
             if err or not (archives instanceof Array)
                 console.error err or "no archive!"
@@ -111,8 +109,11 @@ class ArchiveList extends Leaf.Widget
         @noMore = true
         @UI.emptyHint$.show()
     appendArchiveListItem:(item)->
-        console.trace()
         @UI.emptyHint$.hide()
+        if item.archive.guid in @loadedGuids
+            # likely to be duplicated
+            return
+        @loadedGuids.push item.archive.guid
         item.appendTo @UI.container
         item.on "read",(data)=>
             App.emit "read",data
@@ -234,40 +235,6 @@ class ArchiveListItem extends ArchiveDisplayer
             console.debug "mark as unread done->render"
             console.debug @lockRead,@archive.hasRead,"is the state"
             @render()
-class ArchiveFilter extends Leaf.Widget
-    constructor:()->
-        super App.templates["archive-filter"]
-        @conditions = Leaf.Widget.makeList @UI.conditions
-    buildQuery:()->
-        if @conditions.length is 0
-            return null
-        query = {}
-        # I will support tags latter
-        for condition in @conditions
-            if condition.type is "keyword"
-                query.keywords = query.keywords or []
-                query.keywords.push condition.value
-            if condition.type is "like"
-                query.properties.like = true
-            if condition.type is "readLater"
-                query.properties.readLater = true
-        return query
-    clear:()->
-        @conditions.length = 0
-    addCondition:(condition)->
-        @emit "change"
-        console.error condition,"~~~"
-        @conditions.push condition
-class ArchiveConditionKeyword extends Leaf.Widget
-    constructor:(@value)->
-        super App.templates["archive-filter-condition"]
-        @type = "keyword"
-class ArchiveConditionLike extends Leaf.Widget
-    constructor:(@value)->
-        @type = "like"
-class ArchiveConditionReadLater extends Leaf.Widget
-    constructor:()->
-        @type = "readLater"
-        
+
 window.ArchiveListItem = ArchiveListItem
 window.ArchiveList = ArchiveList

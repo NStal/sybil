@@ -11,9 +11,12 @@ body,html{
 }
 .source-view{
     .source-list{
+        //padding-top:@header-height;
         position:absolute;
         top:0;
         left:-500px;
+        //height:100%;
+        //.box-sizing;
         .transition(left,500ms);
     }
     &.show-list .source-list{
@@ -54,7 +57,31 @@ body,html{
     }
     
 }
-
+.list-view{
+    position:relative;
+    left:0px;
+    .transition(left,300ms);
+    .list-view-list{
+        min-width:70%;
+        width:70%;
+        max-width:70%;
+    }
+    .list-view-archive-list{
+        min-width:70%;
+    }
+    .archive-displayer{
+        float:none;
+        width:100%;
+        min-width:100%;
+    }
+    &.slide-col2{
+        left:-70%;
+    }
+    &.slide-col3{
+        left:-140%;
+    }
+    
+}
 .fancy-scroll{
     ::-webkit-scrollbar {
         width: auto;
