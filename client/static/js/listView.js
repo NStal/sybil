@@ -31,7 +31,64 @@
       this.list.appendTo(this.node);
       this.archives.appendTo(this.node);
       this.archiveDisplayer.appendTo(this.node);
+      this.node.ontouchstart = (function(_this) {
+        return function(e) {
+          _this.lastStartDate = Date.now();
+          return _this.lastStartEvent = e;
+        };
+      })(this);
+      this.node.ontouchmove = (function(_this) {
+        return function(e) {
+          _this.lastMoveEvent = e;
+          if (!_this.lastMoveEvent || !_this.lastStartEvent) {
+            return;
+          }
+          if (Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY) > Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY)) {
+            _this.lastStartEvent.preventDefault();
+            return _this.lastMoveEvent.preventDefault();
+          }
+        };
+      })(this);
+      Hammer(this.node).on("swiperight", (function(_this) {
+        return function(ev) {
+          ev.preventDefault();
+          return _this.previousSlide();
+        };
+      })(this));
+      Hammer(this.node).on("swipeleft", (function(_this) {
+        return function(ev) {
+          ev.preventDefault();
+          return _this.nextSlide();
+        };
+      })(this));
+      this.currentSlide = 0;
     }
+
+    ListView.prototype.nextSlide = function() {
+      if (this.currentSlide > 1) {
+        return;
+      }
+      this.currentSlide++;
+      return this.applySlide();
+    };
+
+    ListView.prototype.previousSlide = function() {
+      if (this.currentSlide <= 0) {
+        return;
+      }
+      this.currentSlide--;
+      return this.applySlide();
+    };
+
+    ListView.prototype.applySlide = function() {
+      if (this.currentSlide === 0) {
+        return this.node$.removeClass("slide-col2").removeClass("slide-col3");
+      } else if (this.currentSlide === 1) {
+        return this.node$.addClass("slide-col2").removeClass("slide-col3");
+      } else {
+        return this.node$.addClass("slide-col2").addClass("slide-col3");
+      }
+    };
 
     return ListView;
 
@@ -140,14 +197,13 @@
       this.currentList = list;
       this.currentList.getArchives((function(_this) {
         return function(err, archives) {
-          var archive, _i, _len, _results;
+          var archive, _i, _len;
           _this.length = 0;
-          _results = [];
           for (_i = 0, _len = archives.length; _i < _len; _i++) {
             archive = archives[_i];
-            _results.push(_this.push(new ArchiveListItem(archive)));
+            _this.push(new ArchiveListItem(archive));
           }
-          return _results;
+          return _this[0].select();
         };
       })(this));
       list = this.currentList;
