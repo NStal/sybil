@@ -47,13 +47,25 @@ class Source extends Leaf.EventEmitter
         Model.on "archive/unread",(archive)=>
             if archive.sourceGuid is @guid
                 @unread()
+    queryStatisticInfo:(callback=()->true)->
+        App.messageCenter.invoke "getSourceStatistic",@guid,(err,info)=>
+            if err
+                callback err
+                return
+            @totalArchive = info.totalArchive or []
+            @statistic = info.statistic or []
+            @emit "change"
+            callback(null)
     set:(@data)->
         @guid = @data.guid
         @name = @data.name
         @unreadCount = @data.unreadCount
         @tags = @data.tags or []
-        @emit "change"
         @uri = @data.uri
+        @collectorName = @data.collectorName
+        @description = @data.description
+        
+        @emit "change"
     toJSON:()->
         return @data
     read:()->

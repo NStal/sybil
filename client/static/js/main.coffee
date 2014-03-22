@@ -42,6 +42,7 @@ App.templateManager.use "archive-list"
         ,"p2p-node-list-item"
         ,"p2p-list"
         ,"p2p-node-info-displayer"
+        ,"source-detail"
 
 $ ()->
     App.templateManager.start()
@@ -52,9 +53,7 @@ App.connect = ()->
     @connectManager.start()
     @connectManager.ready ()=>
         @emit "connect"
-        console.debug "!!!!!!!!!!!!!!!!!!!!!!","connect"
     @connectManager.on "connect",()=>
-        console.log "..."
         @messageCenter.setConnection(@connectManager.connection)
     @connectManager.on "disconnect",()=>
         @messageCenter.unsetConnection()
@@ -69,8 +68,8 @@ App.init = ()->
     App.sourceView = new SourceView()
     #App.tagView = new TagView()
     #App.customView = new CustomView()
-    App.searchView = new SearchView()
     App.listView = new ListView()
+    App.searchView = new SearchView()
     App.p2pView = new P2pView()
     App.viewSwitcher = new ViewSwitcher()
     App.offlineHinter = new OfflineHinter()

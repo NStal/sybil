@@ -108,14 +108,36 @@
       })(this));
     }
 
+    Source.prototype.queryStatisticInfo = function(callback) {
+      if (callback == null) {
+        callback = function() {
+          return true;
+        };
+      }
+      return App.messageCenter.invoke("getSourceStatistic", this.guid, (function(_this) {
+        return function(err, info) {
+          if (err) {
+            callback(err);
+            return;
+          }
+          _this.totalArchive = info.totalArchive || [];
+          _this.statistic = info.statistic || [];
+          _this.emit("change");
+          return callback(null);
+        };
+      })(this));
+    };
+
     Source.prototype.set = function(data) {
       this.data = data;
       this.guid = this.data.guid;
       this.name = this.data.name;
       this.unreadCount = this.data.unreadCount;
       this.tags = this.data.tags || [];
-      this.emit("change");
-      return this.uri = this.data.uri;
+      this.uri = this.data.uri;
+      this.collectorName = this.data.collectorName;
+      this.description = this.data.description;
+      return this.emit("change");
     };
 
     Source.prototype.toJSON = function() {

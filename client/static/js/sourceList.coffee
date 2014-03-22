@@ -16,6 +16,8 @@ class SourceListFolder extends Leaf.Widget
             child.on "delete",()=>
                 @children.removeItem child
                 @render()
+            child.on "detail",(source)=>
+                @emit "detail",(source)
         @children.on "child/remove",(child)=>
             if child.parent is this
                 child.parent = null
@@ -109,13 +111,20 @@ class SourceListItem extends Leaf.Widget
             e.preventDefault()
             selections = [
                 {
+                    name:"source detail"
+                    ,callback:()=>
+                        @emit "detail",@source
+                }
+                ,{
                     name:"unsubscribe"
                     ,callback:()=>
                         
                         if not confirm("unsubscribe item #{@source.name}?")
                             return
-                        @unsubscribe()
+                        @unsubscribe() 
                 }
+                
+                    
             ]
             ContextMenu.showByEvent e,selections
     unsubscribe:(callback = ()=>true)->
@@ -151,7 +160,7 @@ class SourceListItem extends Leaf.Widget
         @UI.sourceIcon.onload = ()->
             this.style.display = "inline"
             self.iconLoaded = true
-    onClickName:()->
+    onClickNode:()->
         @emit "select",this
         return false
     active:()->
@@ -241,7 +250,9 @@ class SourceList extends Leaf.Widget
             else
                 @children.removeItem(item)
             @save()
-        
+                
+        item.on "detail",(source)=>
+            @emit "detail",(source)        
         @_attachDrag(item)
         if item instanceof SourceListFolder
             folder = item

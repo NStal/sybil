@@ -9,13 +9,18 @@
     __extends(ListView, _super);
 
     function ListView() {
+      var checker;
       this.list = new List();
       this.archives = new ArchiveList();
       this.archiveDisplayer = new ListArchiveDisplayer();
       console.debug(this.archiveDisplayer.node, this.archiveDisplayer, "!!!");
       this.list.on("select", (function(_this) {
         return function(archiveList) {
-          return _this.archives.load(archiveList.archiveList);
+          _this.archives.load(archiveList.archiveList);
+          if (_this.enableListAutoSlide) {
+            _this.nextSlide();
+          }
+          return _this.enableListAutoSlide = true;
         };
       })(this));
       this.archives.on("select", (function(_this) {
@@ -24,60 +29,51 @@
           if (_this.currentArchiveListItem) {
             _this.currentArchiveListItem.deselect();
           }
-          return _this.currentArchiveListItem = archiveListItem;
+          _this.currentArchiveListItem = archiveListItem;
+          if (_this.enableArchiveAutoSlide) {
+            _this.nextSlide();
+          }
+          return _this.enableArchiveAutoSlide = true;
         };
       })(this));
       ListView.__super__.constructor.call(this, $(".list-view")[0], "list view");
       this.list.appendTo(this.node);
       this.archives.appendTo(this.node);
       this.archiveDisplayer.appendTo(this.node);
-      this.node.ontouchstart = (function(_this) {
-        return function(e) {
-          _this.lastStartDate = Date.now();
-          return _this.lastStartEvent = e;
-        };
-      })(this);
-      this.node.ontouchmove = (function(_this) {
-        return function(e) {
-          _this.lastMoveEvent = e;
-          if (!_this.lastMoveEvent || !_this.lastStartEvent) {
-            return;
-          }
-          if (Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY) > Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY)) {
-            _this.lastStartEvent.preventDefault();
-            return _this.lastMoveEvent.preventDefault();
-          }
-        };
-      })(this);
-      Hammer(this.node).on("swiperight", (function(_this) {
+      checker = new SwipeChecker(this.node);
+      checker.on("swiperight", (function(_this) {
         return function(ev) {
-          ev.preventDefault();
           return _this.previousSlide();
         };
       })(this));
-      Hammer(this.node).on("swipeleft", (function(_this) {
+      checker.on("swipeleft", (function(_this) {
         return function(ev) {
-          ev.preventDefault();
           return _this.nextSlide();
         };
       })(this));
       this.currentSlide = 0;
     }
 
-    ListView.prototype.nextSlide = function() {
-      if (this.currentSlide > 1) {
-        return;
+    ListView.prototype.slideTo = function(count) {
+      if (count < 0) {
+        count = 0;
       }
-      this.currentSlide++;
+      if (count > 2) {
+        count = 2;
+      }
+      this.currentSlide = count;
       return this.applySlide();
+    };
+
+    ListView.prototype.nextSlide = function() {
+      return this.slideTo(this.currentSlide + 1 || 2);
     };
 
     ListView.prototype.previousSlide = function() {
       if (this.currentSlide <= 0) {
         return;
       }
-      this.currentSlide--;
-      return this.applySlide();
+      return this.slideTo(this.currentSlide - 1 || 0);
     };
 
     ListView.prototype.applySlide = function() {

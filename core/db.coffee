@@ -128,6 +128,31 @@ exports.getSources = (callback)->
             callback err
             return
         callback null,arr
+exports.getSourceArchiveCount = (guid,callback)->
+    Collections.archive.find({sourceGuid:guid}).count (err,count)->
+        callback err,count
+exports.getSourceStatistic = (guid,callback)->
+    howLong = 30 #30days
+    delta = 30 * 24 * 60 * 60 * 1000
+    after = new Date(Date.now() - delta)
+    cursor = Collections.archive.find({sourceGuid:guid,createDate:{$gte:after}},{createDate:true},{limit:10000})
+    cursor.toArray (err,arr)->
+        if err
+            callback err
+            return
+        result = []
+        for index in [0...30]
+            result.push 0
+        for item in arr
+            secondsOfDay = 24 * 60 * 60 * 1000
+            if item.createDate
+                result[parseInt((item.createDate.getTime() - after.getTime()) / secondsOfDay)]++
+        statistic = result
+        exports.getSourceArchiveCount guid,(err,count)->
+            if err
+                callback err
+                return
+            callback null,{totalArchive:count,statistic:statistic}
 exports.getSourceArchives = (guid,callback)->
     cursor = Collections.archive.find {sourceGuid:guid}
     cursor.toArray (err,arr)->
@@ -394,6 +419,8 @@ exports.getCustomArchives = (query,callback)->
         finalQuery.sourceUrl = new RegExp(query.inurl.replace(/\./,"\\."),"i")
     if query.title
         finalQuery.title = new RegExp(escapeRegExp(query.title),"i")
+    if not query.viewRead
+        finalQuery.hasRead = false
     # Note: I don't know if doing this will introduce any security issue
     # But it's really convinient. Perform some check if it is a problem in future
     if finalQuery.$or.length is 0
@@ -482,7 +509,7 @@ exports.loadCollectorConfig = (name,callback)->
         callback(err,item)
 exports.saveCollectorConfig = (name,data,callback)->
     Collections.collectorConfig.update {name:name},data,{safe:true,upsert:true},(err)=>
-        callback(err)    
+        callback(err)
 # models goes here
 #
 
@@ -532,6 +559,7 @@ class Source extends EventEmitter
             ,uri:@uri
             ,collectorName:@collectorName
             ,unreadCount:@unreadCount or null
+            ,description:@description or null
         }
 class P2pNode
     constructor:(data)->
@@ -552,7 +580,7 @@ class P2pNode
             ,profile:@profile
             ,_id:@hash
         }
-class Friend 
+class Friend
     constructor:(data)->
         for prop of data
             @[prop] = data[prop]

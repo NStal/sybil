@@ -77,6 +77,7 @@ class WebApiServer extends EventEmitter
             @sybil.saveCustomWorkspace query.name,query.data,(err)->
                 callback err
         messageCenter.registerApi "getCustomArchives",(query,callback)=>
+            query.query.viewRead = query.viewRead or false
             @sybil.getCustomArchives query.query,(err,archives)=>
                 if err
                     console.error err
@@ -283,8 +284,14 @@ class WebApiServer extends EventEmitter
                 if err or not lists or not found
                     callback "not found"
                     return 
-                @sybil.getCustomArchives {properties:{listName:name}},(err,archives)->
+                @sybil.getCustomArchives {properties:{listName:name},viewRead:true},(err,archives)->
                     callback null,{name:"read later",archives:archives}
+        messageCenter.registerApi "getSourceStatistic",(guid,callback)=>
+            @sybil.getSourceStatistic guid,(err,result)->
+                if err
+                    callback err
+                    return
+                callback null,result
     pushReadLater:(archive)->
         @boardCastEvent "readLater",archive
     pushUnreadLater:(archive)->

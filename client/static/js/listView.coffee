@@ -6,46 +6,42 @@ class ListView extends View
         console.debug @archiveDisplayer.node,@archiveDisplayer,"!!!"
         @list.on "select",(archiveList)=>
             @archives.load archiveList.archiveList
+            if @enableListAutoSlide
+                @nextSlide()
+            @enableListAutoSlide = true
         @archives.on "select",(archiveListItem)=>
             @archiveDisplayer.display archiveListItem.archive
             if @currentArchiveListItem
                 @currentArchiveListItem.deselect()
             @currentArchiveListItem = archiveListItem
+            if @enableArchiveAutoSlide
+                @nextSlide()
+            @enableArchiveAutoSlide = true
         super $(".list-view")[0],"list view"
         @list.appendTo @node
         @archives.appendTo @node
         @archiveDisplayer.appendTo @node
-
-        # mobile
-        @node.ontouchstart = (e)=>
-            @lastStartDate = Date.now()
-            @lastStartEvent = e
-        @node.ontouchmove = (e)=>
-            @lastMoveEvent = e
-            if not @lastMoveEvent or not @lastStartEvent
-                return
-            #alert Math.abs(@lastStartEvent.touches[0].clientX - @lastMoveEvent.touches[0].clientX) > 50
-            if Math.abs(@lastStartEvent.touches[0].clientY - @lastMoveEvent.touches[0].clientY) > Math.abs( @lastStartEvent.touches[0].clientY - @lastMoveEvent.touches[0].clientY)
-                @lastStartEvent.preventDefault()
-                @lastMoveEvent.preventDefault()
         
-        Hammer(@node).on "swiperight",(ev)=>
-            ev.preventDefault()
+        # mobile
+        checker = new SwipeChecker(@node);
+        checker.on "swiperight",(ev)=>
             @previousSlide()
-        Hammer(@node).on "swipeleft",(ev)=>
-            ev.preventDefault()
+        checker.on "swipeleft",(ev)=>
             @nextSlide();
         @currentSlide = 0
-    nextSlide:()->
-        if @currentSlide > 1
-            return
-        @currentSlide++
+    slideTo:(count)->
+        if count < 0
+            count = 0
+        if count > 2
+            count = 2
+        @currentSlide = count
         @applySlide()
+    nextSlide:()->
+        @slideTo @currentSlide+1 or 2
     previousSlide:()->
         if @currentSlide <= 0
             return
-        @currentSlide--
-        @applySlide()
+        @slideTo @currentSlide-1 or 0
     applySlide:()->
         if @currentSlide is 0
             @node$.removeClass("slide-col2").removeClass("slide-col3")

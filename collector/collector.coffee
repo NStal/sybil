@@ -86,7 +86,7 @@ class CollectorClub extends EventEmitter
                 target = manager
                 break
         if not target
-            callback "invalid collector name #{name}"
+            callback new Error "collector not found"
             return
         target.subscribe uri,(err,source)->
             callback err,source
@@ -98,7 +98,7 @@ class CollectorClub extends EventEmitter
                 target = manager
                 break
         if not target
-            callback "invalid collector name #{name}"
+            callback new Error "collector not found"
             return
         target.unsubscribe guid,(err)->
             callback err
