@@ -5,10 +5,19 @@ class SearchView extends View
         @archiveDisplayer.node$.hide()
         @searchList.on "select",(archive)=>
             console.log "select",archive
-            @archiveDisplayer.setArchive(archive)
-            @archiveDisplayer.node$.show()
+            @archiveDisplayer.setArchive(archive);
+            @archiveDisplayer.node$.show();
+            @node$.addClass("show-displayer");
         super($(".search-view")[0],"search view")
-            
+        # mobile
+        checker = new SwipeChecker(@node);
+        checker.on "swiperight",(ev)=>
+            @node$.removeClass("show-displayer");
+        checker.on "swipeleft",(ev)=>
+            @node$.addClass("show-displayer");
+    show:()->
+        super()
+        @node$.removeClass("show-displayer");
 
 class SearchList extends Leaf.Widget
     constructor:()->
@@ -28,10 +37,10 @@ class SearchList extends Leaf.Widget
                 done()
                 return
             listItem = new SearchListItem(item.archive)
-            listItem.onClickTitle = ()=>
+            listItem.onClickNode = ()=>
                 @emit "select",listItem.archive
             
-            listItem.onMouseoverTitle = ()=>
+            listItem.onMouseoverNode = ()=>
                 @emit "select",listItem.archive
             @resultList.push listItem 
             setTimeout done,@_pushInterval

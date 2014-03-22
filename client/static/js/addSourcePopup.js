@@ -351,6 +351,10 @@
       return this._push(new Text(args.join(" "), "terminal-ok"));
     };
 
+    Terminal.prototype.wait = function() {};
+
+    Terminal.prototype.endwait = function() {};
+
     Terminal.prototype.singleSelection = function(selections) {
       var buttons, selection, _fn, _i, _len;
       buttons = [];

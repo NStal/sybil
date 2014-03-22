@@ -8,6 +8,7 @@
     __extends(SearchView, _super);
 
     function SearchView() {
+      var checker;
       this.searchList = new SearchList();
       this.archiveDisplayer = new ArchiveDisplayer(App.templates["archive-displayer"]);
       this.archiveDisplayer.node$.hide();
@@ -15,11 +16,28 @@
         return function(archive) {
           console.log("select", archive);
           _this.archiveDisplayer.setArchive(archive);
-          return _this.archiveDisplayer.node$.show();
+          _this.archiveDisplayer.node$.show();
+          return _this.node$.addClass("show-displayer");
         };
       })(this));
       SearchView.__super__.constructor.call(this, $(".search-view")[0], "search view");
+      checker = new SwipeChecker(this.node);
+      checker.on("swiperight", (function(_this) {
+        return function(ev) {
+          return _this.node$.removeClass("show-displayer");
+        };
+      })(this));
+      checker.on("swipeleft", (function(_this) {
+        return function(ev) {
+          return _this.node$.addClass("show-displayer");
+        };
+      })(this));
     }
+
+    SearchView.prototype.show = function() {
+      SearchView.__super__.show.call(this);
+      return this.node$.removeClass("show-displayer");
+    };
 
     return SearchView;
 
@@ -52,10 +70,10 @@
             return;
           }
           listItem = new SearchListItem(item.archive);
-          listItem.onClickTitle = function() {
+          listItem.onClickNode = function() {
             return _this.emit("select", listItem.archive);
           };
-          listItem.onMouseoverTitle = function() {
+          listItem.onMouseoverNode = function() {
             return _this.emit("select", listItem.archive);
           };
           _this.resultList.push(listItem);

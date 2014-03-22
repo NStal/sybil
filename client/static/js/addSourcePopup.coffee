@@ -186,6 +186,8 @@ class Terminal extends Leaf.Widget
         @_push new Text(args.join(" "),"terminal-ok")
     good:(args...)->
         @_push new Text(args.join(" "),"terminal-ok")
+    wait:()->
+    endwait:()->
     singleSelection:(selections)->
         buttons = []
         for selection in selections

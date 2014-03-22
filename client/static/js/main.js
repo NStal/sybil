@@ -11,7 +11,7 @@
 
   App.templateManager = new Leaf.TemplateManager();
 
-  App.templateManager.use("archive-list", "archive-list-item", "source-list", "source-list-folder", "source-list-item", "add-source-popup", "source-detail-panel", "read-later-list", "read-later-list-item", "tag-list", "tag-list-item", "tag-archive-list", "custom-source-list", "custom-archive-list", "custom-group-item", "custom-source-item", "custom-tag-item", "tag-selector", "source-selector", "context-menu", "context-menu-item", "archive-filter", "archive-filter-condition", "search-list", "search-list-item", "archive-displayer", "list-view-list", "list-view-list-item", "list-view-archive-list", "list-view-archive-list-item", "p2p-node-item", "p2p-node-list-item", "p2p-list", "p2p-node-info-displayer");
+  App.templateManager.use("archive-list", "archive-list-item", "source-list", "source-list-folder", "source-list-item", "add-source-popup", "source-detail-panel", "read-later-list", "read-later-list-item", "tag-list", "tag-list-item", "tag-archive-list", "custom-source-list", "custom-archive-list", "custom-group-item", "custom-source-item", "custom-tag-item", "tag-selector", "source-selector", "context-menu", "context-menu-item", "archive-filter", "archive-filter-condition", "search-list", "search-list-item", "archive-displayer", "list-view-list", "list-view-list-item", "list-view-archive-list", "list-view-archive-list-item", "p2p-node-item", "p2p-node-list-item", "p2p-list", "p2p-node-info-displayer", "source-detail");
 
   $(function() {
     App.templateManager.start();
@@ -25,13 +25,11 @@
     this.connectManager.start();
     this.connectManager.ready((function(_this) {
       return function() {
-        _this.emit("connect");
-        return console.debug("!!!!!!!!!!!!!!!!!!!!!!", "connect");
+        return _this.emit("connect");
       };
     })(this));
     this.connectManager.on("connect", (function(_this) {
       return function() {
-        console.log("...");
         return _this.messageCenter.setConnection(_this.connectManager.connection);
       };
     })(this));
@@ -49,8 +47,8 @@
     App.addSourcePopup = new AddSourcePopup();
     App.addSourcePopup.appendTo(document.body);
     App.sourceView = new SourceView();
-    App.searchView = new SearchView();
     App.listView = new ListView();
+    App.searchView = new SearchView();
     App.p2pView = new P2pView();
     App.viewSwitcher = new ViewSwitcher();
     App.offlineHinter = new OfflineHinter();

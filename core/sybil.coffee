@@ -15,7 +15,11 @@ class Sybil extends (require "events").EventEmitter
         # 3.init collectors
         # 4.init plugins (won't check)
         @settings = require("../settings.coffee")
-        @settingManager.setDefaultSettingFolder @settings.pluginSettingsPath or require("path").join(__dirname,"../settings/")
+        settingPath = @settings.pluginSettingsPath or require("path").join(__dirname,"../settings/")
+        @settingManager.setDefaultSettingFolder settingPath
+        fs = require("fs")
+        if not fs.existsSync(settingPath)
+            fs.mkdirSync(settingPath)
         @collectorClub.on "archive",(archive)=>
             #console.log "archive",archive.guid
             @archiveProcessQueue.push archive
@@ -75,6 +79,10 @@ class Sybil extends (require "events").EventEmitter
     getSources:(callback)->
         Database.getSources (err,sources)->
             callback err,sources
+    
+    getSourceStatistic:(guid,callback)->
+        Database.getSourceStatistic guid,(err,result)->
+            callback err,result
     getSourceArchives:(guid,callback)->
         Database.getSourceArchives guid,(err,archives)=>
             @completeArchivesMeta archives,(err,archives)=>
@@ -211,7 +219,6 @@ class Sybil extends (require "events").EventEmitter
             if not err and friend
                 @emit "friend/remove",friend
             callback err,friend
-    
     search:(query,callback)->
         # search is a key feature and complicated work
         # The performance is considered as an important factor

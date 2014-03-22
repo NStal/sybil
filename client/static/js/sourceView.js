@@ -8,6 +8,7 @@
     __extends(SourceView, _super);
 
     function SourceView() {
+      var checker;
       this.sourceList = new SourceList();
       this.archiveList = new ArchiveList();
       this.sourceList.on("select", (function(_this) {
@@ -15,34 +16,22 @@
           return _this.archiveList.load(info);
         };
       })(this));
+      this.sourceList.on("detail", (function(_this) {
+        return function(source) {
+          _this.sourceDetail.setSource(source);
+          return _this.sourceDetail.show();
+        };
+      })(this));
+      this.sourceDetail = new SourceDetail();
       SourceView.__super__.constructor.call(this, $(".source-view")[0], "source view");
-      this.node.ontouchstart = (function(_this) {
-        return function(e) {
-          _this.lastStartDate = Date.now();
-          return _this.lastStartEvent = e;
-        };
-      })(this);
-      this.node.ontouchmove = (function(_this) {
-        return function(e) {
-          _this.lastMoveEvent = e;
-          if (!_this.lastMoveEvent || !_this.lastStartEvent) {
-            return;
-          }
-          if (Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY) > Math.abs(_this.lastStartEvent.touches[0].clientY - _this.lastMoveEvent.touches[0].clientY)) {
-            _this.lastStartEvent.preventDefault();
-            return _this.lastMoveEvent.preventDefault();
-          }
-        };
-      })(this);
-      Hammer(this.node).on("swiperight", (function(_this) {
+      checker = new SwipeChecker(this.node);
+      checker.on("swiperight", (function(_this) {
         return function(ev) {
-          ev.preventDefault();
           return _this.node$.addClass("show-list");
         };
       })(this));
-      Hammer(this.node).on("swipeleft", (function(_this) {
+      checker.on("swipeleft", (function(_this) {
         return function(ev) {
-          ev.preventDefault();
           return _this.node$.removeClass("show-list");
         };
       })(this));

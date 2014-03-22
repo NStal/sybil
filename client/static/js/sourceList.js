@@ -27,9 +27,12 @@
           child.on("select", function() {
             return _this.emit("select", child);
           });
-          return child.on("delete", function() {
+          child.on("delete", function() {
             _this.children.removeItem(child);
             return _this.render();
+          });
+          return child.on("detail", function(source) {
+            return _this.emit("detail", source);
           });
         };
       })(this));
@@ -192,6 +195,11 @@
           e.preventDefault();
           selections = [
             {
+              name: "source detail",
+              callback: function() {
+                return _this.emit("detail", _this.source);
+              }
+            }, {
               name: "unsubscribe",
               callback: function() {
                 if (!confirm("unsubscribe item " + _this.source.name + "?")) {
@@ -259,7 +267,7 @@
       };
     };
 
-    SourceListItem.prototype.onClickName = function() {
+    SourceListItem.prototype.onClickNode = function() {
       this.emit("select", this);
       return false;
     };
@@ -385,6 +393,11 @@
             _this.children.removeItem(item);
           }
           return _this.save();
+        };
+      })(this));
+      item.on("detail", (function(_this) {
+        return function(source) {
+          return _this.emit("detail", source);
         };
       })(this));
       this._attachDrag(item);
