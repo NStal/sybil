@@ -80,6 +80,9 @@ class ViewSwitcher extends Leaf.Widget
             @hide()
     onClickAddSourceButton:()->
         App.addSourcePopup.show()
+    onClickSettingButton:()->
+        App.settingPanel.show()
+
 class ViewSelectItem extends Leaf.Widget
     constructor:(@name)->
         super document.createElement "li"

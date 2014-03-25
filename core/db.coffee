@@ -128,6 +128,12 @@ exports.getSources = (callback)->
             callback err
             return
         callback null,arr
+exports.renameSource = (guid,name,callback)->
+    Collections.source.findAndModify {guid:guid},{$set:{name:name}},{safe:true},(err)->
+        callback err
+exports.setSourceDescription = (guid,description,callback)->
+    Collections.source.findAndModify {guid,guid},{$set:{description:description}},{safe:true},(err)->
+        callback err
 exports.getSourceArchiveCount = (guid,callback)->
     Collections.archive.find({sourceGuid:guid}).count (err,count)->
         callback err,count

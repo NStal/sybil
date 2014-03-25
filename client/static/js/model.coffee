@@ -48,6 +48,9 @@ class Source extends Leaf.EventEmitter
             if archive.sourceGuid is @guid
                 @unread()
     queryStatisticInfo:(callback=()->true)->
+        if @statistic
+            callback()
+            return
         App.messageCenter.invoke "getSourceStatistic",@guid,(err,info)=>
             if err
                 callback err
@@ -66,6 +69,19 @@ class Source extends Leaf.EventEmitter
         @description = @data.description
         
         @emit "change"
+    rename:(name,callback = ()->true)->
+        App.messageCenter.invoke "renameSource",{guid:@guid,name:name},(err)=>
+            if not err
+                @name = name
+                @emit "change"
+            callback err
+    describe:(description,callback = ()->true)->
+        App.messageCenter.invoke "setSourceDescription",{guid:@guid,description:description},(err)=>
+            if not err
+                @description = description
+                return
+            callback err
+            
     toJSON:()->
         return @data
     read:()->

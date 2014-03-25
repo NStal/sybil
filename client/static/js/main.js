@@ -11,7 +11,7 @@
 
   App.templateManager = new Leaf.TemplateManager();
 
-  App.templateManager.use("archive-list", "archive-list-item", "source-list", "source-list-folder", "source-list-item", "add-source-popup", "source-detail-panel", "read-later-list", "read-later-list-item", "tag-list", "tag-list-item", "tag-archive-list", "custom-source-list", "custom-archive-list", "custom-group-item", "custom-source-item", "custom-tag-item", "tag-selector", "source-selector", "context-menu", "context-menu-item", "archive-filter", "archive-filter-condition", "search-list", "search-list-item", "archive-displayer", "list-view-list", "list-view-list-item", "list-view-archive-list", "list-view-archive-list-item", "p2p-node-item", "p2p-node-list-item", "p2p-list", "p2p-node-info-displayer", "source-detail");
+  App.templateManager.use("archive-list", "archive-list-item", "source-list", "source-list-folder", "source-list-item", "add-source-popup", "read-later-list", "read-later-list-item", "tag-list", "tag-list-item", "tag-archive-list", "custom-source-list", "custom-archive-list", "custom-group-item", "custom-source-item", "custom-tag-item", "tag-selector", "source-selector", "context-menu", "context-menu-item", "archive-filter", "archive-filter-condition", "search-list", "search-list-item", "archive-displayer", "list-view-list", "list-view-list-item", "list-view-archive-list", "list-view-archive-list-item", "p2p-node-item", "p2p-node-list-item", "p2p-list", "p2p-node-info-displayer", "source-detail", "int-entry", "string-entry");
 
   $(function() {
     App.templateManager.start();
@@ -52,6 +52,7 @@
     App.p2pView = new P2pView();
     App.viewSwitcher = new ViewSwitcher();
     App.offlineHinter = new OfflineHinter();
+    App.settingPanel = new SettingPanel();
     Model.initEventListener();
     _ref = View.views;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {

@@ -16,12 +16,6 @@
           return _this.archiveList.load(info);
         };
       })(this));
-      this.sourceList.on("detail", (function(_this) {
-        return function(source) {
-          _this.sourceDetail.setSource(source);
-          return _this.sourceDetail.show();
-        };
-      })(this));
       this.sourceDetail = new SourceDetail();
       SourceView.__super__.constructor.call(this, $(".source-view")[0], "source view");
       checker = new SwipeChecker(this.node);

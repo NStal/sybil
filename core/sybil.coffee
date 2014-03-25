@@ -79,7 +79,12 @@ class Sybil extends (require "events").EventEmitter
     getSources:(callback)->
         Database.getSources (err,sources)->
             callback err,sources
-    
+    renameSource:(guid,name,callback)->
+        Database.renameSource guid,name,(err)->
+            callback err
+    setSourceDescription:(guid,description,callback)->
+        Database.setSourceDescription guid,description,(callback)->
+            callback err
     getSourceStatistic:(guid,callback)->
         Database.getSourceStatistic guid,(err,result)->
             callback err,result

@@ -19,9 +19,11 @@
 
 #class GlobalOverlay extends Leaf.Widget
 #    constructor:()->
-#        
+#
+App.on "connect",()->
+    App.settingPanel.test()
 App.on "structureReady",()->
-    
+            
     
     setTimeout (()->
 #        App.viewSwitcher.switchTo "p2p view"

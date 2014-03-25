@@ -5,6 +5,7 @@
 # 3.5 (app ready)
 # 4. Sync the required data like source/list/nodes
 #
+    
 window.App = new Leaf.EventEmitter()
 App.messageCenter = new MessageCenter()
 App.templateManager = new Leaf.TemplateManager()
@@ -14,7 +15,6 @@ App.templateManager.use "archive-list"
         ,"source-list-folder"
         ,"source-list-item"
         ,"add-source-popup"
-        ,"source-detail-panel"
         ,"read-later-list"
         ,"read-later-list-item"
         ,"tag-list"
@@ -43,6 +43,8 @@ App.templateManager.use "archive-list"
         ,"p2p-list"
         ,"p2p-node-info-displayer"
         ,"source-detail"
+        ,"int-entry"
+        ,"string-entry"
 
 $ ()->
     App.templateManager.start()
@@ -65,6 +67,7 @@ App.init = ()->
     # views 
     App.addSourcePopup = new AddSourcePopup()
     App.addSourcePopup.appendTo document.body
+    
     App.sourceView = new SourceView()
     #App.tagView = new TagView()
     #App.customView = new CustomView()
@@ -73,6 +76,7 @@ App.init = ()->
     App.p2pView = new P2pView()
     App.viewSwitcher = new ViewSwitcher()
     App.offlineHinter = new OfflineHinter()
+    App.settingPanel = new SettingPanel()
     #App.tagSelector = new TagSelector()
     #App.sourceSelector = new SourceSelector()
     #App.tagSelector.appendTo document.body
@@ -90,8 +94,7 @@ App.init = ()->
     
     App.viewSwitcher.switchTo "source view"
     App.emit "structureReady"
-    App.connect()
-    
+    App.connect()  
 App.showHint = (str)->
     alert str
 App.showError = (str)->
@@ -147,4 +150,4 @@ class UserConfig extends Leaf.EventEmitter
         if typeof @data[key] isnt "undefined"
             return
         @set(key,value)
-        
+
