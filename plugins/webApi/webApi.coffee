@@ -292,6 +292,19 @@ class WebApiServer extends EventEmitter
                     callback err
                     return
                 callback null,result
+        messageCenter.registerApi "renameSource",(data,callback)=>
+            if not data or not data.guid or not data.name
+                callback "invalid parameter"
+                return
+            @sybil.renameSource data.guid,data.name,(err)=>
+                callback err
+        messageCenter.registerApi "setSourceDescription",(data,callback)=>
+            if not data or not data.guid
+                callback "invalid parameter"
+                return
+            @sybil.setSourceDescription data.guid,data.description or null,(err)=>
+                callback err
+
     pushReadLater:(archive)->
         @boardCastEvent "readLater",archive
     pushUnreadLater:(archive)->

@@ -5,14 +5,15 @@ module.exports = {
     dbPort:"12309"
     dbOption:{}
     collectors:["rss","#pageWatcher"]
-    # plugin name start with # won't be load, this can be used as a easy toggler
     proxies:[]
+    # plugin name start with # won't be load, this can be used as a handy toggler
     plugins:[
         "webApi"
         "sybilP2pNetwork"
         "resourceProxy"
         "p2pWebApi"
         "safeGateway"
+        "settingWebApi"
         "#externalProxy"      # as a reverse proxy to allow remote access
         "#runtimeShell"
         
@@ -25,6 +26,7 @@ module.exports = {
     safeGatewayIp:"auto"
     webApiPort:3107
     privateKeyPath:"./rsa.key"
+    pidPath:"./pid"
     hubServerHost:"localhost"
     hubServerPort:57612
     nodeServerHost:"localhost"

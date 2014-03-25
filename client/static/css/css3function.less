@@ -1,8 +1,8 @@
-.transition (@attr,@time){
-    transition:@attr @time ease;
-    -moz-transition:@attr @time ease;
-    -webkit-transition:@attr @time ease;
-    -o-transition:@attr @time ease;
+.transition (@attr,@time,@method:ease){
+    transition:@attr @time @method;
+    -moz-transition:@attr @time @method;
+    -webkit-transition:@attr @time @method;
+    -o-transition:@attr @time @method;
 }
 .box-sizing{
     box-sizing:border-box;

@@ -27,12 +27,9 @@
           child.on("select", function() {
             return _this.emit("select", child);
           });
-          child.on("delete", function() {
+          return child.on("delete", function() {
             _this.children.removeItem(child);
             return _this.render();
-          });
-          return child.on("detail", function(source) {
-            return _this.emit("detail", source);
           });
         };
       })(this));
@@ -197,7 +194,7 @@
             {
               name: "source detail",
               callback: function() {
-                return _this.emit("detail", _this.source);
+                return _this.showSourceDetail();
               }
             }, {
               name: "unsubscribe",
@@ -213,6 +210,11 @@
         };
       })(this);
     }
+
+    SourceListItem.prototype.showSourceDetail = function() {
+      App.sourceView.sourceDetail.setSource(this.source);
+      return App.sourceView.sourceDetail.show();
+    };
 
     SourceListItem.prototype.unsubscribe = function(callback) {
       if (callback == null) {
@@ -393,11 +395,6 @@
             _this.children.removeItem(item);
           }
           return _this.save();
-        };
-      })(this));
-      item.on("detail", (function(_this) {
-        return function(source) {
-          return _this.emit("detail", source);
         };
       })(this));
       this._attachDrag(item);

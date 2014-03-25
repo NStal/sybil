@@ -4,9 +4,6 @@ class SourceView extends View
         @archiveList = new ArchiveList()
         @sourceList.on "select",(info)=>
             @archiveList.load info
-        @sourceList.on "detail",(source)=>
-            @sourceDetail.setSource source
-            @sourceDetail.show()
         @sourceDetail = new SourceDetail()
         super $(".source-view")[0],"source view"
         #@node.ontouchstart = (e)=>

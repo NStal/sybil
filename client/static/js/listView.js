@@ -299,7 +299,11 @@
       })(this));
     };
 
-    ArchiveListItem.prototype.onClickDone = function() {
+    ArchiveListItem.prototype.onClickDone = function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
       if (this.isDone) {
         return this.markAsUndone();
       } else {

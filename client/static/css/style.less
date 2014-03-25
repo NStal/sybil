@@ -28,6 +28,16 @@ html *{
     border-bottom:1px solid #2a2a2a;
     position:fixed;
     z-index:10000;
+    .button{
+        border:none;
+        box-shadow:none;
+        font-size:24px;
+        line-height:@header-height;
+        float:right;
+        color:#ddd;
+        padding:0 10px;
+        margin:0;
+    }
     .option{
         width:200px;
         .box-sizing;
@@ -210,22 +220,24 @@ html *{
             height:100%;
             padding:2px 2px;
             .box-sizing;
-            overflow:auto;
+            overflow-x:visible;
+            overflow-y:auto;
             
         }
         .item{
             .box-sizing;
             @item-height:28px; 
-            overflow:hidden;
+            overflow:visible;
             line-height:@item-height;
             display:block;
+            position:relative;
             height:@item-height;
             width:100%;
             font-weight:200;
             padding-right:5px;
             .name:hover{
                 color:white;
-                                
+                
             }
             .title{
                 overflow:hidden;
@@ -275,7 +287,7 @@ html *{
             }
             .source-list-item-container{
                 padding-left:20px;
-                overflow:hidden;
+                overflow:visible;
                 .transition(all,100ms);
                 display:none;
             }
@@ -333,17 +345,6 @@ html *{
             }
             display:none;
         }
-    }
-    .source-detail{
-        width:100%;
-        height:100%;
-        z-index:101;
-        position:absolute;
-        top:0;
-        left:0;
-        background-color:white;
-        display:none;
-        padding-top:@header-height;
     }
 }
 .search-view{
@@ -781,20 +782,23 @@ html *{
     }
 }
 
-.context-menu{
-    width:180px;
+.popup{
     border-radius:4px;
     padding:5px 0;
     position:absolute;
-    background-color:rgba(255,255,255,0.8);
+    background-color:rgba(255,255,255,0.9);
     .light-shadow;
     color:@comfortable-black;
-    z-index:9999999999;
     .transition(background-color,10000ms);
     &:hover{
         .transition(all,300ms);
         background-color:rgba(255,255,255,1);
     }
+}
+.context-menu{
+    width:180px;
+    z-index:9999999999;
+    .popup;
     .context-menu-item{
         width:100%;
         padding:.2em 1.5em;
@@ -1020,5 +1024,87 @@ html *{
     &.show{
         background-color:rgba(0,0,0,0.5);
         opacity:1;
+    }
+}
+
+.source-detail{
+    display:none;
+    .popup;
+    z-index:1000;
+    width:70%;
+    max-height:60%;
+    left:0;
+    padding:20px 30px;
+    top:0;
+    overflow:auto;
+    .readable;
+    canvas{
+        width:100%;
+        height:150px;
+        border-bottom:1px solid rgba(0,0,0,0.75);
+        margin-top:20px;
+    }
+    .item-title{
+        margin-top:20px;
+        margin-bottom:10px;
+        font-weight:800;
+    }
+}
+
+.setting-panel{
+    .popup;
+    width:80%;
+    min-height:60%;
+    overflow:auto;
+    z-index:10000;
+    top:0;
+    left:0;
+    display:none;
+    .wrapper{
+        padding:30px;
+        .flex-row;
+    }
+    .groups{
+        h3{
+            margin-bottom:14px;
+        }
+        min-width:200px;
+        padding:10px;
+        border-right:1px solid #ddd;
+        .group{
+            color:#aaa;
+            .clickable;
+            padding:4px 0;
+            &.active{
+                color:#444;
+            }
+        } 
+    }
+    .entrys{
+        padding:10px 10px 10px 20px;
+        h3{
+            padding-bottom:15px;
+        }
+        .entry{
+            width:100%;
+            padding-bottom:8px;
+            .error{
+                color:red;
+            }
+            label{
+                display:block;
+                float:left;
+                overflow:hidden;
+                min-width:80px;
+                line-height:24px;
+                padding-right:20px;
+            }
+            input{
+                border:1px solid #ddd;
+                box-shadow:none;
+                padding:2px 6px;
+            }
+            
+        }
     }
 }

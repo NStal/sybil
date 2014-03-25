@@ -114,6 +114,10 @@
           return true;
         };
       }
+      if (this.statistic) {
+        callback();
+        return;
+      }
       return App.messageCenter.invoke("getSourceStatistic", this.guid, (function(_this) {
         return function(err, info) {
           if (err) {
@@ -138,6 +142,46 @@
       this.collectorName = this.data.collectorName;
       this.description = this.data.description;
       return this.emit("change");
+    };
+
+    Source.prototype.rename = function(name, callback) {
+      if (callback == null) {
+        callback = function() {
+          return true;
+        };
+      }
+      return App.messageCenter.invoke("renameSource", {
+        guid: this.guid,
+        name: name
+      }, (function(_this) {
+        return function(err) {
+          if (!err) {
+            _this.name = name;
+            _this.emit("change");
+          }
+          return callback(err);
+        };
+      })(this));
+    };
+
+    Source.prototype.describe = function(description, callback) {
+      if (callback == null) {
+        callback = function() {
+          return true;
+        };
+      }
+      return App.messageCenter.invoke("setSourceDescription", {
+        guid: this.guid,
+        description: description
+      }, (function(_this) {
+        return function(err) {
+          if (!err) {
+            _this.description = description;
+            return;
+          }
+          return callback(err);
+        };
+      })(this));
     };
 
     Source.prototype.toJSON = function() {

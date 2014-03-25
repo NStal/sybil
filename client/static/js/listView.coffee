@@ -161,7 +161,10 @@ class ArchiveListItem extends Leaf.Widget
         @archive.changeList @listName,(err)=>
             @isDone = false
             @render()
-    onClickDone:()->
+    onClickDone:(e)->
+        if e
+            e.preventDefault()
+            e.stopImmediatePropagation()
         if @isDone
             @markAsUndone()
         else

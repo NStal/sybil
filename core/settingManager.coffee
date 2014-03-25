@@ -5,7 +5,6 @@ SafeFileWriter = require("safe-file-writer");
 # Sybil only has one SettingManager
 # Every plugin can has it's own Settings or access globalsettings
 # Every Settings can have many SettingEntry with a Validator
-# 
 class SettingManager extends EventEmitter
     constructor:()->
         @path = pathModule.resolve(__dirname,"..","settings/")
@@ -120,8 +119,11 @@ class SettingEntry
         ,object:"object"
         ,any:"any"
     }
-    constructor:(@name,@type,@validator = Validator.bypassValidator)->
-        return
+    constructor:(@name,@type,@validator)->
+        if @type is "int"
+            @validator = @validator or Validator.intValidator
+        else
+            @validator = @validator or Validator.bypassValidator
     test:(value)->
         return @validator.test(value)
     validate:(value)->
@@ -130,9 +132,11 @@ class SettingEntry
 class Validator
     @bypassValidator = new Validator()
     @intValidator = new Validator (value)->
+        value = value or ""
+        console.log "test",value.toString().trim()
         if /^\d+$/.test value.toString().trim()
             return parseInt(value.toString().trim())
-        throw new Error "need to be int"
+        throw new Error "need to be an integer"
     constructor:(@checker,@option = {})->
         # checker should pass the value if it's correct
         # or modify the value to make it correct
