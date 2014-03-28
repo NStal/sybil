@@ -1,1 +1,5 @@
-{}
+{
+    "email": null,
+    "nickname": null,
+    "nodeServer": 5000
+}

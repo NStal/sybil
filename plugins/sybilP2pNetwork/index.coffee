@@ -17,3 +17,17 @@ exports.register = (dep,callback)->
         console.log "p2p server is ready"
         callback null,sybilP2pNetwork
 exports.requires = []
+exports.settings = {
+    email:{
+        default:null
+        type:"email"
+    }
+    nickname:{
+        default:null
+        type:"username"
+    }
+    nodeServer:{
+        default:5000
+        type:"int"
+    }
+}

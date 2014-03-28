@@ -32,7 +32,7 @@ sybilDomain.onAddNode = (node)->
                 callback "unkown error"
                 return
             callback null,archives
-    
+
 sybilP2pNetwork = {}
 module.exports = sybilP2pNetwork
 sybilP2pNetwork.setup = (privateKey,profile,options = {},callback)->

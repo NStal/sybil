@@ -13,8 +13,6 @@ exports.httpGet = (option,callback)->
         exports._httpGet option,callback
         return
     httpGetQueue.push {option:option,callback:callback}
-# WARNING a recursive 301 may cause endless loop here
-# I should fix this when possible
 exports._httpGet = (option,callback)->
     url = option.url
     proxy = option.proxy or null

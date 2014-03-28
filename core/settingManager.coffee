@@ -34,6 +34,7 @@ class Settings extends EventEmitter
         if not @path
             throw new Error "can restore without setPath() first"
         @writer = new SafeFileWriter(@path)
+        console.log "inside trial"
         @writer.restore (err,content)=>
             if err
                 console.error "fail to restore settings"
@@ -60,11 +61,11 @@ class Settings extends EventEmitter
     _set:(key,value)->
         @entrys[key].value = value
     set:(key,value)->
-        if @entrys[key] && @entrys[key].test value
+        if @entrys[key] && @entrys[key].test value 
+            @_set(key,value)
             @emit "change",key,value
             @emit "change/#{key}",value
             @save()
-            @_set(key,value)
             return
         throw new Error "invalid setting set for #{key} of value #{value}"
     validate:(key,value)->
@@ -133,7 +134,6 @@ class Validator
     @bypassValidator = new Validator()
     @intValidator = new Validator (value)->
         value = value or ""
-        console.log "test",value.toString().trim()
         if /^\d+$/.test value.toString().trim()
             return parseInt(value.toString().trim())
         throw new Error "need to be an integer"

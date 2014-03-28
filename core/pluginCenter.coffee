@@ -49,6 +49,7 @@ class PluginCenter extends EventEmitter
                 console.debug "skip plugin #{name}"
                 done()
                 return
+            console.log "try load plugin",name
             @_loadPlugin name,(err)->
                 if not err
                     loaded.push name
@@ -72,7 +73,6 @@ class PluginCenter extends EventEmitter
                 settings._set(prop,defines[prop].default)
         settings.restore (err)->
             settings.save ()->
-                console.log "safe default yes!"
                 callback err,settings
     _loadPlugin:(name,callback)->
         #console.debug @pluginMap
@@ -130,7 +130,6 @@ class Dependency
             parent = parent.parent
         item.parent = this
         @dependencies.push item
-        console.log @name,"ADD dep",name
     flatten:(queue = [])->
         for child in @dependencies
             child.flatten(queue)

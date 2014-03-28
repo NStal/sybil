@@ -52,6 +52,9 @@ $ ()->
         App.templates = templates
         App.init()
 App.connect = ()->
+    @messageCenter.on "error",(e)=>
+        console.error e
+        console.error e.stack
     @connectManager.start()
     @connectManager.ready ()=>
         @emit "connect"
