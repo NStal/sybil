@@ -1,7 +1,8 @@
 # prepare settings, setup logs/pid/background states
 # and finally load sybil, so neat.
-
-require("coffee-script")
+#require("coffee-script")
+fs = require "fs"
+    
 http = require "http"
 http.globalAgent.maxSockets = 200;
 https = require "https"
@@ -18,14 +19,13 @@ catch e
 
 logger.useColor = settings.logWithColor
 # setup log redirections if log path is defined
-if settings.logPath
-    fs = require "fs"
+if settings.logPath and not settings.debug
     logStream = fs.createWriteStream(settings.logPath,{flags:"a"});
     process.__defineGetter__ "stdout",()->logStream
     process.__defineGetter__ "stderr",()->logStream
 
 # do we have any clone running (and murder it :( )
-pm = require("./util/processManager.coffee")
+pm = require("./common/processManager.coffee")
 pidPath = settings.pidPath or "./pid"
 if fs.existsSync(pidPath)
     pid = parseInt(fs.readFileSync(pidPath))
@@ -33,10 +33,8 @@ if fs.existsSync(pidPath)
         pm.ensureDeath(pid)
 
 # ensure it's running in background ( or suicide and respawn)
-pm.background()
-
+if not settings.debug
+    pm.background()
 # save pid
 fs.writeFileSync(pidPath,process.pid)
 require("./core/sybil.coffee")
-
-

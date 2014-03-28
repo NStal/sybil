@@ -1,5 +1,6 @@
 {
     "dbName":"sybil",
+    "debug":true,
     "webApiHost":"localhost",
     "webApiPort":3006,
     "nickname":"NStal",

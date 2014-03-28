@@ -1,1 +1,1 @@
-../../../../../leafJs/compiled/leaf.js
+/home/wuminghan/workspace/leafJs/compiled/leaf.js

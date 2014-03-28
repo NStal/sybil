@@ -137,7 +137,7 @@ class Rss extends EventEmitter
             return
         httpUtil.httpGet {url:@url,timeout:timeout},(err,res,body)=>
             if err
-                console.debug "check fail #{err.toString()} now through proxy #{@proxy}"
+                console.debug "check fail #{@url} #{err.toString()} now through proxy #{@proxy}"
                 httpUtil.httpGet {url:@url,proxy:@proxy,timeout:timeout},(_err,_res,body)=>
                     if _err
                         if _err is "target not available"

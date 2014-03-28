@@ -22,6 +22,12 @@
   });
 
   App.connect = function() {
+    this.messageCenter.on("error", (function(_this) {
+      return function(e) {
+        console.error(e);
+        return console.error(e.stack);
+      };
+    })(this));
     this.connectManager.start();
     this.connectManager.ready((function(_this) {
       return function() {

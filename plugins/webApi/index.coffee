@@ -6,10 +6,10 @@ exports.register = (deps,callback)->
 exports.requires = []
 exports.settings = {
     host:{
-        ,default:null
+        default:null
     }
-    ,port:{
+    port:{
         type:"int"
-        ,default:null
+        default:null
     }
 }
