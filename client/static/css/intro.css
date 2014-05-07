@@ -231,7 +231,7 @@ input:focus {
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
 }
 .blue-glow {
-  box-shadow: 0 0 5px 0 #00ccfc, 0 0 4px 0 rgba(256, 256, 256, 0.8), 0 0 2px 0 #ffffff;
+  box-shadow: 0 0 5px 0 #00ccfc, 0 0 4px 0 rgba(255, 255, 255, 0.8), 0 0 2px 0 #ffffff;
 }
 .no-select {
   -webkit-touch-callout: none;
@@ -366,7 +366,7 @@ input:focus {
 }
 /* makes the font 33% larger relative to the icon container */
 .fa-lg {
-  font-size: 1.3333333333333333em;
+  font-size: 1.33333333em;
   line-height: 0.75em;
   vertical-align: -15%;
 }
@@ -383,12 +383,12 @@ input:focus {
   font-size: 5em;
 }
 .fa-fw {
-  width: 1.2857142857142858em;
+  width: 1.28571429em;
   text-align: center;
 }
 .fa-ul {
   padding-left: 0;
-  margin-left: 2.142857142857143em;
+  margin-left: 2.14285714em;
   list-style-type: none;
 }
 .fa-ul > li {
@@ -396,13 +396,13 @@ input:focus {
 }
 .fa-li {
   position: absolute;
-  left: -2.142857142857143em;
-  width: 2.142857142857143em;
-  top: 0.14285714285714285em;
+  left: -2.14285714em;
+  width: 2.14285714em;
+  top: 0.14285714em;
   text-align: center;
 }
 .fa-li.fa-lg {
-  left: -1.8571428571428572em;
+  left: -1.85714286em;
 }
 .fa-border {
   padding: .2em .25em .15em;

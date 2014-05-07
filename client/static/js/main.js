@@ -34,6 +34,7 @@
       return function() {
         App.initialLoaded = true;
         _this.emit("connect");
+        return;
         $(".loading").addClass("hide");
         return setTimeout((function() {
           return $(".loading").hide();
