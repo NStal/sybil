@@ -26,7 +26,6 @@ App.connect = ()->
     @connectionManager.ready ()=>
         App.initialLoaded = true
         @emit "connect"
-        return
         $(".loading").addClass("hide");
         setTimeout (()=>
             $(".loading").hide()
