@@ -1,3 +1,7 @@
+App = require "app"
+#App.initialLoad ()=>
+#    App.settingPanel.test()
+
 #class TextGhost
 #    constructor:(target,text)->
 #        @setTarget target
@@ -20,12 +24,12 @@
 #class GlobalOverlay extends Leaf.Widget
 #    constructor:()->
 #
-App.on "connect",()->
-    App.settingPanel.test()
-App.on "structureReady",()->
-            
-    
-    setTimeout (()->
+#App.on "connect",()->
+#    App.settingPanel.test()
+#App.on "structureReady",()->
+#            
+#    
+#    setTimeout (()->
 #        App.viewSwitcher.switchTo "p2p view"
 #        App.userConfig.set "enableResourceProxy",true
 #        App.userConfig.set "useResourceProxyByDefault",true
@@ -35,7 +39,7 @@ App.on "structureReady",()->
 #        App.searchView.searchList.UI.searchKeywordInput.value = "nodejs"
 #        App.searchView.searchList.onClickSearchButton()
         
-        ),100
+#        ),100
 
 
 # Enhancement goes here

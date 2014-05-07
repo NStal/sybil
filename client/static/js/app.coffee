@@ -1,1 +1,1 @@
-exports.App = new Leaf.EventEmitter()
+module.exports = new Leaf.EventEmitter()

@@ -90,7 +90,7 @@ class CollectorClub extends EventEmitter
             return
         target.subscribe uri,(err,source)->
             callback err,source
-    unsubscribe:(guid,callback)->
+    unsubscribe:(guid = "",callback)->
         target = null
         name = guid.substring(0,guid.indexOf("_"))
         for manager in @managers

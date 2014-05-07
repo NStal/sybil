@@ -9,9 +9,9 @@ module.exports = {
     # plugin name start with # won't be load, this can be used as a handy toggler
     plugins:[
         "webApi"
-        "sybilP2pNetwork"
+        "#sybilP2pNetwork"
         "resourceProxy"
-        "p2pWebApi"
+        "#p2pWebApi"
         "safeGateway"
         "settingWebApi"
         "#externalProxy"      # as a reverse proxy to allow remote access
@@ -40,7 +40,7 @@ module.exports = {
 
 dynamic = {}
 dynamic.__defineGetter__ "proxy",() ->
-    return module.exports.proxies[0]
+    return module.exports.proxies[0] or null
 
 dynamic.__defineGetter__ "server",() ->
     return module.exports.serverList[0]

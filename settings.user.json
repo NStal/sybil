@@ -11,8 +11,8 @@
     "processTitle":"sybil",
     "safeGatewayUsername":"wuminghan",
     "safeGatewayPassword":"P@ssw0rd",
-    "proxies":[{
-        "host":"nstal.me",
-        "port":12222
-    }]
+    "proxies":[
+        "http://localhost:7002/"
+        ,"phttp://nstal.me:12222/"
+    ]
 }

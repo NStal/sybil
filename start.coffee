@@ -1,8 +1,7 @@
 # prepare settings, setup logs/pid/background states
 # and finally load sybil, so neat.
-#require("coffee-script")
 fs = require "fs"
-    
+
 http = require "http"
 http.globalAgent.maxSockets = 200;
 https = require "https"
@@ -19,7 +18,9 @@ catch e
 
 logger.useColor = settings.logWithColor
 # setup log redirections if log path is defined
-if settings.logPath and not settings.debug
+if process.argv[2] is "debug"
+    settings.debug = true
+if settings.logPath and not settings.debug 
     logStream = fs.createWriteStream(settings.logPath,{flags:"a"});
     process.__defineGetter__ "stdout",()->logStream
     process.__defineGetter__ "stderr",()->logStream

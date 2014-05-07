@@ -1,23 +1,32 @@
+i18n = require "i18n"
+moment = require "lib/moment"
+App = require "app"
+Model = require "model"
 class ArchiveDisplayer extends Leaf.Widget
     constructor:(template)->
         super template
     setArchive:(archive)->
-        @archive = archive
+        if @archive
+            @archive.stopListenBy this
+            
+        @archive = archive 
+        @archive.listenBy this,"change",@render
         @render()
         @useDisplayContent = true
+
     _renderShareInfo:(profile,howmany)->
         if howmany is 0 
             @UI.shareInfo$.text ""
             return true
         if not profile
-            @UI.shareInfo$.text App.textFormat App.Language.thisManyPeopleHasShareIt_i,howmany
+            @UI.shareInfo$.text i18n.thisManyPeopleHasShareIt_i howmany
             return true
         if profile
             html = "<img src='http://www.gravatar.com/avatar/#{profile.hash}?s=12&d=identicon'></img>"
             if howmany > 1
-                words = App.textFormat App.Language.andThisMorePeopleHasShareIt_i,howmany-1
+                words = i18n.andThisMorePeopleHasShareIt_i howmany-1
             else
-                words = profile.nickname+" "+App.Language.sharesIt
+                words = profile.nickname+" "+i18n.sharesIt()
             @UI.shareInfo$.html(html+words)
             
     render:()->
@@ -31,9 +40,13 @@ class ArchiveDisplayer extends Leaf.Widget
         if @archive.listName is "read later"
             @UI.readLater$.addClass("active")
         else
-            @UI.readLater$.removeClass("active") 
+            @UI.readLater$.removeClass("active")
+        if @archive.listName
+            @renderData.listText = "list (#{@archive.listName})"
+        else
+            @renderData.listText = "list"
         if @archive.createDate
-            @UI.date$.text(moment(@archive.createDate).format(App.Language.fullDateFormatString))
+            @UI.date$.text moment(@archive.createDate).format(i18n.fullDateFormatString())
         if @archive.share
             @UI.share$.addClass("active")
         else
@@ -67,6 +80,8 @@ class ArchiveDisplayer extends Leaf.Widget
                             url = @getAttribute "src"
                             if url.indexOf("/remoteResource")>=0
                                 return
+                            if url.indexOf("file://") >= 0
+                                return
                             $(this).attr("src","/remoteResource?url=#{encodeURIComponent(url)}&referer=#{originalLink}")
                 else
                     content = document.createElement("div")
@@ -81,7 +96,6 @@ class ArchiveDisplayer extends Leaf.Widget
                 this.setAttribute "target","_blank"
                 
     onClickShare:()->
-        console.log "HI ~~"
         if not @archive.share
             console.log @archive
             @archive.markAsShare (err)=>
@@ -107,12 +121,66 @@ class ArchiveDisplayer extends Leaf.Widget
             @archive.unlikeArchive (err)=>
                 if err then console.error err
                 @render()
+    onClickList:(e)->
+        if not @listSelector
+            @listSelector = new ArchiveDisplayerListSelector()
+            @listSelector.listenBy this,"select",(listModel)=>
+                @archive.changeList listModel.name,(err)=>
+                    @listSelector.active listModel.name
+                    @listSelector.hide()
+        @listSelector.updateState()
+        @listSelector.show(e)
+        if @archive.listName
+            @listSelector.active @archive.listName
     markAsLike:()->
         if not @archive.like
             @archive.likeArchive () -> @render()
     markAsUnlike:()->
         if not @archive.like
             @archive.unlikeArchive () => @render()
-    
 
-window.ArchiveDisplayer = ArchiveDisplayer
+Popup = require "widget/popup"
+class ArchiveDisplayerListSelector extends Popup
+    constructor:()->
+        super App.templates["archive-displayer-list-selector"]
+        @lists = Leaf.Widget.makeList @UI.lists
+        @lists.on "child/add",(item)=>
+            item.listenBy this,"select",@select
+        @lists.on "child/remove",(item)=>
+            item.destroy()
+    updateState:()->
+        @lists.length = 0
+        for list in Model.ArchiveList.lists.models
+            @lists.push new ArchiveDisplayerListSelectorItem list
+    show:(e)->
+        super()
+        if not e
+            return
+        if Leaf.Util.isMobile()
+            return
+        @node$.width(300)
+        height = @node$.height()
+        @node$.css({position:"absolute",top:e.clientY+15-height,left:e.clientX-10})
+    select:(item)->
+        @emit "select",item.list
+    active:(name)->
+        if not name
+            return
+        for item in @lists
+            item.deactive()
+            if item.list.name is name
+                item.active()
+    onClickCloseButton:()->
+        @hide()
+class ArchiveDisplayerListSelectorItem extends Leaf.Widget
+    constructor:(@list)->
+        super "<li data-text='name'></li>"
+        @renderData.name = @list.name
+    onClickNode:()->
+        @emit "select",this
+    active:()->
+        @renderData.name = "(current) "+@list.name
+    deactive:()->
+        @renderData.name = @list.name
+#window.ArchiveDisplayer = ArchiveDisplayer
+module.exports = ArchiveDisplayer

@@ -5,81 +5,58 @@
 # 3.5 (app ready)
 # 4. Sync the required data like source/list/nodes
 #
-    
-window.App = new Leaf.EventEmitter()
-App.messageCenter = new MessageCenter()
-App.templateManager = new Leaf.TemplateManager()
-App.templateManager.use "archive-list"
-        ,"archive-list-item"
-        ,"source-list"
-        ,"source-list-folder"
-        ,"source-list-item"
-        ,"add-source-popup"
-        ,"read-later-list"
-        ,"read-later-list-item"
-        ,"tag-list"
-        ,"tag-list-item"
-        ,"tag-archive-list"
-        ,"custom-source-list"
-        ,"custom-archive-list"
-        ,"custom-group-item"
-        ,"custom-source-item"
-        ,"custom-tag-item"
-        ,"tag-selector"
-        ,"source-selector"
-        ,"context-menu"
-        ,"context-menu-item"
-        ,"archive-filter"
-        ,"archive-filter-condition"
-        ,"search-list"
-        ,"search-list-item"
-        ,"archive-displayer"
-        ,"list-view-list"
-        ,"list-view-list-item"
-        ,"list-view-archive-list"
-        ,"list-view-archive-list-item"
-        ,"p2p-node-item"
-        ,"p2p-node-list-item"
-        ,"p2p-list"
-        ,"p2p-node-info-displayer"
-        ,"source-detail"
-        ,"int-entry"
-        ,"string-entry"
+View = require "view"
+ViewSwitcher = View.ViewSwitcher
+AddSourcePopup = require "addSourcePopup"
+SourceView = require "sourceView"
+ListView = require "listView"
+SearchView = require "searchView"
+OfflineHinter = require "offlineHinter"
+SettingPanel = require "settingPanel"
+App = require("./app")
 
-$ ()->
-    App.templateManager.start()
-    App.templateManager.on "ready",(templates)->
-        App.templates = templates
-        App.init()
+
+require "enhancement"
+
 App.connect = ()->
     @messageCenter.on "error",(e)=>
         console.error e
         console.error e.stack
-    @connectManager.start()
-    @connectManager.ready ()=>
+    @connectionManager.start()
+    @connectionManager.ready ()=>
+        App.initialLoaded = true
         @emit "connect"
-    @connectManager.on "connect",()=>
-        @messageCenter.setConnection(@connectManager.connection)
-    @connectManager.on "disconnect",()=>
+        $(".loading").addClass("hide");
+        setTimeout (()=>
+            $(".loading").hide()
+        ),500
+    @connectionManager.on "connect",()=>
+        @messageCenter.setConnection(@connectionManager.connection)
+    @connectionManager.on "disconnect",()=>
         @messageCenter.unsetConnection()
+App.initialLoad = (callback)->
+    if @initialLoaded
+        callback()
+    else
+        @once "connect",callback
 App.init = ()->
     # public components
-    App.userConfig = new UserConfig()
+
     
-    App.connectManager = new ConnectManager()
+    App.viewSwitcher = new ViewSwitcher()
+    
     # views 
     App.addSourcePopup = new AddSourcePopup()
     App.addSourcePopup.appendTo document.body
-    
-    App.sourceView = new SourceView()
-    #App.tagView = new TagView()
-    #App.customView = new CustomView()
-    App.listView = new ListView()
-    App.searchView = new SearchView()
-    App.p2pView = new P2pView()
-    App.viewSwitcher = new ViewSwitcher()
     App.offlineHinter = new OfflineHinter()
     App.settingPanel = new SettingPanel()
+            
+    App.sourceView = new SourceView()
+    App.listView = new ListView()
+    App.searchView = new SearchView()
+#    App.p2pView = new P2pView()
+#    App.offlineHinter = new OfflineHinter()
+
     #App.tagSelector = new TagSelector()
     #App.sourceSelector = new SourceSelector()
     #App.tagSelector.appendTo document.body
@@ -90,17 +67,18 @@ App.init = ()->
     # is that some views need to be display:flex;
     # So if I set display:none in style sheet
     # I won't be able to know who need to be display:flex;
-    Model.initEventListener()
     for view in View.views
-        console.debug "view:::",view,View.views
         view.hide()
     
     App.viewSwitcher.switchTo "source view"
     App.emit "structureReady"
-    App.connect()  
+    App.connect()
 App.showHint = (str)->
+    console.log "HINT:",str
     alert str
 App.showError = (str)->
+    console.error str
+    return
     alert str
 App.confirm = (str,callback)->
     if confirm(str)
@@ -108,49 +86,18 @@ App.confirm = (str,callback)->
     else
         callback false
 
-# local user UI config to remember the user settings for thing like last view I used
-# , should I use image proxy, should I expand archives or what ever that effects only the user UI.
-# We don't save these data to database now, only preserved at front end.
-class ConnectManager extends Leaf.EventEmitter
-    constructor:(address)->
-        super()
-        @connectInterval = 1000
-        @connection = new ServerConnection()
-        @connection.on "connect",()=>
-            @emit "connect"
-        @connection.on "disconnect",()=>
-            @emit "disconnect"
-            console.debug "reconnect"
-            setTimeout @connection.reconnect.bind(@connection),500
-    ready:(args...)->
-        @connection.ready.apply @connection,args
-    start:()->
-        if window.location.protocol is "https:"
-            wsProtocol = "wss:"
-        else
-            wsProtocol = "ws:"
+App.templateManager = require("templateManager")
+App.messageCenter = new (require "util/messageCenter")
+App.connectionManager = new (require "connectionManager")
+App.persistentDataStoreManager = new (require "persistentDataStore").Manager()
+App.userConfig = new (require "userConfig")
+App.modelSyncManager = new (require "modelSyncManager")
 
-        @connection.connect("#{wsProtocol}//#{window.location.hostname}:#{window.location.port}#{window.location.pathname}")
 
-class UserConfig extends Leaf.EventEmitter
-    constructor:(name = "userConfig")->
-        super()
-        @name = name
-        if not localStorage
-            @data = {}
-            return
-        @data = JSON.parse(localStorage.getItem(@name) or "{}")
-    get:(key,value)->
-        if typeof @data[key] is "undefined"
-            return value
-        return @data[key]
-    set:(key,value)->
-        @emit "change/#{key}",value
-        @data[key] = value
-        if localStorage
-            localStorage.setItem(@name,JSON.stringify(@data))
-    init:(key,value)->
-        if typeof @data[key] isnt "undefined"
-            return
-        @set(key,value)
-
+$ ()->
+    App.templateManager.start()
+    App.templateManager.on "ready",(templates)->
+        App.templates = templates
+        App.init()
+    
+    require "test"

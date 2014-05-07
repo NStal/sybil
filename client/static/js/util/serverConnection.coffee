@@ -1,4 +1,3 @@
-
 class ServerConnection extends Leaf.EventEmitter
     constructor:()->
         super()
@@ -37,4 +36,4 @@ class ServerConnection extends Leaf.EventEmitter
         @websocket = null
         @emit "disconnect"
             
-window.ServerConnection = ServerConnection
+module.exports = ServerConnection

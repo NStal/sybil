@@ -4,42 +4,15 @@
     <meta charset="UTF-8" />
     <script type="text/javascript" src="js/lib/leaf.js"></script>
     <script type="text/javascript" src="js/lib/jquery.js"></script>
+    <script type="text/javascript" src="js/lib/leafRequire.js"></script>
     <script type="text/javascript" src="js/lib/sanitizer.js"></script>
-    <script type="text/javascript" src="js/lib/moment.js"></script>
-    <script type="text/javascript" src="js/lib/async.js"></script>
     <script type="text/javascript" src="js/lib/lodash.js"></script>
+    <!--script type="text/javascript" src="js/lib/moment.js"></script>
+    <!--script type="text/javascript" src="js/lib/async.js"></script-->
+    <!--script type="text/javascript" src="js/lib/lodash.js"></script-->
     <script type="text/javascript" src="js/lib/parseUri.js"></script>
     <script type="text/javascript" src="js/lib/md5.js"></script>
-    <script type="text/javascript" src="js/lib/hammer.min.js"></script>
-    
-    <script type="text/javascript" src="js/util/messageCenter.js"></script>
-    <script type="text/javascript" src="js/util/serverConnection.js"></script> 
-    <script type="text/javascript" src="js/util/task.js"></script>
-    <script type="text/javascript" src="js/util/dragContext.js"></script>
-    <script type="text/javascript" src="js/util/swipeChecker.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
-    <script type="text/javascript" src="js/i18n.js"></script>
-    <script type="text/javascript" src="js/model.js"></script>
-    <script type="text/javascript" src="js/view.js"></script>
-    <script type="text/javascript" src="js/contextMenu.js"></script> 
-    <script type="text/javascript" src="js/archiveDisplayer.js"></script>
-    
-    <script type="text/javascript" src="js/sourceView.js"></script> 
-    <script type="text/javascript" src="js/sourceList.js"></script>
-    <script type="text/javascript" src="js/archiveList.js"></script>
-    <script type="text/javascript" src="js/sourceDetail.js"></script>
-    
-    <script type="text/javascript" src="js/searchView.js"></script>
-    <script type="text/javascript" src="js/listView.js"></script>
-    <script type="text/javascript" src="js/p2pView.js"></script>
-    
-    <script type="text/javascript" src="js/addSourcePopup.js"></script>
-    <script type="text/javascript" src="js/enhancement.js"></script>
-    <script type="text/javascript" src="js/offlineHinter.js"></script>
-
-    <script type="text/javascript" src="js/settingPanel.js"></script>
-    <script type="text/javascript" src="js/mobile.js"></script>
-    <script type="text/javascript" src="js/test.js"></script>
+    <script type="text/javascript" src="js/init.js"></script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="app-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
@@ -86,14 +59,17 @@
   <widget data-widget="tagList"></widget>
   <widget data-widget="tagArchiveList"></widget>
     </div-->
-    <div class="view list-view">
-      <widget data-widget="list"></widget>
-      <widget data-widget="archives"></widget> 
-    </div>
     <div class="view source-view"> 
       <widget data-widget="sourceList"></widget>
       <div class="source-list-overlay" data-id="sourceListOverlay"></div>
       <widget data-widget="archiveList"></widget>
+
+    </div>
+    
+    <div class="view list-view">
+      <widget data-widget="list"></widget>
+      <widget data-widget="archives"></widget> 
+      <widget data-widget="archiveDisplayer"></widget>
 
     </div>
     <div class="view search-view fancy-scroll">

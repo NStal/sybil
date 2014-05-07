@@ -37,7 +37,7 @@
       if (!this.endPoint) {
         return;
       }
-      swipeFloor = 50;
+      swipeFloor = 60;
       if (e.touches.length === 0) {
         endDate = Date.now();
         if (endDate - this.startDate < 1000) {
@@ -53,7 +53,7 @@
 
     SwipeChecker.prototype.onmove = function(e) {
       this.endPoint = [e.touches[0].clientX, e.touches[0].clientY];
-      if (Math.abs(this.endPoint[0] - this.startPoint[0]) > Math.abs(this.endPoint[1] - this.startPoint[1])) {
+      if (Math.abs(this.endPoint[0] - this.startPoint[0]) - Math.abs(this.endPoint[1] - this.startPoint[1]) > 1) {
         return e.preventDefault();
       }
     };
@@ -62,6 +62,6 @@
 
   })(Leaf.EventEmitter);
 
-  window.SwipeChecker = SwipeChecker;
+  module.exports = SwipeChecker;
 
 }).call(this);

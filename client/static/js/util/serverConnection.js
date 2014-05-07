@@ -74,6 +74,6 @@
 
   })(Leaf.EventEmitter);
 
-  window.ServerConnection = ServerConnection;
+  module.exports = ServerConnection;
 
 }).call(this);

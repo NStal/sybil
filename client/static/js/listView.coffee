@@ -1,27 +1,36 @@
+App = require "app"
+SwipeChecker = require("util/swipeChecker")
+Model = require "model"
+View = require "view"
+ArchiveDisplayer = require "archiveDisplayer"
+ScrollChecker = require "util/scrollChecker"
+moment = require "lib/moment"
 class ListView extends View
     constructor:()->
         @list = new List()
         @archives = new ArchiveList()
         @archiveDisplayer = new ListArchiveDisplayer()
-        console.debug @archiveDisplayer.node,@archiveDisplayer,"!!!"
-        @list.on "select",(archiveList)=>
-            @archives.load archiveList.archiveList
-            if @enableListAutoSlide
-                @nextSlide()
-            @enableListAutoSlide = true
+        @list.on "init",()=>
+            if @isShow
+                @show()
+        @list.on "select",(list)=>
+            @archives.load list.archiveList
+            # enable auto slide after first slide
+            # so we will still at left most position
+            # when user first check in at list view
+        @archives.on "archive",()=>
+            @slideTo(1)
         @archives.on "select",(archiveListItem)=>
             @archiveDisplayer.display archiveListItem.archive
             if @currentArchiveListItem
                 @currentArchiveListItem.deselect()
             @currentArchiveListItem = archiveListItem
-            if @enableArchiveAutoSlide
-                @nextSlide()
+            @slideTo(2)
             @enableArchiveAutoSlide = true
         super $(".list-view")[0],"list view"
-        @list.appendTo @node
-        @archives.appendTo @node
-        @archiveDisplayer.appendTo @node
-        
+#        @list.appendTo @node
+#        @archives.appendTo @node
+#        @archiveDisplayer.appendTo @node
         # mobile
         checker = new SwipeChecker(@node);
         checker.on "swiperight",(ev)=>
@@ -47,30 +56,43 @@ class ListView extends View
             @node$.removeClass("slide-col2").removeClass("slide-col3")
         else if @currentSlide is 1
             @node$.addClass("slide-col2").removeClass("slide-col3")
-        else
+        else if @currentSlide is 2
+            if not @archiveDisplayer.archive
+                return
             @node$.addClass("slide-col2").addClass("slide-col3")
-        
+    show:()->
+        if not @list.current and @list.lists.length > 0
+            @list.lists[0].select()
+        super()
 
 class List extends Leaf.Widget
     constructor:()->
         super App.templates["list-view-list"]
         @lists = Leaf.Widget.makeList(@UI.container)
-        for list in Model.ArchiveList.lists
-            @lists.push new ListItem(list)
-        Model.on "archiveList/add",(list)=>
+        App.initialLoad ()=>
+            Model.ArchiveList.sync ()=>
+                @emit "init"
+        # WARN: no add currently
+        App.modelSyncManager.on "archiveList/add",(list)=>
             @lists.push new ListItem(list)
         # refactor here
         # done add onClickNode method here
         # make it inside constructor
         @lists.on "child/add",(list)=>
-            list.on "select",()=>
-                @emit "select",list
+            @bubble list,"select",()->
                 if @current
                     @current.node$.removeClass("select");
                 @current = list
-            # select the first list
-            if @lists.length is 1
-                list.onClickNode()
+                return ["select",list]
+    onClickAddListButton:()->
+        name = prompt "enter you list name"
+        if not name or not name.trim()
+            return
+        name = name.trim()
+        Model.ArchiveList.create name,(err,list)=>
+            console.debug "create list",err,list
+            if err
+                App.showError err
 class ListItem extends Leaf.Widget
     constructor:(@archiveList)->
         super App.templates["list-view-list-item"]
@@ -83,43 +105,60 @@ class ListItem extends Leaf.Widget
         @render()
     render:()->
         @UI.name$.text @archiveList.name
-        console.debug @archiveList
         @UI.unreadCounter$.text @archiveList.count
         @name = @archiveList.name
-    onClickNode:()=>
+    select:()->
         @emit "select",this
         @node$.addClass("select");
+    onClickNode:()=>
+        @select()
+        
 class ArchiveList extends Leaf.Widget.List
     constructor:()->
         super App.templates["list-view-archive-list"]
-        @addArchive = @addArchive.bind(this)
-        @removeArchive = @removeArchive.bind(this)
         @on "child/add",(archiveListItem)=>
             archiveListItem.listName = @currentList.name
-            archiveListItem.on "select",()=>
+            archiveListItem.listenBy this,"select",()=>
                 @emit "select",archiveListItem
+        @on "child/remove",(item)=>
+            # we don't remove it instead we should a delete dash at middle of it
+            return
+            #item.destroy()
+        @scrollChecker = new ScrollChecker(@node)
+        @scrollChecker.on "scrollBottom",()=>
+            @more()
+
+                
     load:(list)->
         if @currentList
-            @currentList.removeListener "add",@addArchive
-            @currentList.removeListener "remove",@removeArchive
+            @currentList.stopListenBy this
         @currentList = list
-        @currentList.getArchives (err,archives)=>
-            @length  = 0
+        @currentList.listenBy this,"add",@prependArchive
+        @currentList.listenBy this,"remove",@removeArchive
+        @length  = 0
+        @noMore = false
+        @more()
+            
+    more:()->
+        if @noMore
+            return
+        loadCount = 20
+        @currentList.getArchives {offset:@length,count:loadCount},(err,archives)=>
             for archive in archives
                 @push new ArchiveListItem(archive)
-            @[0].select()
+            if archives.length isnt loadCount
+                @noMore = true
         list = @currentList
-        @currentList.on "add",@addArchive
-        @currentList.on "remove",@removeArchive
-    addArchive:(archive)->
+
+    prependArchive:(archive)->
         for item in this
             if item.archive.guid is archive.guid
                 if item.isDone
                     item.isDone = false
                     item.render()
-                
                 return
-        @push new ArchiveListItem(archive)
+        @emit "archive"
+        @unshift new ArchiveListItem(archive)
     removeArchive:(archive)->
         for item,index in this
             if item.archive.guid is archive.guid
@@ -127,11 +166,14 @@ class ArchiveList extends Leaf.Widget.List
                     item.isDone = true
                     item.render()
                     return
+    onClickMoreButton:()->
+        @more()
 class ArchiveListItem extends Leaf.Widget
     constructor:(@archive)->
         super App.templates["list-view-archive-list-item"]
         @render()
         @isDone = false
+        @use @archive
     onClickNode:()->
         @select()
     select:()->
@@ -157,7 +199,6 @@ class ArchiveListItem extends Leaf.Widget
     markAsUndone:()->
         if not @isDone
             return
-        console.debug "mark as undone",@listName
         @archive.changeList @listName,(err)=>
             @isDone = false
             @render()
@@ -178,7 +219,6 @@ class ArchiveListItem extends Leaf.Widget
         else if result.length is 0
             result = "( empty )"
         return result
-
     
 class ListArchiveDisplayer extends ArchiveDisplayer
     constructor:()->
@@ -188,6 +228,7 @@ class ListArchiveDisplayer extends ArchiveDisplayer
     display:(archive)->
         @node$.removeClass("no-article")
         @setArchive(archive)
+        @node.scrollTop = 0
         @render()
         
-window.ListView = ListView
+module.exports = ListView

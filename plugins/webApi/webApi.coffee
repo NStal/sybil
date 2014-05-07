@@ -99,6 +99,9 @@ class WebApiServer extends EventEmitter
                 count = query.count or 20
                 if offset is null
                     offsetIndex = 0
+                else if typeof offset is "number"
+                    # handled by db
+                    offsetIndex = 0
                 else
                     for item,index in archives
                         if item.guid is offset
@@ -236,12 +239,38 @@ class WebApiServer extends EventEmitter
         messageCenter.registerApi "search",(query,callback)=>
             input = query.input
             count = query.count or 100
-            offset = query.offset or 0
-            @sybil.search input,(err,archives)->
-                console.log "get search result #{archives.length}"
-                console.log "return #{offset}:=>#{count}"
-                archives = archives.slice(offset,offset+count)
-                callback err,archives
+            @sybil.search input,{},(err,archives)->
+                if err
+                    console.error err
+                    err = "db error"
+                    callback err
+                    return
+                sort = query.sort or "latest"
+                if sort is "sybil"
+                    true
+                else if sort is "oldest"
+                    true
+                else
+                    # default by latest
+                    sortArchive(archives)
+                if not query.viewRead
+                    archives = archives.filter (item)->not item.hasRead
+                console.log query,archives.length
+                offset = query.offset or null
+                count = query.count or 20
+                if offset is null
+                    offsetIndex = 0
+                else if typeof offset is "number"
+                    # handled by db
+                    offsetIndex = 0
+                else
+                    for item,index in archives
+                        if item.guid is offset
+                            offsetIndex = index+1
+                            break
+                if not offsetIndex
+                    offsetIndex = 0
+                callback err,archives.slice(offsetIndex,offsetIndex+count)
         messageCenter.registerApi "share",(guid,callback)=>
             @sybil.shareArchive guid,(err)->
                 callback err
@@ -269,8 +298,8 @@ class WebApiServer extends EventEmitter
             option = data.option or {}
             @sybil.getShareArchiveByNodeHashes hashes,option,(err,archives)=>
                 callback err,archives
-        messageCenter.registerApi "addList",(listName,callback)=>
-            @sybil.addList listName,(err,list)=>
+        messageCenter.registerApi "createList",(listName,callback)=>
+            @sybil.createList listName,(err,list)=>
                 callback err,list
         messageCenter.registerApi "removeList",(listName,callback)=>
             @sybil.removeList listName,(err)=>
@@ -278,13 +307,21 @@ class WebApiServer extends EventEmitter
         messageCenter.registerApi "getLists",(_,callback)=>
             @sybil.getLists (err,lists)=>
                 callback err,lists
-        messageCenter.registerApi "getList",(name,callback)=>
+        messageCenter.registerApi "getList",(option = {},callback)=>
+            name = option.name
+            offset = option.offset or 0
+            count = option.count or 20
+            if not name
+                callback "invalid list name"
+                return
             @sybil.getLists (err,lists = [])=>
                 found = lists.some (list)->list.name is name
                 if err or not lists or not found
                     callback "not found"
                     return 
                 @sybil.getCustomArchives {properties:{listName:name},viewRead:true},(err,archives)->
+                    sortArchive archives
+                    archives = archives.slice(offset,offset+count)
                     callback null,{name:"read later",archives:archives}
         messageCenter.registerApi "getSourceStatistic",(guid,callback)=>
             @sybil.getSourceStatistic guid,(err,result)->

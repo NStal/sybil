@@ -36,7 +36,7 @@ class RssArchive extends Collector.Archive
 class Rss extends EventEmitter
     # not use for now
     # but these encodings are known to be (must be) supported
-    @validEncoding = ["utf-8","gb2312","utf8","gbk","gb18030","bg5"]
+    @validEncoding = ["utf-8","gb2312","utf8","gbk","gb18030","big5"]
     constructor:(@raw,option={})->
         @name = @raw.name or "unfetched"
         @url = @raw.url
@@ -132,7 +132,7 @@ class Rss extends EventEmitter
         @needProxy = true
     # check will automatically setup informations
     check:(callback)->
-        if @url.indexOf("http://") isnt 0 and @url.indexOf("https://") isnt 0
+        if @url.indexOf("http://") isnt 0 and @url.indexOf("https://") isnt 0 and @url.indexOf("feed://") isnt 0
             callback("invalid url")
             return
         httpUtil.httpGet {url:@url,timeout:timeout},(err,res,body)=>

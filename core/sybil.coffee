@@ -34,7 +34,9 @@ class Sybil extends (require "events").EventEmitter
                 @collectorClub.addAndStart(name)
         @initTasks.on "done",()=>
             @emit "init"
-            @pluginCenter.loadPlugin.apply @pluginCenter,@settings.plugins or ["webApi","#externalProxy","#runtimeShell","p2p","resourceProxy"]
+            @pluginCenter.loadPlugins @settings.plugins or ["webApi"],(err)=>
+                @isReady = true
+                @emit "ready"
             
     # here comes all the sybil apis
     handleArchive:(archive,done)->
@@ -83,7 +85,7 @@ class Sybil extends (require "events").EventEmitter
         Database.renameSource guid,name,(err)->
             callback err
     setSourceDescription:(guid,description,callback)->
-        Database.setSourceDescription guid,description,(callback)->
+        Database.setSourceDescription guid,description,(err)->
             callback err
     getSourceStatistic:(guid,callback)->
         Database.getSourceStatistic guid,(err,result)->
@@ -130,8 +132,9 @@ class Sybil extends (require "events").EventEmitter
         Database.markArchiveAsRead guid,(err,archive)->
             callback err,archive
     markArchiveAsUnread:(guid,callback)->
-        Database.markArchiveAsUnread guid,(err,archive)->
+        Database.markArchiveAsUnread guid,(err,archive)=>
             callback err,archive
+            @emit "unread",{guid:guid,sourceGuid:archive.sourceGuid}
     addTagToSource:(guid,tag,callback)->
         Database.addTagToSource guid,tag,(err,item)->
             callback err,item
@@ -142,13 +145,13 @@ class Sybil extends (require "events").EventEmitter
         console.log "start move archive",archiveGuid,listName
         Database.moveArchiveToList archiveGuid,listName,(err,archive)=>
             console.log "move",archiveGuid,listName
-            @emit "archive/listChange",{archive:archive,listName:listName}
+            @emit "archive/listChange",{archive:archive,listName:listName,to:listName,from:archive.listName}
             callback err
     getLists:(callback)->
         Database.getLists (err,lists)->
             callback err,lists
-    addList:(listName,callback)->
-        Database.addList listName,(err,list)->
+    createList:(listName,callback)->
+        Database.createList listName,(err,list)->
             callback err,list
     removeList:(listName,callback)->
         Database.removeList listName,(err)->
@@ -158,7 +161,7 @@ class Sybil extends (require "events").EventEmitter
             @emit "readLater",archive
             callback err,archive
     unreadLaterArchive:(guid,callback)->
-        Database.unreadLaterArchive guid,(err,archive)->
+        Database.unreadLaterArchive guid,(err,archive)=>
             @emit "unreadLater",archive
             callback err,archive
     getReadLaterArchives:(callback)->
@@ -224,7 +227,7 @@ class Sybil extends (require "events").EventEmitter
             if not err and friend
                 @emit "friend/remove",friend
             callback err,friend
-    search:(query,callback)->
+    search:(query,option,callback)->
         # search is a key feature and complicated work
         # The performance is considered as an important factor
         # thus it's hard to build seperately with database
@@ -242,7 +245,7 @@ class Sybil extends (require "events").EventEmitter
                 inurl = c.value
             if c.type is "title"
                 title = c.value
-        Database.getCustomArchives {keywords:keywords,inurl:inurl,title:title},(err,archives)->
+        Database.getCustomArchives {viewRead:true,keywords:keywords,inurl:inurl,title:title},(err,archives)->
             # scoring
             archives.forEach (archive)->
                 score = (archive.fetchDate or new Date()).getTime()
@@ -284,9 +287,8 @@ sybil.on "init",()->
                     console.log "force sync source",dbSource.name
                     done()
                 ),(err)=>
-                    sybil.isReady = true
-                    console.log "sybil is ready"
-                    sybil.emit "ready"
+                    console.log "sybil is repaired"
+                    sybil.emit "repair"
         
 #    sybil.subscribe {uri:"http://revlonpc.blog.fc2.com/?xml",name:"rss"},(err,hints)=>
 #        if err and err isnt "duplicated"
