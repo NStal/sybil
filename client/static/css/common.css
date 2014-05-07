@@ -31,7 +31,7 @@
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
 }
 .blue-glow {
-  box-shadow: 0 0 5px 0 #00ccfc, 0 0 4px 0 rgba(256, 256, 256, 0.8), 0 0 2px 0 #ffffff;
+  box-shadow: 0 0 5px 0 #00ccfc, 0 0 4px 0 rgba(255, 255, 255, 0.8), 0 0 2px 0 #ffffff;
 }
 .box-sizing {
   box-sizing: border-box;

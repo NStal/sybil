@@ -66,3 +66,40 @@
     -o-transform:scale3d(@x,@y,@z);
     -ms-transform:scale3d(@x,@y,@z);
 }
+.transform(@args){
+    transform:@args;
+    -webkit-transform:@args;
+    -moz-transform:@args;
+    -o-transform:@args;
+    -ms-transform:@args;
+}
+.transform-style(@args){
+    transform-style:@args;
+    -webkit-transform-style:@args;
+    -ms-transform-style:@args;
+}
+.animation(@args){
+    animation:@args;
+    -webkit-animation:@args;
+    -moz-animation:@args;
+    -o-animation:@args;
+    -ms-animation:@args;
+}
+.perspective(@args){
+    perspective:@args;
+    -webkit-perspective:@args;
+    -moz-perspective:@args;
+    -o-perspective:@args;
+    -ms-perspective:@args;
+}
+
+.keyframes(@name; @frames) {
+    @-webkit-keyframes @name {
+      @vendor: -webkit-;
+      @frames(); 
+    }
+    @keyframes @name {
+      @vendor: ~'';
+      @frames(); 
+    }
+}
