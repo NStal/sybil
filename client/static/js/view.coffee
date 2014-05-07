@@ -1,3 +1,4 @@
+App = require "app"
 class View extends Leaf.Widget
     @views = []
     constructor:(template,name)->
@@ -22,6 +23,7 @@ class ViewSwitcher extends Leaf.Widget
         super $(".view-switcher")[0]
         @currentView = null
         @viewItems = []
+        @hideListener = @hideListener.bind(this)
     switchTo:(name)->
         has = false
         for view in View.views when view.name is name
@@ -36,20 +38,31 @@ class ViewSwitcher extends Leaf.Widget
             return
         if not has
             throw "view #{name} not found"
-    onClickTitle:()->
+    onClickTitle:(e)->
+        e.stopImmediatePropagation()
+        e.preventDefault()
         @syncViews()
         if @isShow
             @hide()
         else
             @show()
-    show:()-> 
+    hideListener:(e)->
+        e.stopImmediatePropagation()
+        e.preventDefault()
+        @hide()
+        return false
+    show:()->
+        window.addEventListener "click",@hideListener
         @isShow = true
-        @UI.viewSelector$.slideDown(100)
+        # actually height is still controlled by css
+        # 80px max height per item is generall more than the per item height
+        @UI.viewSelector$.css({"max-height":"#{@viewItems.length * 80}px"});
         @UI.directionIcon$.removeClass("fa-caret-right")
         @UI.directionIcon$.addClass("fa-caret-down")
-    hide:()-> 
+    hide:()->
+        window.removeEventListener "click",@hideListener
         @isShow = false
-        @UI.viewSelector$.slideUp(100)
+        @UI.viewSelector$.css({"max-height":0});
         @UI.directionIcon$.addClass("fa-caret-right") 
         @UI.directionIcon$.removeClass("fa-caret-down")
     syncViews:()->
@@ -87,8 +100,10 @@ class ViewSelectItem extends Leaf.Widget
     constructor:(@name)->
         super document.createElement "li"
         @node$.text(@name)
-    onClickNode:()->
+    onClickNode:(e)->
+        e.stopImmediatePropagation()
+        e.preventDefault()
         @emit "select"
 
-window.ViewSwitcher = ViewSwitcher
-window.View = View
+module.exports  = View
+module.exports.ViewSwitcher = ViewSwitcher

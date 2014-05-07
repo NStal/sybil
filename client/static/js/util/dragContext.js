@@ -17,14 +17,26 @@
       window.addEventListener("mousemove", this.mousemoveListener);
     }
 
+    DragContext.prototype.addContext = function(node) {
+      this.addDraggable(node);
+      return this.addDroppable(node);
+    };
+
     DragContext.prototype.addDraggable = function(node) {
-      var draggable;
+      var draggable, item, _i, _len, _ref;
+      _ref = this.draggables;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        item = _ref[_i];
+        if (item.node === node) {
+          return;
+        }
+      }
       draggable = new DraggableState(node, this);
       this.draggables.push(draggable);
       return draggable.on("start", (function(_this) {
         return function(e) {
           if (_this.currentDraggableState) {
-            throw "already dragging";
+            throw new Error("already dragging");
           }
           _this.currentDraggableState = draggable;
           return _this.emit("start", e);
@@ -32,34 +44,21 @@
       })(this));
     };
 
-    DragContext.prototype.removeDraggable = function(node) {
-      return this.draggables = this.draggables.filter(function(item) {
-        if (item.node === node) {
-          item.destroy();
-          return false;
-        }
-        return true;
-      });
-    };
-
-    DragContext.prototype.removeDroppable = function(node) {
-      return this.droppables = this.droppables.filter(function(item) {
-        if (item.node === node) {
-          item.destroy();
-          return false;
-        }
-        return true;
-      });
-    };
-
     DragContext.prototype.addDroppable = function(node) {
-      var droppable;
+      var droppable, item, _i, _len, _ref;
+      _ref = this.droppables;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        item = _ref[_i];
+        if (item.node === node) {
+          return;
+        }
+      }
       droppable = new DroppableState(node, this);
       this.droppables.push(droppable);
       droppable.on("drop", (function(_this) {
         return function(e) {
           if (!_this.currentDraggableState) {
-            throw "drop on no draggable";
+            throw new Error("drop with no draggable");
           }
           if (_this.draggingShadow && _this.draggingShadow.parentElement) {
             _this.draggingShadow.parentElement.removeChild(_this.draggingShadow);
@@ -85,35 +84,62 @@
       })(this));
     };
 
-    DragContext.prototype.mouseupListener = function(e) {
-      if (this.currentDraggableState) {
-        document.body.classList.remove("no-select");
-        e.draggable = this.currentDraggableState.node;
-        this.currentDraggableState = null;
-        if (this.draggingShadow && this.draggingShadow.parentElement) {
-          this.draggingShadow.parentElement.removeChild(this.draggingShadow);
+    DragContext.prototype.removeDraggable = function(node) {
+      return this.draggables = this.draggables.filter(function(item) {
+        if (item.node === node) {
+          item.destroy();
+          return false;
         }
-        this.draggingShadow = null;
-        return this.emit("release", e);
+        return true;
+      });
+    };
+
+    DragContext.prototype.removeDroppable = function(node) {
+      return this.droppables = this.droppables.filter(function(item) {
+        if (item.node === node) {
+          item.destroy();
+          return false;
+        }
+        return true;
+      });
+    };
+
+    DragContext.prototype.clearContext = function(node) {
+      this.removeDraggable(node);
+      return this.removeDroppable(node);
+    };
+
+    DragContext.prototype.mouseupListener = function(e) {
+      if (!this.currentDraggableState) {
+        return;
       }
+      document.body.classList.remove("no-select");
+      e.draggable = this.currentDraggableState.node;
+      this.currentDraggableState = null;
+      if (this.draggingShadow && this.draggingShadow.parentElement) {
+        this.draggingShadow.parentElement.removeChild(this.draggingShadow);
+      }
+      this.draggingShadow = null;
+      return this.emit("release", e);
     };
 
     DragContext.prototype.mousemoveListener = function(e) {
-      if (this.currentDraggableState) {
-        document.body.classList.add("no-select");
-        e.draggable = this.currentDraggableState.node;
-        e.preventDefault();
-        if (this.hasHover) {
-          this.hasHover = false;
-          e.dragHover = true;
-        } else {
-          e.dragHover = false;
-        }
-        this.emit("move", e);
-        if (this.draggingShadow) {
-          this.draggingShadow.style.top = e.clientY + "px";
-          return this.draggingShadow.style.left = e.clientX + "px";
-        }
+      if (!this.currentDraggableState) {
+        return;
+      }
+      document.body.classList.add("no-select");
+      e.draggable = this.currentDraggableState.node;
+      e.preventDefault();
+      if (this.hasHover) {
+        this.hasHover = false;
+        e.dragHover = true;
+      } else {
+        e.dragHover = false;
+      }
+      this.emit("move", e);
+      if (this.draggingShadow) {
+        this.draggingShadow.style.top = e.clientY + "px";
+        return this.draggingShadow.style.left = e.clientX + "px";
       }
     };
 
@@ -187,9 +213,8 @@
     }
 
     DraggableState.prototype._onMove = function(e) {
-      return;
       if (this.parent.currentDraggableState) {
-        return;
+        return true;
       }
       return this.emit("move", e);
     };
@@ -202,6 +227,8 @@
       if (this.parent.currentDraggableState) {
         return;
       }
+      e.stopImmediatePropagation();
+      e.preventDefault();
       return this.emit("start", e);
     };
 
@@ -216,6 +243,6 @@
 
   })(Leaf.EventEmitter);
 
-  window.DragContext = DragContext;
+  module.exports = DragContext;
 
 }).call(this);

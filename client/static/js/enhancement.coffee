@@ -1,3 +1,4 @@
+App = require "app"
 App.on "structureReady",()->
     lastViewName = App.userConfig.get("lastView") or "source view"
     App.viewSwitcher.on "viewChange",(view)->

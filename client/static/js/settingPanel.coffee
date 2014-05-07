@@ -1,9 +1,13 @@
+App = require "app"
+async = require "lib/async"
 class SettingPanel extends Leaf.Widget
     constructor:()->
         super $(".setting-panel")[0]
         @hide()
         @groups = Leaf.Widget.makeList @UI.settingGroups
         @adjust()
+        App.initialLoad ()=>
+            @sync()
     show:()->
         @node$.show()
         @adjust()
@@ -27,15 +31,18 @@ class SettingPanel extends Leaf.Widget
         @groups.push group
         group.on "select",()=>
             @activeGroup group
-    syncBySettingOptions:(options)->
+    _setOptions:(options)->
         @groups.length = 0
         for group of options
             group = new SettingGroup(group,options[group]);
             @addGroup group
-    test:()->
-        console.error "invoke"
+    sync:(callback = ()->true )->
         App.messageCenter.invoke "getSettings",{},(err,result)=>
-            @syncBySettingOptions(result)
+            if err
+                callback err
+                return
+            @_setOptions(result)
+            callback null
     onClickResetButton:()->
         if not @currentGroup
             return
@@ -150,4 +157,4 @@ class StringEntry extends SettingEntry
         super App.templates["int-entry"]
     
         
-window.SettingPanel = SettingPanel
+module.exports = SettingPanel

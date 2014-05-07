@@ -1,52 +1,55 @@
 <div class="source-detail">
-  <div class="item-title">
-    Name:
-  </div>
-  <div> 
-    <div data-id="name">
+  <div class="title">Source Detail</div>
+  <button data-id="close" class="close-button">close</button>
+  <div class="content">
+    <div class="item-title">
+      Name:
     </div>
-    <span class="edit-button" data-id="nameEditButton">edit</span>
-  </div>
-  <div class="item-title">
-    Source Uri:
-  </div>
-  <div class="item-title">
-    Description:
-  </div>
-  <div data-id="description">
-    <div data-id="descriptionContent">
+    <div class="item-content"> 
+      <div data-id="name">
+      </div>
+      <span class="edit-button" data-id="nameEditButton">edit</span>
     </div>
-    <div data-id="descriptionEditButton">
-      
+    <div class="item-title">
+      Source Uri:
     </div>
-  </div> 
-  <div data-id="descriptionEditor" >
-    <textarea data-id="descriptionInput"></textarea>
-    <button data-id="submitDescriptionButton" class=""></button>
-  </div>
-  <div data-id="uri">
-  </div>
-  <div class="item-title">
-    Source Type:
-  </div>
-  <div data-id="type">
-  </div>
-  <div class="item-title">
-    Unread/Total:
-  </div>
-  <div data-id="archives">
-    ?/?
-  </div>
-  <div class="item-title">
-    Frequency:
-  </div>
-  <div data-id="frequency">
-  </div>
-  <div class="item-title">
-    Statistics:
+    <a data-id="uri" class="item-content" target="_blank">
+    </a>
+    <div class="item-title">
+      Description:
+    </div>
+    <div data-id="description" class="item-content">
+      <div data-id="descriptionContent">
+      </div>
+      <button data-id="descriptionEditButton" class="button">
+        Edit
+      </button>
+    </div> 
+    <div data-id="descriptionEditor"  class="item-content description-editor" >
+      <textarea data-id="descriptionInput"></textarea>
+      <button data-id="submitDescriptionButton" class="button">OK</button>
+    </div>
+    <div class="item-title">
+      Source Type:
+    </div>
+    <div data-id="type" class="item-content">
+    </div>
+    <div class="item-title">
+      Unread/Total:
+    </div>
+    <div data-id="archives" class="item-content">
+      ?/?
+    </div>
+    <div class="item-title">
+      Frequency:
+    </div>
+    <div data-id="frequency" class="item-content">
+    </div>
+    <div class="item-title">
+      Statistics:
 
+    </div>
+    <widget data-widget="sourceStatistic"></widget>
+    
   </div>
-  <widget data-widget="sourceStatistic"></widget>
-
-  <button data-id="close" class="button">close</button>
 </div>

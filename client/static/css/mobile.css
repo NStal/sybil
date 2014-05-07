@@ -1697,9 +1697,10 @@ body,
 html {
   height: 100%;
   width: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 .fancy-scroll ::-webkit-scrollbar {
-  width: initial;
+  width: 3px;
 }
 .fancy-scroll ::-webkit-scrollbar-track {
   background-color: auto;
@@ -1714,37 +1715,52 @@ html {
   padding-top: 44px;
   position: absolute;
   top: 0;
-  left: -300px;
-  transition: left 300ms ease;
-  -moz-transition: left 300ms ease;
-  -webkit-transition: left 300ms ease;
-  -o-transition: left 300ms ease;
-}
-.source-view.show-list .source-list {
-  left: 0;
-  z-index: 1000;
-  transition: left 300ms ease;
-  -moz-transition: left 300ms ease;
-  -webkit-transition: left 300ms ease;
-  -o-transition: left 300ms ease;
-}
-.source-view .source-list-overlay {
-  width: 100%;
-  height: 100%;
   z-index: 999;
-  background-color: rgba(0, 0, 0, 0.5);
-  position: absolute;
-  left: 0;
-  top: 0;
+  transform: translate3d(-300px, 0, 0);
+  -webkit-transform: translate3d(-300px, 0, 0);
+  -moz-transform: translate3d(-300px, 0, 0);
+  -o-transform: translate3d(-300px, 0, 0);
+  -ms-transform: translate3d(-300px, 0, 0);
   transition: all 300ms ease;
   -moz-transition: all 300ms ease;
   -webkit-transition: all 300ms ease;
   -o-transition: all 300ms ease;
+}
+.source-view .source-list .item {
+  line-height: 36px;
+  height: 36px;
+}
+.source-view .source-list .item .left-icon {
+  height: 36px;
+  line-height: 36px;
+}
+.source-view .source-list .item .left-icon img {
+  vertical-align: middle;
+  line-height: 36px;
+  margin-bottom: 3px;
+}
+.source-view .source-list .collapse.item {
+  height: auto;
+}
+.source-view.show-list .source-list {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+}
+.source-view .source-list-overlay {
+  width: 100%;
+  height: 100%;
+  z-index: 998;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  left: 0;
+  top: 0;
   display: none;
 }
 .source-view.show-list .source-list-overlay {
   display: block;
-  opacity: 1;
 }
 .source-view .archive-list {
   min-width: 100%;
@@ -1752,6 +1768,7 @@ html {
 }
 .source-view .archive-list .container-wrapper .container {
   overflow: hidden;
+  opacity: 1;
 }
 .source-view .archive-list > .title .wrapper:hover {
   height: 176px;
@@ -1775,10 +1792,10 @@ html {
 .list-view {
   position: relative;
   left: 0px;
-  transition: left 300ms ease;
-  -moz-transition: left 300ms ease;
-  -webkit-transition: left 300ms ease;
-  -o-transition: left 300ms ease;
+  transition: all 300ms ease;
+  -moz-transition: all 300ms ease;
+  -webkit-transition: all 300ms ease;
+  -o-transition: all 300ms ease;
 }
 .list-view .list-view-list {
   min-width: 70%;
@@ -1792,12 +1809,24 @@ html {
   float: none;
   width: 100%;
   min-width: 100%;
+  height: 100%;
+  display: block;
 }
 .list-view.slide-col2 {
-  left: -70%;
+  transform: translate3d(-70%, 0, 0);
+  -webkit-transform: translate3d(-70%, 0, 0);
+  -moz-transform: translate3d(-70%, 0, 0);
+  -o-transform: translate3d(-70%, 0, 0);
+  -ms-transform: translate3d(-70%, 0, 0);
+  _left: -70%;
 }
 .list-view.slide-col3 {
-  left: -140%;
+  transform: translate3d(-140%, 0, 0);
+  -webkit-transform: translate3d(-140%, 0, 0);
+  -moz-transform: translate3d(-140%, 0, 0);
+  -o-transform: translate3d(-140%, 0, 0);
+  -ms-transform: translate3d(-140%, 0, 0);
+  _left: -140%;
 }
 .search-view {
   position: relative;
@@ -1823,4 +1852,35 @@ html {
 }
 .archive-displayer {
   background-color: #ddd;
+}
+.archive-displayer-list-selector {
+  background-color: white;
+  color: black;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
+  width: 80%;
+  height: 80%;
+  top: 10%;
+  left: 10%;
+  margin: 0 auto;
+  position: absolute;
+}
+.archive-displayer-list-selector .close-button {
+  display: none;
+}
+.archive-displayer-list-selector ul li {
+  list-style: none;
+  padding: 5px;
+  font-size: 24px;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.archive-displayer-list-selector ul li:hover {
+  text-decoration: underline;
 }

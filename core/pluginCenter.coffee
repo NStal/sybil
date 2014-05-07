@@ -4,62 +4,48 @@ console = require("../common/logger.coffee").create("PluginCenter")
 class PluginCenter extends EventEmitter
     constructor:(sybil)->
         @sybil = sybil
-        path = require "path"
-        @loadAvailablePlugins()
-        @pluginSettings = []
-    loadAvailablePlugins:()->
+    loadPlugins:(names,callback)->
         @pluginAvailable = []
         @pluginMap = {}
         @dependencies = new Dependencies()
-        files = (require "fs").readdirSync require("path").join(__dirname,"../plugins/")
-        files.forEach (name)=>
-            reg = new RegExp "[a-z0-9]+(\.coffee)?(\.js)?$"
-            if not reg.test name
-                console.log "not pass",name
+        names = names.filter (item)->item
+        names = names.map (item)->item.trim()
+        names.forEach (name)=>
+            if name[0] is "#"
                 return
-            basename = (require "path").basename(name)
-            extname = (require "path").extname(basename)
-            pluginName = basename.substring(0,basename.length - extname.length)
+            
+            plugin = {name:name,provide:null,modulePath:"../plugins/#{name}"}
             try
-                module = require "../plugins/#{name}"
+                plugin.module = require plugin.modulePath
             catch e
-                console.debug e
-                console.debug e.stack
-                console.debug "fail to init plugin #{name}"
-                console.debug "skip it"
-                return
-            plugin = {name:pluginName,module:module,provide:null,requires:module.requires or []}
+                console.error e
+                throw new Error "fail to load plugin #{name}"
+            plugin.requires = plugin.module.requires
             @pluginAvailable.push plugin
             @dependencies.add plugin
+            
         @pluginAvailable = @pluginAvailable.filter (plugin)=>
             try
                 plugin.dependencies = @dependencies.get(plugin.name).flatten()
-                console.debug plugin.dependencies,plugin.name,"deps"
+                console.debug plugin.name,"dependencies:",plugin.dependencies
             catch e
                 console.debug e
-                console.debug "remove invalid plugin",plugin.name
+                console.debug "plugin dependencies unmet",plugin.name
+                console.debug "disable it"
                 return false 
             @pluginMap[plugin.name] = plugin
             return true
-    loadPlugin:(names...)->
-        loaded = []
-        console.debug "LOAD~!!!",names
-        async.forEachSeries names,((name,done)=>
-            if name[0] is "#"
-                console.debug "skip plugin #{name}"
-                done()
-                return
-            console.log "try load plugin",name
-            @_loadPlugin name,(err)->
-                if not err
-                    loaded.push name
-                done(err)
-            ),(err)=>
+        async.forEachSeries @pluginAvailable,((plugin,done)=>
+            @_loadPlugin plugin,done
+            ),(err)->
                 if err
-                    console.error err
+                    console.error "fail to load plugin"
+                    callback err
                     return
-                console.debug "plugin loads: #{loaded.join(',')}"
-    prepareSetting:(name,module,callback)->
+                callback null
+    prepareSetting:(plugin,callback)->
+        name = plugin.name
+        module = plugin.module
         console.debug "prepare setting for module #{name}"
         settings = @sybil.settingManager.createSettings(name)
         defines = module.settings or {}
@@ -74,12 +60,13 @@ class PluginCenter extends EventEmitter
         settings.restore (err)->
             settings.save ()->
                 callback err,settings
-    _loadPlugin:(name,callback)->
+    _loadPlugin:(plugin,callback)->
         #console.debug @pluginMap
-        depends = @pluginMap[name].dependencies
+        name = plugin.name
+        depends = plugin.dependencies
         console.debug "load plugin #{name} dependencies: #{depends.join(',')}"
         dependsMap = {}
-        current = @pluginMap[name]
+        current = plugin
         if current.provide
             callback null,current.provide
             return
@@ -98,7 +85,9 @@ class PluginCenter extends EventEmitter
                     callback err
                     return
                 @_assignGlobalModel(dependsMap)
-                @prepareSetting name,current.module,(err,settings)=>
+                current.module = require(current.modulePath)
+                current.requires = current.module.requires or []
+                @prepareSetting plugin,(err,settings)=>
                     if err
                         callback err
                         return
@@ -114,7 +103,7 @@ class PluginCenter extends EventEmitter
         map.database = require("./db.coffee")
         
     
-        
+
 
 class Dependency
     constructor:(@name)->

@@ -1,3 +1,5 @@
+async = require("lib/async")
+App = require("app")
 class AddSourcePopup extends Leaf.Widget
     constructor:()->
         super(App.templates["add-source-popup"])
@@ -133,7 +135,6 @@ class SourceAdder extends Leaf.EventEmitter
                         @terminal.error "fail to add source #{hintToString(source)}"
                         callback(err)
                     return
-                
                 @terminal.ok "successfully add #{hintToString(source)}"
                 callback()
     addSourceCarefully:(uri,callback)=>
@@ -200,4 +201,4 @@ class Terminal extends Leaf.Widget
         @_push.apply(this,buttons)
     multiSelect:(selections,callback)->
         callback null,selections
-window.AddSourcePopup = AddSourcePopup
+module.exports = AddSourcePopup

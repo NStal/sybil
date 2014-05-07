@@ -1,3 +1,10 @@
+App = require "app"
+Model = require "model"
+View = require "view"
+ArchiveDisplayer = require "archiveDisplayer"
+SwipeChecker = require "util/swipeChecker"
+EndlessSearchArchiveLoader = require("procedure/endlessSearchArchiveLoader")
+async = require "lib/async"
 class SearchView extends View
     constructor:()->
         @searchList = new SearchList()
@@ -5,7 +12,9 @@ class SearchView extends View
         @archiveDisplayer.node$.hide()
         @searchList.on "select",(archive)=>
             console.log "select",archive
-            @archiveDisplayer.setArchive(archive);
+            @archiveDisplayer.setArchive(archive)
+            console.debug "~~~",@archiveDisplayer.node.scrollTop
+            @archiveDisplayer.node.scrollTop = 0
             @archiveDisplayer.node$.show();
             @node$.addClass("show-displayer");
         super($(".search-view")[0],"search view")
@@ -23,23 +32,18 @@ class SearchList extends Leaf.Widget
     constructor:()->
         super App.templates["search-list"]
         @resultList = Leaf.Widget.makeList @UI.resultList
-        @count = 30
-        @offset = 0
-        @_queueTaskId = 0
+        @resultList.on "child/remove",(child)=>child.destroy()
         @UI.searchKeywordInput$.keydown (e)=>
             if e.which is Leaf.Key.enter
                 @onClickSearchButton()
                 return false
         @_searchId = 0
-        @_pushInterval = 10
-        @appendQueue = async.queue ((item,done)=>
-            if item.id isnt @_searchId
-                done()
-                return
-            listItem = new SearchListItem(item.archive)
+        @_pushInterval = 4
+        @appendQueue = async.queue ((archive,done)=>
+            listItem = new SearchListItem(archive)
             listItem.onClickNode = ()=>
+                console.debug "select",listItem.archive
                 @emit "select",listItem.archive
-            
             listItem.onMouseoverNode = ()=>
                 @emit "select",listItem.archive
             @resultList.push listItem 
@@ -47,29 +51,9 @@ class SearchList extends Leaf.Widget
             ),1
         @node.onscroll = ()=>
             @onScroll()
-        @_noMore = true
-        @__defineSetter__ "noMore",(value)=>
-            if value and value isnt @_noMore
-                @UI.noMoreHint$.show()
-            else
-                @UI.noMoreHint$.hide()
-            @_noMore = value
-        @__defineGetter__ "noMore",()=>
-            return @_noMore
-            
-        @_isLoading = false
-        @__defineSetter__ "isLoading",(value)=>
-            if value and value isnt @_isLoading
-                @UI.loadingHint$.show()
-            else
-                @UI.loadingHint$.hide()
-            @_isLoading = value
-            console.debug "change loading",value
-        
-        @__defineGetter__ "isLoading",(value)=>
-            return @_isLoading
-        @isLoading = false
         @scrollTarget = @node
+        @viewRead = true
+        @loadCount = 20
     onScroll:()->
         console.log @scrollTarget.scrollHeight - @scrollTarget.scrollTop - @scrollTarget.clientHeight,@scrollTarget.clientHeight/2
         if @scrollTarget.scrollHeight - @scrollTarget.scrollTop - @scrollTarget.clientHeight < @scrollTarget.clientHeight/2
@@ -77,32 +61,35 @@ class SearchList extends Leaf.Widget
     applySearch:(query)->
         @query = query
         @offset = 0
-        @noMore = false
-        @isLoading = false
-        @_queueTaskId++
         @resultList.length = 0
+        if @searcher
+            @searcher.stopListenBy this
+        @searcher = new EndlessSearchArchiveLoader();
+        @searcher.reset {query:query,viewRead:@viewRead,count:@loadCount}
+        @searcher.listenBy this,"archive",@appendArchive
+        @searcher.listenBy this,"noMore",@onNoMore
         @more()
     more:()->
         if not @query
             return
-        if @noMore
+        if not @searcher
             return
-        if @isLoading
+        if @searcher.noMore
             return
-        @isLoading = true
-        App.messageCenter.invoke "search",{input:@query,count:@count or 10,offset:@offset or 0},(err,archives)=>
-            console.debug archives.length,@count,@offset,@query
-            @isLoading = false
+        if @searcher.isLoading
+            return
+        @UI.loadingHint$.show()
+        @searcher.more (err,archives)=> 
+            @UI.loadingHint$.hide()
             if err
                 App.showError err
                 return
-            if archives.length is 0
-                @noMore = true
-                return
-            @offset += archives.length
-            for archive in archives
-                item = new Model.Archive(archive)
-                @appendQueue.push {archive:item,id:@_searchId}
+    appendArchive:(archive)->
+        console.debug archive,"to append"
+        @UI.noMoreHint$.hide()
+        @appendQueue.push archive
+    onNoMore:()->
+        @UI.noMoreHint$.show()
     onClickSearchButton:()->
         query = @UI.searchKeywordInput.value.trim()
         @applySearch(query)
@@ -110,8 +97,8 @@ class SearchList extends Leaf.Widget
 class SearchListItem extends Leaf.Widget
     constructor:(@archive)->
         super App.templates["search-list-item"]
-        @archive.on "change",()=>
-            @render()
+        @archive.listenBy this,"change",@render
+        @use archive
         @render()
     render:()->
         @UI.title$.text(@archive.title)
@@ -119,6 +106,7 @@ class SearchListItem extends Leaf.Widget
         if not @archive.createDate
             time = (new Date(0)).getTime()
         else
+            console.log @archive.createDate
             time = @archive.createDate.getTime()
         now = Date.now()
         tilNow = now - time
@@ -151,4 +139,4 @@ class SearchListItem extends Leaf.Widget
         @_tempDiv = @_tempDiv or document.createElement("div")
         @_tempDiv.innerHTML = html
         return $(@_tempDiv).text().substring(0,count or 200)+"..."
-window.SearchView = SearchView
+module.exports = SearchView

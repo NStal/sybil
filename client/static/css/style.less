@@ -27,7 +27,7 @@ html *{
     background-color:#303030;
     border-bottom:1px solid #2a2a2a;
     position:fixed;
-    z-index:10000;
+    z-index:1000;
     .button{
         border:none;
         box-shadow:none;
@@ -69,7 +69,12 @@ html *{
         top:@header-height;
         left:0;
         width:300px;
+        height:autopx;
+        max-height:0px;
+        overflow:hidden;
         border-radius:0 0 5px 0;
+        transform: translateZ(0);
+        .transition(max-height,100ms); 
         .light-shadow;
         li{
             .clickable;
@@ -234,7 +239,7 @@ html *{
             height:@item-height;
             width:100%;
             font-weight:200;
-            padding-right:5px;
+            padding-right:0;
             .name:hover{
                 color:white;
                 
@@ -258,13 +263,14 @@ html *{
             .unread-counter{
                 display:block;
                 float:right;
+                padding-right:3px;
             }
             .name{
                 float:left;
 		text-overflow:ellipsis;
 		white-space:nowrap;
                 display:block;
-                max-width:75%;
+                max-width:70%;
                 overflow:hidden;
                 
             }
@@ -286,12 +292,12 @@ html *{
                 }
             }
             .source-list-item-container{
-                padding-left:20px;
                 overflow:visible;
                 .transition(all,100ms);
                 display:none;
             }
             .item{
+                padding-left:20px;
                 padding-right:0;
             }
         }
@@ -452,7 +458,27 @@ html *{
     .list-view-list{
         height:100%;
         .left-list;
-        
+        .actions{
+            min-height:45px;
+            max-height:45px;
+            .button{
+                float:left;
+                padding:5px;
+                .box-sizing;
+                .clickable;
+                height:45px;
+                line-height:36px;
+                text-align:center;
+                width:100%;
+                color:@color-font-normal-white;
+                border:none;
+                box-shadow:none;
+                &:hover span{
+                    color:white;
+                }
+            }
+            
+        }
         background-color:@color-dark-bg;
         .box-sizing;
         border-right:1px solid @color-dark-bg-shadow;
@@ -460,6 +486,7 @@ html *{
             .clickable;
             padding:5px;
             margin:2px;
+            color:@color-font-normal-white;
             &.select{
                 color:white;
                 background-color:@comfortable-black;
@@ -703,7 +730,7 @@ html *{
 
 .add-source-popup{
     @width:500px;
-    z-index:10000;
+    z-index:1001;
     width:100%;
     height:100%; 
     position:absolute;
@@ -795,10 +822,55 @@ html *{
         background-color:rgba(255,255,255,1);
     }
 }
+.popup-menu{
+    border-radius:4px;
+    padding:5px 0;
+    position:absolute;
+    background-color:rgba(255,255,255,0.9);
+    .light-shadow;
+    color:@comfortable-black;
+    .transition(background-color,10000ms);
+    &:hover{
+        .transition(all,300ms);
+        background-color:rgba(255,255,255,1);
+    }
+}
+.popup-window{
+    position:absolute;
+    background-color:@color-dark-bg;
+    color:@color-font-normal-white;
+    overflow:hidden;
+    .light-shadow;
+    .close-button{
+        position:absolute;
+        top:8px;
+        right:14px;
+        border:none;
+        border-radius:5px;
+        .clickable;
+    }
+    .title{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        background-color:#303030;
+        padding:10px;
+        text-align:center;
+    }
+    .content{
+        padding:20px;
+        padding-top:50px;
+        .box-sizing;
+        height:100%;
+        width:100%;
+        overflow:auto;
+    }
+}
 .context-menu{
     width:180px;
     z-index:9999999999;
-    .popup;
+    .popup-menu;
     .context-menu-item{
         width:100%;
         padding:.2em 1.5em;
@@ -897,6 +969,7 @@ html *{
                 padding-right:6px;
                 text-shadow:1px 1px #eee;
             }
+            line-height:28px;
 	    &:hover{
                 
 		color:@hint-color; 
@@ -1007,7 +1080,7 @@ html *{
     height:100%;
     pointer-events:none;
     background-color:rgba(0,0,0,0);
-    z-index:1000000;
+    z-index:1002;
     .transition(opacity,1000ms);
     mix-blend-mode: darken;
     .text{
@@ -1028,20 +1101,37 @@ html *{
 }
 
 .source-detail{
-    display:none;
-    .popup;
-    z-index:1000;
-    width:70%;
-    max-height:60%;
+    .popup-window;
+    z-index:1001;
+    width:80%;
+    max-height:80%;
+    height:1000px;
     left:0;
-    padding:20px 30px;
     top:0;
-    overflow:auto;
+    a{
+        color:@color-font-normal-white;
+        text-decoration:none;
+        &:hover{
+            text-decoration:underline;
+        }
+    }
     .readable;
+    .item-content{
+        padding-left:20px;
+    }
+    .description-editor{
+        width:100%;
+        min-height:100px;
+    }
+    textarea{
+        width:80%;
+        min-height:80px;
+        padding:10px;
+    }
     canvas{
         width:100%;
         height:150px;
-        border-bottom:1px solid rgba(0,0,0,0.75);
+        border-bottom:1px solid #888;
         margin-top:20px;
     }
     .item-title{
@@ -1056,7 +1146,7 @@ html *{
     width:80%;
     min-height:60%;
     overflow:auto;
-    z-index:10000;
+    z-index:1001;
     top:0;
     left:0;
     display:none;
@@ -1106,5 +1196,53 @@ html *{
             }
             
         }
+    }
+}
+.archive-displayer-list-selector{
+    background-color:white;
+    color:black;
+    padding:10px;
+    border-radius:5px;
+    .light-shadow;
+    .close-button{
+        display:none;
+    }
+    ul{
+        li{
+            list-style:none;
+            padding:5px; 
+            .clickable;
+            &:hover{
+                text-decoration:underline;
+            }
+        }
+    }
+}
+.no-interaction{
+    pointer-events:none;
+}
+
+
+.loading{
+    background-color:#303030;
+    display:table;
+    position:absolute;
+    z-index:10000;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    text-align:center;
+    .hint{
+        display:table-cell;
+        color:#999;
+        text-align:center;
+        vertical-align:middle;
+    }
+    .transform-scale(1,1,1);
+    .transition(all,300ms);
+    &.hide{
+        opacity:0;
+        .transform-scale(0.65,0.65,1);
     }
 }

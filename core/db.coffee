@@ -129,10 +129,10 @@ exports.getSources = (callback)->
             return
         callback null,arr
 exports.renameSource = (guid,name,callback)->
-    Collections.source.findAndModify {guid:guid},{$set:{name:name}},{safe:true},(err)->
+    Collections.source.findAndModify {guid:guid},{},{$set:{name:name}},{safe:true},(err)->
         callback err
 exports.setSourceDescription = (guid,description,callback)->
-    Collections.source.findAndModify {guid,guid},{$set:{description:description}},{safe:true},(err)->
+    Collections.source.findAndModify {guid:guid},{},{$set:{description:description}},{safe:true},(err)->
         callback err
 exports.getSourceArchiveCount = (guid,callback)->
     Collections.archive.find({sourceGuid:guid}).count (err,count)->
@@ -197,7 +197,7 @@ exports.updateUnreadCount = (query,callback)->
             ),(err)->
                 callback err
 exports.setArchiveDisplayContent = (guid,content,callback)->
-    Collections.archive.findAndModify {guid:guid},{$set:{displayContent:content or null}},{safe:true},(err,archive)->
+    Collections.archive.findAndModify {guid:guid},{},{$set:{displayContent:content or null}},{safe:true},(err,archive)->
         callback err,archive
     
 
@@ -227,7 +227,7 @@ exports.markArchiveAsRead = (guid,callback)->
         if not archive
             callback "read archive not found"
             return
-        Collections.source.update {guid:archive.sourceGuid},{$inc:{unreadCount:-1}},{safe:true},(err,archive)->
+        Collections.source.update {guid:archive.sourceGuid},{$inc:{unreadCount:-1}},{safe:true},(err)->
             callback null,archive
 exports.markAllArchiveAsRead = (guid,callback)->
     Collections.archive.update {sourceGuid:guid},{$set:{hasRead:true}},{multi:true,safe:true},(err)->
@@ -311,7 +311,7 @@ exports._ensureList = (callback)->
     else
         console.log "has archvie"
         callback()
-exports.addList = (listName,callback)->
+exports.createList = (listName,callback)->
     if not listName
         callback "invalid list name"
         return
@@ -402,6 +402,7 @@ exports.getShareArchiveByNodeHashes = (hashes,option = {},callback)->
             callback err,arr
             return
 exports.getCustomArchives = (query,callback)->
+    console.log "initl",query
     finalQuery = {$or:[]}
     tagQuery = null
     if query.sourceGuids instanceof Array and query.sourceGuids.length > 0
@@ -434,7 +435,7 @@ exports.getCustomArchives = (query,callback)->
     if query.properties
         for prop of query.properties
             finalQuery[prop] = query.properties[prop]
-            
+    console.log finalQuery,"~~~",{limit:query.limit or 10000,skip:query.offset or 0}
     cursor = Collections.archive.find finalQuery,{limit:query.limit or 10000,skip:query.offset or 0}
     # here maybe some performance issue one day
     # but we are designed for single user

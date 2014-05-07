@@ -1,3 +1,4 @@
+App = require("../app")
 class ContextMenu extends Leaf.Widget
     constructor:(selections)->
         super(App.templates["context-menu"])
@@ -14,11 +15,25 @@ class ContextMenu extends Leaf.Widget
             setTimeout selection.callback,0 
         @children.push child
     show:(e)->
+        e.stopImmediatePropagation()
+        e.preventDefault()
+        ContextMenu.show(this)
         @node$.show()
         @node$.css({top:e.clientY-15,left:e.clientX-10})
     hide:()->
         @node$.hide()
         @emit "hide"
+ContextMenu.show = (who)->
+    if @menu
+        @menu.remove()
+    @mask.show()
+    @mask.once "hide",()=>
+        @mask.hide()
+        @menu.hide()
+    @menu = who
+    @menu.appendTo document.body
+    @menu.once "hide",()=>
+        @mask.hide()
 ContextMenu.showByEvent = (e,selections)->
     if @menu
         @menu.remove()
@@ -55,4 +70,4 @@ class ContextMenuItem extends Leaf.Widget
         @node$.text word
     onClickNode:()->
         @emit "fire",this
-window.ContextMenu = ContextMenu
+module.exports = ContextMenu

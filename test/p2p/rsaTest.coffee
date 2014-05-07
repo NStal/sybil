@@ -15,6 +15,7 @@ describe "rsa test",()->
     it "test sign",(done)->
         data = "hello"
         signature = privateKey.sign(new Buffer(data))
+        console.assert Buffer.isBuffer signature
         result = publicKey.verify(new Buffer(data),signature)
         console.assert result
         done()
