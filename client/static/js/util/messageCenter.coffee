@@ -1,13 +1,3 @@
-# MessageCenter Accept a JSON format message
-# MessageCenter is designed for 1 to 1 messaging
-# 
-# FORMATS
-# Invoke: {id:'id',type:'invoke',name:'actionName',data:data}
-# Event:   {type:'event',name:'eventName',data:data}
-# for Invoke we should response something with (err,data) callback
-# for Event we only dispatch them to who ever cares but dont return anything
-# for Invoke response
-# InvokeResponse: {id:'original id',type:'response',data:data,error:err}
 Buffer = Buffer or Array
 
 # MessageCenter Accept a JSON format message
@@ -40,7 +30,6 @@ Buffer = Buffer or Array
 # In case of silent, invoke should eventually fail due to a timeout.
 # Other type of RPC are designed for totally not fail concerned.
 EventEmitter = Leaf.EventEmitter
-
 class MessageCenter extends EventEmitter
     @stringify:(obj)->
         return JSON.stringify @normalize obj
@@ -170,8 +159,8 @@ class MessageCenter extends EventEmitter
         else
             controller.clear(new Error "connection not set")
         return controller
-    fireEvent:(name,data)->
-        message = @stringify({type:"event",name:name,data:data})
+    fireEvent:(name,params...)->
+        message = @stringify({type:"event",name:name,params:params})
         if @connection
             try
                 @connection.send message
@@ -200,7 +189,8 @@ class MessageCenter extends EventEmitter
     handleEvent:(info)->
         if not info.name
             @emit "error",new Error "invalid message #{JSON.stringify(info)}"
-        @emit "event/"+info.name,info.data
+        args = ["event/"+info.name].concat info.params or []
+        @emit.apply this,args
         
     handleResponse:(info)->
         if not info.id

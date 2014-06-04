@@ -34,10 +34,12 @@
       return function() {
         App.initialLoaded = true;
         _this.emit("connect");
-        $(".loading").addClass("hide");
+        setTimeout((function() {
+          return $(".landing").addClass("hide");
+        }), 200);
         return setTimeout((function() {
-          return $(".loading").hide();
-        }), 500);
+          return $(".landing").hide();
+        }), 1000);
       };
     })(this));
     this.connectionManager.on("connect", (function(_this) {

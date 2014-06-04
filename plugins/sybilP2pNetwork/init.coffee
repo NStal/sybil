@@ -5,6 +5,7 @@ KadDomain = require("./network/kad/domain.coffee")
 class SybilNetwork extends Lord
     constructor:(@key,option = {})->
         super @key
-        @kadDomain = new KadDomain()
-        @addDomain @kadDomain
+        @kadDomain = new KadDomain(@key)
+        @kadDomain.once "ready",()=>
+            @addDomain @kadDomain
         

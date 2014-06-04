@@ -1682,15 +1682,26 @@ input:focus {
 .fa-try:before {
   content: "\f195";
 }
-@-webkit-keyframes "blink" {
+@-webkit-keyframes blink {
   0% {
-    opacity: 0.4;
+    opacity: 0.2;
   }
   50% {
-    opacity: 0.75;
+    opacity: 0.95;
   }
   100% {
-    opacity: 0.4;
+    opacity: 0.2;
+  }
+}
+@keyframes blink {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0.2;
   }
 }
 body,
@@ -1883,4 +1894,12 @@ html {
 }
 .archive-displayer-list-selector ul li:hover {
   text-decoration: underline;
+}
+.landing .middle .center img {
+  transform: scale3d(0.3, 0.3, 1);
+  -webkit-transform: scale3d(0.3, 0.3, 1);
+  -moz-transform: scale3d(0.3, 0.3, 1);
+  -o-transform: scale3d(0.3, 0.3, 1);
+  -ms-transform: scale3d(0.3, 0.3, 1);
+  left: -10px;
 }

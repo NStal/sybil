@@ -313,7 +313,7 @@ class SourceList extends Leaf.Widget
             @children.push new SourceListItem(sourceModel)
     buildFolderData:(folders)->
         @currentFolderData = folders
-        coherency = 10
+        coherency = 100
         async.eachLimit folders,coherency,((item,done)=>
             setTimeout ( ()=>done() ),0
             if item.type is "folder"

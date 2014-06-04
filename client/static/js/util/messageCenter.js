@@ -3,6 +3,7 @@
   var Buffer, EventEmitter, MessageCenter, ReadableStream, WritableStream,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Buffer = Buffer || Array;
@@ -241,12 +242,13 @@
       return controller;
     };
 
-    MessageCenter.prototype.fireEvent = function(name, data) {
-      var e, message;
+    MessageCenter.prototype.fireEvent = function() {
+      var e, message, name, params;
+      name = arguments[0], params = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       message = this.stringify({
         type: "event",
         name: name,
-        data: data
+        params: params
       });
       if (this.connection) {
         try {
@@ -288,10 +290,12 @@
     };
 
     MessageCenter.prototype.handleEvent = function(info) {
+      var args;
       if (!info.name) {
         this.emit("error", new Error("invalid message " + (JSON.stringify(info))));
       }
-      return this.emit("event/" + info.name, info.data);
+      args = ["event/" + info.name].concat(info.params || []);
+      return this.emit.apply(this, args);
     };
 
     MessageCenter.prototype.handleResponse = function(info) {

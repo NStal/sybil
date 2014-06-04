@@ -26,10 +26,12 @@ App.connect = ()->
     @connectionManager.ready ()=>
         App.initialLoaded = true
         @emit "connect"
-        $(".loading").addClass("hide");
         setTimeout (()=>
-            $(".loading").hide()
-        ),500
+            $(".landing").addClass("hide");
+        ),200
+        setTimeout (()=>
+            $(".landing").hide()
+        ),1000
     @connectionManager.on "connect",()=>
         @messageCenter.setConnection(@connectionManager.connection)
     @connectionManager.on "disconnect",()=>

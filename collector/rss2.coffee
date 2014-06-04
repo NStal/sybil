@@ -1,8 +1,12 @@
-Collector = require("./collector.coffee") 
+Collector = require("./collector.coffee")
 FeedParser = require "feedparser"
 EventEmitter = (require "events").EventEmitter
 Iconv = (require "iconv").Iconv
 helper = require "./helper.coffee"
+httpUtil = require "../common/httpUtil.coffee"
+sybilSettings = require "../settings.coffee"
+console = require("../common/logger.coffee").create("CollectorRSS")
+timeout = 20 * 1000;
 class RssArchive extends Collector.Archive
     constructor:(@data,rss)->
         super()
@@ -12,10 +16,10 @@ class RssArchive extends Collector.Archive
         @createDate = new Date(@data.date)
         @fetchDate = new Date()
         if not @data.guid
-            throw new "no guid"
+            throw new Error "no guid"
             @invalid = true
         if not @content and not @title
-            throw new "archive has no title and content"
+            throw new Error "archive has no title and content"
         @guid = "rss_"+@data.guid
         @collectorName = "rss"
         @authorName = @data.author
@@ -26,12 +30,13 @@ class RssArchive extends Collector.Archive
     load:(callback)->
         # load image or something
         callback(null,this)
-
 # Rss hold rss information
 # say update frequency, encoding, error count
 # and history/logs
 class Rss extends EventEmitter
-    @validEncoding = ["utf-8","gb2312","utf8","gbk"]
+    # not use for now
+    # but these encodings are known to be (must be) supported
+    @validEncoding = ["utf-8","gb2312","utf8","gbk","gb18030","big5"]
     constructor:(@raw,option={})->
         @name = @raw.name or "unfetched"
         @url = @raw.url
@@ -45,12 +50,13 @@ class Rss extends EventEmitter
         #       this only happens when my proxy is not available
         #       maybe it's down or my proxy code is wrong
         #       or GFW is upgraded
+        # 
         @state = @raw.state or "uncheck"
         @encoding = @raw.encoding or null
         @failCount = parseInt(@raw.failCount) or 0
         @description = @raw.description or null
-        @fetchFrequency = @raw.fetchFrequency or 1
-        @lastUpdate = new Date(@raw.lastUpdate)
+        @lastUpdate = new Date(@raw.lastUpdate or 0)
+        @lastFetch = new Date(@raw.lastFetch or 0)
         @lastArchiveIds = @raw.lastArchiveIds or []
         @lastError = @raw.lastError
         @option = option
@@ -58,6 +64,7 @@ class Rss extends EventEmitter
         @minInterval = @option.minInterval or 2 * 60 * 1000
         @maxInterval = @option.maxInterval or 12 * 60 * 60 * 1000 
         @nextInterval = @raw.nextInterval or 0
+        @isStop = true
     start:()->
         @isStop = false
         if @timer
@@ -65,15 +72,15 @@ class Rss extends EventEmitter
         # for uncheckd/invalid rss we do a initialize check
         # When it's not checked, it may be fail/hang last time
         # or newly added rss.
-        # whatever it is we give it a change to prove herself
-        
-        
+        # whatever it is we give it a change to prove herself 
         check = (callback)=>
             @check (err)=>
                 if not err
                     @state = "checked"
                     callback()
                     return
+                @lastError = err
+                @lastErrorDate = new Date()
                 switch err
                     when "invalid url","not available","invalid xml","invalid rss"
                         @state = "fail"
@@ -81,27 +88,36 @@ class Rss extends EventEmitter
                     when "proxy not available"
                         @state = "hang"
                         callback()
-                        console.warn "proxy not available"
+                        console.debug "proxy not available"
                     else throw "unexpect error when check rss validation, if you see it, your code is incorrect"
+                
             return
         work = (callback)=>
+            @lastFetch = new Date()
             @fetch (err)=>
                 if err
                     # something is wrong
+                    #
+                    @lastError = err
+                    @lastErrorDate = new Date()
                     @increaseInterval()
+                    @failCount += 1
                     @state = "fail"
                 # if everything goes right
                 # @fetch will handle the interval correctly
+                else
+                    @failCount = 0
+                @save()
                 callback()
         
         next = ()=>
-            console.log "next",@state,@nextInterval
             if @isStop
                 clearTimeout @timer
                 @timer = null
                 return
             if @state isnt "checked"
                 check ()=>
+                    @save()
                     if @state is "checked"
                         next()
                     else
@@ -128,12 +144,13 @@ class Rss extends EventEmitter
         @needProxy = true
     # check will automatically setup informations
     check:(callback)->
-        if @url.indexOf("http://") isnt 0 and @url.indexOf("https://") isnt 0
+        if @url.indexOf("http://") isnt 0 and @url.indexOf("https://") isnt 0 and @url.indexOf("feed://") isnt 0
             callback("invalid url")
             return
-        helper.httpGet {url:@url},(err,res,body)=>
+        httpUtil.httpGet {url:@url,timeout:timeout},(err,res,body)=>
             if err
-                helper.httpGet {url:@url,proxy:@proxy},(_err,_res,body)=>
+                console.debug "check fail #{@url} #{err.toString()} now through proxy #{@proxy}"
+                httpUtil.httpGet {url:@url,proxy:@proxy,timeout:timeout},(_err,_res,body)=>
                     if _err
                         if _err is "target not available"
                             callback("not available")
@@ -150,53 +167,72 @@ class Rss extends EventEmitter
             bodyBuffer = body
             body = body.toString().trim()
             firstLine = body.substring(0,body.indexOf(">")).trim()
-            if firstLine.indexOf("<?xml") isnt 0
-                console.error firstLine,"body:",body
+            if firstLine.indexOf("<?xml") isnt 0 and firstLine.indexOf("<rss") isnt 0
                 callback("invalid xml")
                 return
             encodingReg = /encoding=\"[0-9a-z]+\"/ig
             match = firstLine.match encodingReg
+            console.log match,res.headers["content-type"]
             if not match
-                if res.headers["content-encoding"]
-                    @encoding = res.headers["content-encoding"].toLowerCase()
+                if res.headers["content-type"] and res.headers["content-type"].toLowerCase().indexOf("charset=") > 0
+                    contentType = res.headers["content-type"].toLowerCase()
+                    for item in contentType.split(";")
+                        if not item
+                            continue
+                        kv = item.split("=")
+                        if kv[0].trim() is "charset"
+                            @encoding = kv[1]
+                            
                 # else if res.headers["content-type"] and res.headers["content-type"].indexOf("")
                 # add detect latter
                 # but this is less reliable than the xml declare
                 # since most rss generator handles xml correctly
-                else
+                if not @encoding
                     @encoding = "utf-8"
             else
-                @encoding = match[0].replace("encoding=\"","").replace("\"","")
+                @encoding = match[0].replace("encoding=\"","").replace("\"","").toLowerCase()
+            console.log @encoding,"~~~"
+            if @encoding in ["gbk","gb2312"]
+                @encoding = "gb18030"
             if @encoding not in ["utf-8","utf8"]
-                data = (new Iconv(@encoding,"utf-8")).convert(bodyBuffer)
+                try 
+                    data = (new Iconv(@encoding,"utf-8//TRANSLIT//IGNORE")).convert(bodyBuffer)
+                catch e
+                    console.error e,"at",@url
+                    console.error "fail to decode with with #{@encoding}"
+                    callback("invalid encoding")
+                    return
             else
                 data = bodyBuffer
             parser = new FeedParser()
             parser.on "meta",(meta)=>
                 @updateMeta(meta)
+            archives = []
             parser.on "readable",()=>
-                while parser.read()
-                    return
+                while data = parser.read()
+                    archives.push(data)
+                return
             parser.on "error",()=>
                 callback("invalid rss")
             parser.on "end",()=>
-                callback()
+                callback(null,archives)
             parser.write(data)
             parser.end()
     fetch:(callback)->
-        option = {url:@url}
+        option = {url:@url,timeout:timeout}
         if @needProxy
             option.proxy = @proxy
-        helper.httpGet option,(err,res,body)=>
+        httpUtil.httpGet option,(err,res,body)=>
             if err
                 callback err
                 return 
             if @encoding and @encoding not in ["utf8","utf-8"]
                 try
-                    converter = new Iconv(@encoding,"utf8")
+                    converter = new Iconv(@encoding,"utf8//TRANSLIT//IGNORE")
                     bodyString = converter.convert(body).toString("utf8")
                 catch e
                     console.error e
+                    console.error "fail to encode with",@url
                     callback "encoding error"
                     return
             else
@@ -206,7 +242,7 @@ class Rss extends EventEmitter
     handleRssBody:(body,callback)->        
         archiveIds = []
         articles = []
-        lastUpdate = new Date()
+        lastUpdate = null
         parser = new FeedParser()
         parser.on "meta",(meta)=>
             @updateMeta meta
@@ -216,23 +252,17 @@ class Rss extends EventEmitter
                 articles.push article
         parser.on "error",(err)->
             callback err
-        parser.on "end",()=>            
+        parser.on "end",()=>
+            noUpdates = true
             for article,index in articles
                 try 
                     archive = new RssArchive(article,this)
                 catch e
                     console.error e
-                    console.log "Invalid archive",article
+                    console.debug "Invalid archive",article
                     continue
-                if (article.date and article.date.getTime() <= @lastUpdate.getTime()) or archive.guid in @lastArchiveIds
-                    console.log "reach lastupdate",index,@url
-                    if index is 0
-                        #no update
-                        @increaseInterval()
-                    else
-                        #has update
-                        @decreaseInterval()
-                    break
+                if noUpdates and archive.guid not in @lastArchiveIds
+                    noUpdates = false
                 if article.date and article.date.getTime() > @lastUpdate.getTime()
                     # buffer latest in this fetch
                     if article.date.getTime() > lastUpdate.getTime()
@@ -245,10 +275,14 @@ class Rss extends EventEmitter
                     if item and item.validate()
                         @emit "archive",item 
                     else
-                        throw new "Invalid Archive, if saidly we get here, it indicates that the program logic is wrong, if we get correct data the archive should always be valid, so either the broken raw data get passed our poor validation check, or the RssArchive constructor are wrong the data is: #{JSON.stringify(item.toJSON(),null,4)}"
-            if @lastUpdate.getTime() < lastUpdate.getTime()
+                        throw new Error "Invalid Archive, if saidly we get here, it indicates that the program logic is wrong, if we get correct data the archive should always be valid, so either the broken raw data get passed our poor validation check, or the RssArchive constructor are wrong the data is: #{JSON.stringify(item.toJSON(),null,4)}"
+                        
+            if noUpdates
+                @increaseInterval()
+            else
+                @decreaseInterval()
+            if lastUpdate && @lastUpdate.getTime() < lastUpdate.getTime()
                 @lastUpdate = lastUpdate
-                @save()
             if archiveIds.length > 0
                 @lastArchiveIds = archiveIds
             callback()
@@ -259,7 +293,7 @@ class Rss extends EventEmitter
         # and call start imediately after stop
         # may cause issue , don't do it
         if @timer
-            clearTimeout timer
+            clearTimeout @timer
             @timer = null
         @isStop = true
     updateMeta:(meta)->
@@ -267,7 +301,6 @@ class Rss extends EventEmitter
         @description = meta.description
         @save()
     increaseInterval:()->
-        console.log @nextInterval,@minInterval,@maxInterval
         if @nextInterval < @minInterval
             @nextInterval = @minInterval
         else
@@ -284,13 +317,14 @@ class Rss extends EventEmitter
         @raw.state = @state
         @raw.name = @name
         @raw.description = @description
-        @raw.fetchFrequency = @fetchFrequency or 1
         @raw.nextInterval = @nextInterval
         @raw.failCount = @failCount or 0
-        @raw.lastUpdate = @lastUpdate.getTime() or 0
+        @raw.lastUpdate = @lastUpdate and @lastUpdate.getTime() or 0
         @raw.lastArchiveIds = @lastArchiveIds or []
         @raw.needProxy = @needProxy
         @raw.lastError = @lastError
+        @raw.lastErrorDate = @lastErrorDate and @lastErrorDate.getTime() or 0
+        @raw.lastFetch = @lastFetch and @lastFetch.getTime() or 0
         @emit "configUpdate"
     toJSON:()->
         json = {}
@@ -299,7 +333,6 @@ class Rss extends EventEmitter
         json.state = @state
         json.name = @name
         json.descript = @description
-        json.fetchFrequency = @fetchFrequency
         json.failCount = @failCount or 0
         return json
 
@@ -309,7 +342,6 @@ class RssCollector extends Collector.Collector
         @name = name or "rss"
         @config = new Collector.CollectionConfig(@name)
         @rsses = []
-        @collectInstances = []
         @config.load (err)=>
             if err
                 throw err
@@ -333,34 +365,34 @@ class RssCollector extends Collector.Collector
                 return
         rssInfo = {url:link}
         rss = new Rss(rssInfo,@rssOption)
-        rss.check (err)=>
+        rss.check (err,archives)=>
             if err
                 if callback then callback err 
                 return
-            @config.getReference("rsses").push(rssInfo)
+            @config.getReference("rsses",[]).push(rssInfo)
             @rsses.push rss
             @config.save()
             @startRss(rss)
-            callback(null,rss)
-        # note we only accept xml link
+            count=0
+            for archive,index in archives
+                try 
+                    rssArchive = new RssArchive(archive,rss)
+                catch e
+                    console.error e
+                    console.debug "Invalid archive",archive
+                    callback "broken archive"
+                    return
+                @emit "archive",rssArchive
+                count++
+            callback(null,rss,count)
+        # note we only accept xml link by now
         # not able to auto detect rss
-    removeRssByLink:(link)->
-        rsses = @config.getReference("rsses")
-        rsses = rsses.filter (item)->return item.url isnt link
-        @config.setReference("rsses",rsses)
-
-        @rsses = @rsses.filter (item)->
-            if item.url is link
-                if item.collectInstance
-                    item.collectInstance.stop()
-                return false
-            return true
     _init:()->
         @config.set("name","rss")
-        @rssOption.proxy = @config.get "proxy"
+        @rssOption.proxy = sybilSettings.get "proxy"
         @rssOption.maxInterval = 12 * 60 * 60 * 1000
         @rssOption.minInterval = 2 * 60 * 1000
-        rsses = @config.getReference("rsses") or []
+        rsses = @config.getReference("rsses",[])
         for rss in rsses
             try
                 @rsses.push new Rss(rss,@rssOption)
@@ -394,20 +426,80 @@ class RssCollectorManager extends Collector.CollectorManager
             sources.push @_rssToSource(rss)
         return sources
     subscribe:(uri,callback)->
-        @collector.addAndStartRssByLink uri,(err,rss)=>
+        @collector.addAndStartRssByLink uri,(err,rss,count)=>
             # may err and rss both exists
             # when it's duplicated
             if rss
-                callback err,@_rssToSource rss
+                result = @_rssToSource rss
+                callback err,result
             else
                 callback err
+    unsubscribe:(guid,callback)->
+        url = guid.replace "#{@name}_",""
+        found = false
+        @collector.rsses = @collector.rsses.filter (rss)=>
+            if rss.url is url
+                rss.stop()
+                found = true
+                _rsses = @collector.config.getReference("rsses",[])
+                for info,index in _rsses
+                    if info.url is url
+                        _rsses.splice(index,1)
+                        break
+                return false
+            return true
+        if found
+            @collector.config.save()
+            callback()
+            return
+        callback "not found"
     testURI:(uri,callback)->
+        availables = []
+        Tasks = require "node-tasks"
+        tasks = new Tasks("checkAsRss","checkAsHTML")
+        tasks.on "done",()->
+            result = []
+            availables.forEach (uri)->
+                if uri not in result
+                    result.push uri
+            callback(null,result)
         try
-            rss = new Rss({url:uri,proxy:@collector.config.get("proxy")})
+            rss = new Rss({url:uri},{proxy:sybilSettings.get "proxy"})
         catch e
-            callback "invalid url"
+            tasks.done("checkAsRss")
         rss.check (err)->
-            callback err
+            if not err
+                availables.push uri
+            tasks.done("checkAsRss")
+        $ = require "jquery"
+        testAsHTML = (res,content,_callback)->
+            try
+                html = $(content.toString())
+                links = html.find("link").filter () -> this.rel is "alternate" and (this.type is "application/rss+xml" or this.type is "application/atom+xml")
+#                for item in html.find("link")
+#                    console.log "LINK:",item.rel,item.type
+#                for link in links
+#                    console.log link.rel,link.type
+
+                availables.push.apply availables,((require "url").resolve(uri,link.href) for link in links)
+            catch e
+                
+                null
+                #console.log "fail to test as html"
+                #console.log e
+
+            _callback()
+        httpUtil.httpGet {url:uri,noQueue:true,timeout:timeout},(err,res,content)->
+            if err or not content
+                httpUtil.httpGet {url:uri,noQueue:true,timeout:timeout,proxy:sybilSettings.get "proxy"},(err,res,content)->
+                    if err or not content
+                        tasks.done("checkAsHTML")
+                        return
+                    testAsHTML res,content,()->
+                        tasks.done("checkAsHTML")
+                return
+            testAsHTML res,content,()->
+                tasks.done("checkAsHTML")
 
 exports.RssCollector = RssCollector
 exports.Collector = RssCollector

@@ -29,7 +29,7 @@ exports._httpGet = (option,callback)->
     proxy = option.proxy or null
     useStream = option.useStream or false
     if typeof option.maxRedirect isnt "number"
-        option.maxRedirect = 2
+        option.maxRedirect = 3
     else
         if option.maxRedirect < 0
             callback "max redirect reach"

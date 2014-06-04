@@ -211,7 +211,7 @@
 
     ArchiveList.prototype.onScroll = function() {
       var bottom, divider, item, top, _i, _len, _ref, _results;
-      if (this.UI.containerWrapper.scrollHeight - this.UI.containerWrapper.scrollTop - this.UI.containerWrapper.clientHeight < this.UI.containerWrapper.clientHeight / 2) {
+      if (this.UI.containerWrapper.scrollHeight - this.UI.containerWrapper.scrollTop - this.UI.containerWrapper.clientHeight < this.UI.containerWrapper.clientHeight * 2) {
         this.more();
       }
       divider = this.UI.containerWrapper.scrollTop;

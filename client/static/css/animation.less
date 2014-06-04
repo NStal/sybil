@@ -1,13 +1,13 @@
-@-webkit-keyframes "blink"{
+@import "./css3function.less";
+@blink:{
     0%{
-	opacity:0.4;
+	opacity:0.2;
     }
     50%{
-	opacity:0.75;
+	opacity:0.95;
     }
     100%{
-	opacity:0.4;
+	opacity:0.2;
     }
-}
-
-
+};
+.keyframes(blink,@blink);

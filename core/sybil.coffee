@@ -217,7 +217,7 @@ class Sybil extends (require "events").EventEmitter
     getFriends:(callback)->
         Database.getFriends (err,friends)->
             callback err,friends
-    addFriend:(friend,callback)-> 
+    addFriend:(friend,callback)->
         Database.addFriend friend,(err,friend)=>
             if not err
                 @emit "friend/add",friend
