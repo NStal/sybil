@@ -161,6 +161,8 @@ class MongodbStorageConfig extends Config
         super @name
         @collectionName = "collectorConfig"
         @data = {}
+        @delayTime = 300
+        @_delaySaveCallbacks = []
     load:(callback = ()->true )->
         if not Database.isReady
             callback "database not ready"
@@ -171,7 +173,20 @@ class MongodbStorageConfig extends Config
                 return
             @data = data or {}
             callback null,@data
-    save:(callback = ()->true )->
+        
+    _delaySave:(callback = ()->true)->
+        @_delaySaveCallbacks.push callback
+        clearTimeout @_delayTimer
+        @_delayTimer = setTimeout (()=>
+            callbacks = @_delaySaveCallbacks
+            @_delaySaveCallbacks = []
+            @_save (err)=>
+                for callback in callbacks
+                    callback(err)
+            ),@delayTime
+    save:(callback = ()->true)->
+        @_delaySave(callback)
+    _save:(callback = ()->true )->
         if not Database.isReady
             callback "database not ready"
             return

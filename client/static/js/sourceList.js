@@ -516,7 +516,7 @@
     SourceList.prototype.buildFolderData = function(folders) {
       var coherency;
       this.currentFolderData = folders;
-      coherency = 10;
+      coherency = 100;
       return async.eachLimit(folders, coherency, ((function(_this) {
         return function(item, done) {
           var folder, source;

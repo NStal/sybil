@@ -1,5 +1,6 @@
 App = require("app")
 async = require("lib/async")
+_ = require("lib/lodash")
 # A module to save or load persistentent datas
 # in general is some data are browser/UI runtime irrelevant, and the amount is likely to be limited
 # then use this module

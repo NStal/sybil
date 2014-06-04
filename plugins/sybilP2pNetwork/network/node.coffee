@@ -34,6 +34,7 @@ class Node extends EventEmitter
         if @state is "close"
             return
         @channel.addConnection connection
+        
 class Channel extends EventEmitter
     constructor:(@node,connections)->
         super()
@@ -41,20 +42,35 @@ class Channel extends EventEmitter
         @connections = connections
         @_updateChannelState()
     addConnection:(connection)->
-        connection.listenBy this,"close",@removeConnection
-        connection.channel = this
-        connection.node = @node
         @connections.push connection
+        @_attachConnection(connection)
         @_updateChannelState()
     removeConnection:(connection)->
         for item,index in @connections
             if item is connection
                 @connections.splice index,1
-                connection.stopListenBy this
-                connection.channel = null
-                connection.node = null
+                @_detachConnection(connection)
                 @_updateChannelState()
                 return
+    _attachConnection:(connection)->
+        connection.listenBy this,"close",@removeConnection
+        connection.channel = this
+        connection.node = @node
+        for handler in @channelEventListeners
+            connection.messageCenter.listenBy this,"event/"+handler.event,handler.callback
+        for api in @channelApis
+            connection.messageCenter.registerApi api.name,api.callback
+    _detachConnection:(connection)->
+        connection.messageCenter.stopListenBy this
+        for api in @channelApis
+            # monkey patch here
+            # because current message center don't support unregisterApi
+            if not connection.messageCenter.unregisterApi
+                continue
+            connection.messageCenter.unregisterApi api.name
+        connection.stopListenBy this
+        connection.channel = null
+        connection.node = null
     _updateChannelState:()->
         if @connections.length is 0
             @close()
@@ -68,6 +84,16 @@ class Channel extends EventEmitter
             connection.close()
         @connections = []
         @emit "close"
+    getAddresses:()->
+        results = []
+        for connection in @connections
+            if connection.addressString
+                results.push connection.addressString
+            else if connection.address
+                results.push connection.address.toString()
+            else
+                continue
+        return results
     pickAvailableConnection:()->
         # general strategy
         # * private connection won't be pickup
@@ -86,11 +112,12 @@ class Channel extends EventEmitter
             if not connection.isPassive
                 return connection
         return result
-    invoke:(name,param,callback)->
-    fireEvent:(name,param)->
-    stopListenChannelEvent:(event,handler)->
-    listenChannelEvent:(event,handler)->
-        @channelEventListeners.push [event,handler]
+    listenChannelEvent:(event,callback)->
+        @channelEventListeners.push {event,callback}
+        for connection in @connections
+            connection.messageCenter.listenBy this,"event/"+event,callback
     registerApi:(name,callback)->
-    createMessageCenter:()->
+        @channelApis.push {name,callback}
+        for connection in @connections
+            connection.messageCenter.registerApi name,callback
 module.exports = Node

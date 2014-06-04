@@ -1,7 +1,13 @@
+requireUpdate = false;
 context = new LeafRequire({root:"./js/"})
 context.debug = true
 context.enableCache = true
-context.version = "0.0.1"
+context.version = "0.0.3"
+if context.version isnt context.getLastVersion()
+    console.debug "version update from",context.getLastVersion(),"to",context.version
+    console.debug "clear caches"
+    requireUpdate = true
+    context.clearCache()
 # disable caches for debug mode
 if window.location.toString().indexOf("?debug")>0
     context.debug = true
@@ -52,4 +58,6 @@ context.use "model.js"
 context.use "test.js"
 context.load ()->
     console.log "loaded"
+    App = context.require("app")
+    App.requireUpdate = requireUpdate
     context.require "main"

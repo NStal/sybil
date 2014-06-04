@@ -133,7 +133,7 @@ class ArchiveList extends Leaf.Widget
             App.userConfig.set "previewModeFor"+@archiveInfo.name,not previewMode
             @applyPreviewMode()
     onScroll:()->
-        if @UI.containerWrapper.scrollHeight - @UI.containerWrapper.scrollTop - @UI.containerWrapper.clientHeight < @UI.containerWrapper.clientHeight/2
+        if @UI.containerWrapper.scrollHeight - @UI.containerWrapper.scrollTop - @UI.containerWrapper.clientHeight < @UI.containerWrapper.clientHeight*2
             @more()
         divider = @UI.containerWrapper.scrollTop
         divider += $(window).height()/3

@@ -1,6 +1,6 @@
 {
     "dbName":"sybil",
-    "debug":true,
+    "debug":false,
     "webApiHost":"localhost",
     "webApiPort":3006,
     "nickname":"NStal",
@@ -12,7 +12,7 @@
     "safeGatewayUsername":"wuminghan",
     "safeGatewayPassword":"P@ssw0rd",
     "proxies":[
-        "http://localhost:7002/"
+        "http://localhost:7072/"
         ,"phttp://nstal.me:12222/"
     ]
 }

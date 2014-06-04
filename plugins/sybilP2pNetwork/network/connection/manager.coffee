@@ -1,4 +1,4 @@
-EventEmitter = require("eventex").EventEmitter;
+EventEmitter = require("eventex").EventEmitter
 class Manager extends EventEmitter
     constructor:(@lord)->
         super()

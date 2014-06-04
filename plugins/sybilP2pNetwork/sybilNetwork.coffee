@@ -9,7 +9,7 @@ class SybilNetwork extends Lord
         super @key
         @kadDomain = new KadDomain()
         @addDomain @kadDomain
-        standardHost = option.standardHost || "0.0.0.0";
+        standardHost = option.standardHost || "0.0.0.0"
         standardPort = option.standardPort || 5237
         @standardConnectionProvider = new StandardConnectionProvider(standardPort,standardHost)
         @connectionManager.addConnectionProvider @standardConnectionProvider

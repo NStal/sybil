@@ -20,11 +20,13 @@ exports.exist = (pid)->
     catch e
         # if permission denied then some one must be running there (in usual case)
         return e.code is 'EPERM'
-exports.background = ()->
+exports.background = (callback = ()->true)->
     if process.stdin and process.stdin.isTTY
+        callback(true)
         exports.restart()
         process.exit(0)
     else
+        callback(false)
         return
 exports.ensureDeath = (pid)->
     # try my best to kill the process
