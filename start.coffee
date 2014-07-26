@@ -16,10 +16,12 @@ catch e
     console.error "panic"
     process.exit(1)
 
-logger.useColor = settings.logWithColor
-# setup log redirections if log path is defined
 if process.argv[2] is "debug"
     settings.debug = true
+    
+logger.useColor = settings.logWithColor
+logger.root = settings.root
+# setup log redirections if log path is defined
 try
     process.chdir __dirname
 catch
@@ -33,10 +35,11 @@ if fs.existsSync(pidPath)
         pm.ensureDeath(pid)
 
 # ensure it's running in background ( or suicide and respawn)
-if not settings.debug
-    pm.background (aboutToDie)->
-        if aboutToDie
-            console.log "folk to background"
+if not settings.debug and process.stdin and process.stdin.isTTY
+    console.log "fork to background"
+    if pidPath and fs.existsSync pidPath
+        fs.unlinkSync pidPath
+    pm.background()
 
 if settings.logPath and not settings.debug 
     logStream = fs.createWriteStream(settings.logPath,{flags:"a"});

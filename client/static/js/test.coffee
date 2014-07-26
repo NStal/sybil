@@ -26,8 +26,12 @@ App = require "app"
 #
 #App.on "connect",()->
 #    App.settingPanel.test()
-#App.on "structureReady",()->
-#            
+App.on "connect",()->
+    setTimeout (()->
+        App.addSourcePopup.show()
+        App.addSourcePopup.UI.input.value = "http://bitinn.net/"
+        App.addSourcePopup.onClickSubmit()
+    ),100
 #    
 #    setTimeout (()->
 #        App.viewSwitcher.switchTo "p2p view"

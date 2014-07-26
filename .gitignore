@@ -2,6 +2,7 @@
 ./rsa.key
 *key
 ./settings.user.json
+./settings.user.json.backup
 ./settings/*
 client/node-webkit
 node_modules
@@ -11,8 +12,7 @@ pid
 backup/*
 todo.org
 \#*
-
-
 *pem
 releaseUtil
 *.log
+db/*

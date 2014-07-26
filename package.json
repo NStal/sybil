@@ -26,12 +26,18 @@
     "cookie": "~0.1.0",
     "safe-file-writer": "0.0.0",
     "eventex": "0.0.0",
-    "proxy-agent": "~1.1.0",
+    "proxy-agent": "*",
     "extend": "~1.2.1",
-    "agent-base": "~1.0.1",
+    "agent-base": "*",
     "debug": "~0.8.1",
     "commander": "~2.2.0",
-    "lru-cache": "~2.5.0"
+    "lru-cache": "~2.5.0",
+    "create-error": "~0.3.1",
+    "error-doc": "*",
+    "cheerio": "~0.17.0",
+    "tough-cookie": "~0.12.1",
+    "underscore": "~1.6.0",
+    "lodash": "~2.4.1"
   },
   "devDependencies": {
     "coffee-script": "~1.6.3",

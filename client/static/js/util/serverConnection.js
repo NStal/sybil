@@ -32,7 +32,7 @@
         };
       })(this);
       this.websocket.onerror = (function(_this) {
-        return function() {
+        return function(err) {
           return _this.close();
         };
       })(this);

@@ -2,21 +2,30 @@ mongodb = require "mongodb"
 EventEmitter = (require "events").EventEmitter
 async = require "async"
 ObjectID = (require "mongodb").ObjectID
+ErrorDoc = require("error-doc")
 config = require("../settings.coffee")
-dbServer = new mongodb.Server config.dbHost,config.dbPort,config.dbOption
-collectionNames = ["archive","source","workspace","clientConfig","p2pNode","shareRecord","collectorConfig","friend"]
-
-console = require("../common/logger.coffee").create("Database")
-dbConnector = new mongodb.Db(config.dbName,dbServer,{safe:false})
+console = global.env.logger.create(__filename)
 module.exports = new EventEmitter()
 exports = module.exports
-module.exports.isReady = false
-Collections = {}
-module.exports.Collections = Collections
-toBase64 = (string)->
-    return new Buffer(string).toString("base64")
+
+Errors = ErrorDoc.create()
+    .define "Duplication"
+    .define "NotReady"
+    .define "NotFound"
+    .define "InvalidParameter"
+    .generate()
+exports.Errors = Errors
 toMD5 = (string)->
     return (require "crypto").createHash("md5").update(new Buffer(string)).digest("hex")
+
+Collections = {}
+collectionNames = ["archive","source","workspace","clientConfig","p2pNode","shareRecord","collectorConfig","friend"]
+module.exports.isReady = false
+module.exports.Collections = Collections
+
+dbServer = new mongodb.Server config.dbHost,config.dbPort,config.dbOption
+dbConnector = new mongodb.Db(config.dbName,dbServer,{safe:false})
+
     
 exports.init = (callback)->
     dbConnector.open (err,db)->
@@ -59,19 +68,19 @@ exports.ready = (callback)->
         exports.once "ready",callback
 exports.registerCollection = (collectionNames,callback)->
     if not exports.isReady
-        callback "not ready"
+        callback new Errors.NotReady()
         return
 
 exports.saveArchive = (archive,callback)->
     if not archive.guid
-        callback "archive need a guid"
+        callback new Errors.NotFound()
         return
     archive._id = toMD5(archive.guid)
     archive.hasRead = false
     Collections.archive.insert archive,{safe:true},(err,item)->
         if err
             if err.code is 11000
-                callback "duplicate"
+                callback new Errors.Duplication()
             else
                 callback err
             return
@@ -80,17 +89,25 @@ exports.saveArchive = (archive,callback)->
                 callback null,item
         else
             callback null,item
+exports.updateSource = (source,callback = ()-> )->
+    Collections.source.findAndModify {guid:source.guid},{},{$set:source},{safe:true},(err,doc)->
+        if err
+            callback err
+            return
+        callback err,doc
     
 exports.saveSource = (source,callback)->
     source._id = toMD5 source.guid
     Collections.source.insert source,{safe:true},(err,item)->
         if err
             if err.code is 11000
-                callback "duplicate"
+                callback new Errors.Duplication
             else
                 callback err
             return
-        callback null,item[0]
+        exports.updateUnreadCount {guid:source.guid},()->
+            Collections.source.findOne {guid:source.guid},(err,source)->
+                callback err,source
 exports.removeSource = (guid,callback)->
     Collections.source.remove {guid:guid},{safe:true},(err,item)->
         callback err,item
@@ -100,7 +117,7 @@ exports.removeTagFromSource = (guid,tagName,callback)->
             callback err
             return
         if not item
-            callback "not found"
+            callback new Errors.NotFound()
             return
         callback null,item
 exports.addTagToSource = (guid,tagName,callback)->
@@ -109,16 +126,16 @@ exports.addTagToSource = (guid,tagName,callback)->
             callback err
             return
         if not item
-            callback "not found"
+            callback new Errors.NotFound()
             return
         callback null,item
 exports.getSource = (guid,callback)->
     Collections.source.findOne {guid:guid},(err,item)->
         if err 
-            callback "db error"
+            callback new Errors.NotFound()
             return
         if not item
-            callback "not found"
+            callback new Errors.NotFound()
             return
         callback null,item
 exports.getSources = (callback)->
@@ -183,13 +200,13 @@ exports.getTagArchives = (name,callback)->
                 return
             callback null,arr
             return
-exports.updateUnreadCount = (query,callback)->
+exports.updateUnreadCount = (query = {},callback)->
     cursor = Collections.source.find(query)
     cursor.toArray (err,arr)->
         if err
             callback err
             return
-        (require "async").eachSeries arr,((source,done)->
+        (require "async").each arr,((source,done)->
             Collections.archive.find({sourceGuid:source.guid,hasRead:false}).count (err,count)->
                 
                 Collections.source.update {_id:source._id},{$set:{unreadCount:count}},{safe:true},(err)->
@@ -225,7 +242,7 @@ exports.markArchiveAsRead = (guid,callback)->
             callback err
             return
         if not archive
-            callback "read archive not found"
+            callback new Errors.NotFound "read archive not found"
             return
         Collections.source.update {guid:archive.sourceGuid},{$inc:{unreadCount:-1}},{safe:true},(err)->
             callback null,archive
@@ -242,20 +259,20 @@ exports.markArchiveAsUnread = (guid,callback)->
             callback err
             return
         if not archive
-            callback "unread archive not found"
+            callback new Errors.NotFound "unread archive not found"
             return
         Collections.source.update {guid:archive.sourceGuid},{$inc:{unreadCount:1}},{safe:true},(err,source)->
             callback null,archive
 exports.moveArchiveToList = (guid,listName,callback)->
     if not guid
-        callback "move archive to list need a guid"
+        callback new Errors.InvalidParameter "move archive to list need a guid"
         return
     Collections.archive.findAndModify {guid:guid},{},{$set:{listName:listName}},{safe:true},(err,archive)=>
         if err
             callback err
             return
         if not archive
-            callback "archive not found"
+            callback new Errors.InvalidParameter "archive not found"
             return
         console.log "modifed in db",guid
         exports._ensureList ()=>
@@ -313,12 +330,12 @@ exports._ensureList = (callback)->
         callback()
 exports.createList = (listName,callback)->
     if not listName
-        callback "invalid list name"
+        callback new Errors.InvalidParameter "invalid list name"
         return
     exports._ensureList ()=>
         for list in @archiveList
             if list.name is listName
-                callback "already exists"
+                callback new Errors.Duplication()
                 return
         list = {name:listName,count:0}
         @archiveList.push list
@@ -326,7 +343,7 @@ exports.createList = (listName,callback)->
         callback null,list
 exports.removeList = (listName,callback)->
     if not listName
-        callback "invalid listname"
+        callback new Errors.InvalidParameter "invalid listname"
         return
     exports._ensureList ()=>
         find = @archiveList.some (list,index)->
@@ -337,7 +354,7 @@ exports.removeList = (listName,callback)->
                 return true
             return false 
         if not find
-            callback "not found"
+            callback new Errors.NotFound()
             return
 
 exports.readLaterArchive = (guid,callback)->
@@ -346,7 +363,7 @@ exports.readLaterArchive = (guid,callback)->
             callback err
             return
         if not item
-            callback "unread later item not found"
+            callback new Errors.NotFound "unread later item not found"
             return
         callback null,item
 exports.unreadLaterArchive = (guid,callback)->
@@ -355,7 +372,7 @@ exports.unreadLaterArchive = (guid,callback)->
             callback err
             return
         if not item
-            callback "read later item not found"
+            callback new Errors.NotFound "read later item not found"
             return
         callback null,item
 exports.getReadLaterArchives = (callback)->
@@ -412,7 +429,7 @@ exports.getCustomArchives = (query,callback)->
         keywords = []
         for word in query.keywords
             if typeof word isnt "string"
-                callback "invalid keyword parameter"
+                callback new Errors.InvalidParameter "invalid keyword parameter"
                 return
             keywords.push new RegExp(word,"i")
         finalQuery.content = {$all: keywords}
@@ -452,7 +469,7 @@ exports.saveConfig = (name,config,callback)->
 exports.saveP2pNode = (node,callback = ()->true)->
     node = new P2pNode(node)
     if not node.check()
-        callback "invalid p2pnode"
+        callback new Errors.InvalidParameter "invalid p2pnode"
         return
     Collections.p2pNode.update {hash:node.hash},node.toJSON(),{upsert:true,safe:true},(err)->
         callback err,node
@@ -473,7 +490,7 @@ exports.addShareRecord = (record = {},callback)->
             Collections.shareRecord.update {keyHash:keyHash,originalLink:originalLink},record,{upsert:true,safe:true},(err)->
                 callback err
         else
-            callback "exists"
+            callback new Errors.Duplication
 exports.getShareRecordsByHash = (hash,callback)->
     cursor = Collections.shareRecord.find {hash:hash}
     cursor.toArray (err,array)->

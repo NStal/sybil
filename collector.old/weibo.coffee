@@ -1,22 +1,21 @@
 Collector = require("./collector.coffee")
 EventEmitter = (require "events").EventEmitter
 request = require("request")
-
+wc = require "node-weibo-crawler"
+createError = require "create-error"
+WeiboAuthorizer = wc.MobileWebAuthorizer
 class WeiboAccount extends EventEmitter
     constructor:(@data)->
         super()
-        @code = @data.code
-        @accessToken = @data.accessToken
-
-        if not @code
-            throw new Error "Invalid Account"
-        if not @accessToken
-            throw new Error "Invalid Access Token"
-        @code = @data.code
-    toJSON:()->
-        return {
-            @code
-        }
+        @username = @data.username
+        @secret = @data.secret
+        @authorizer = new WeiboAuthorizer()
+    authorize:(callback)->
+        @authorizer.auth @username,@secret
+        @authorizer.once "login",()->
+            callback null
+        @authorizer.once "error",(err)->
+            callback err
     
 # will fetch the weibo images or something like that
 class WeiboArchive extends Collector.Archive
@@ -29,16 +28,19 @@ class WeiboArchive extends Collector.Archive
         @collectorName = "weibo"
         @createDate = new Date(data.created_at)
         @fetchDate = new Date()
+        data.user = data.user or {}
         @authorName = data.user and data.user.name
         @authorAvatar = data.user.profile_image_url
         @authorLink = data.user.domain and "http://weibo.com/"+data.user.domain
         @sourceName = "weibo"
-        @sourceUrl = "http://weibo.com"
-        @content = data.text or ""
+        @sourceUrl = "http://weibo.com/"
+        @content = @composeWeiboContent data
         @contentType = "text"
         @attachments = []
         if data.original_pic
             @attachments.push {type:"image",format:"url",value:data.original_pic}
+    composeWeiboContent:(data)->
+        return data.text or ""
     load:(callback)->
         # maybe create original link latter
         # http://open.weibo.com/qa/index.php?qa=11914&qa_1=%E6%80%8E%E6%A0%B7%E5%87%91%E6%8B%BC%E5%BE%AE%E5%8D%9A%E5%9C%B0%E5%9D%80-%E4%BE%8B%E5%A6%82http-weibo-com-1776646097-zi4crzp2r

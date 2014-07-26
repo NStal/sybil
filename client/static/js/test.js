@@ -4,4 +4,12 @@
 
   App = require("app");
 
+  App.on("connect", function() {
+    return setTimeout((function() {
+      App.addSourcePopup.show();
+      App.addSourcePopup.UI.input.value = "http://bitinn.net/";
+      return App.addSourcePopup.onClickSubmit();
+    }), 100);
+  });
+
 }).call(this);

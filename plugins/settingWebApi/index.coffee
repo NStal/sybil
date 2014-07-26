@@ -6,7 +6,7 @@ exports.register = (deps,done)->
         console.error "here"
         mc.registerApi "getSettings",(_,callback)->
             result = {}
-            for group in sybil.settingManager.settingGroup
+            for group in sybil.pluginSettingManager.settingGroup
                 info = {}
                 length = 0
                 for name of group.entrys
@@ -21,7 +21,7 @@ exports.register = (deps,done)->
             settingName = data.setting
             entryName = data.entry
             value = data.value
-            found = sybil.settingManager.settingGroup.some (setting)->
+            found = pluginSettingManager.settingGroup.some (setting)->
                 if setting.name is settingName
                     try
                         validation = setting.validate entryName,value
@@ -38,7 +38,7 @@ exports.register = (deps,done)->
             settingName = data.setting
             entryName = data.entry
             value = data.value
-            found = sybil.settingManager.settingGroup.some (setting)->
+            found = pluginSettingManager.settingGroup.some (setting)->
                 if setting.name is settingName
                     try
                         setting.set entryName,value

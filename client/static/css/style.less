@@ -782,31 +782,8 @@ html *{
             color:white;
         }
     }
-    .terminal{
-        word-wrap:break-word;
-        box-shadow:inset 0 0 3px 0 rgba(0,0,0,0.5);
-        background-color:rgba(0,0,0,0.5);
-        padding:10px;
-        .box-sizing;
-        overflow:auto;
-        width:100%;
-        height:100%;
-        &>span{
-            opacity:0.8;
-        }
-        .terminal-error{
-            color:red;
-        }
-        .terminal-normal{
-            color:white;
-        }
-        .terminal-warn{
-            color:yellow;
-        }
-        .terminal-ok{
-            color:green;
-        }
-    }
+    
+
 }
 
 .popup{
@@ -1268,5 +1245,64 @@ html *{
     }
     &.active img.light{
         .animation(blink 4s infinite);
+    }
+}                    
+.terminal{
+    
+    position:absolute;
+    bottom:20px;
+    right:20px;
+    max-width:300px;
+    .box-sizing;
+    width:30%;
+    color:@color-font-normal-white;
+    background-color:@color-dark-bg;
+    .title{
+        text-align:center;
+        padding:10px;
+    }
+    .detail{
+        background-color:#303030;
+        padding:10px;
+        box-shadow:inset 0 0 8px 0 #222;
+    }
+    .choice{
+        .flex-row;
+        .flex-wrap;
+        justify-content:space-around;
+        button{
+            width:100px;
+            border:none;
+            background:white;
+            margin:15px;
+            padding:5px 5px;
+        }
+    }
+    &>div{
+        display:none;
+    }
+    &.accepter .accepter
+    ,&.authenticator .authenticator
+    ,&.hinter .hinter{
+        display:block;
+    }
+    .authenticator,accepter{
+        input,button{
+            display:block;
+        }
+        p{
+           margin:5% auto;
+           width:90%;
+           display:block;
+           line-height:20px;
+        }
+        input{
+            width:90%;
+            margin:16px auto;
+            padding:8px 8px;
+            border:none;
+        }
+        button{
+        }
     }
 }

@@ -1,6 +1,8 @@
 #!/bin/bash
+filename=$1
 time=`date "+%Y-%m-%d-%Hhour-%Mmin-%Ssec"`
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+[ -z $filename ] && filename=$time.tar.gz
 backupPathBase=$path/../../backup
 backupPathTemp=$backupPathBase/temp
 echo $backupPath
@@ -16,5 +18,5 @@ mongodump --host $dbHost --port $dbPort --db $db --out $backupPathTemp
 cp $path/../../settings.user.json $backupPathTemp/
 cp $path/../../rsa.key $backupPathTemp/
 pushd $backupPathBase
-tar -zcvf $time.tar.gz --directory=./temp .
+tar -zcvf $filename  --directory=./temp .
 popd

@@ -17,7 +17,7 @@ class ConnectionManager extends Leaf.EventEmitter
             wsProtocol = "wss:"
         else
             wsProtocol = "ws:"
-
+        console.debug "connect at","#{wsProtocol}//#{window.location.hostname}:#{window.location.port}#{window.location.pathname}"
         @connection.connect("#{wsProtocol}//#{window.location.hostname}:#{window.location.port}#{window.location.pathname}")
 
 module.exports = ConnectionManager

@@ -47,7 +47,7 @@ class PluginCenter extends EventEmitter
         name = plugin.name
         module = plugin.module
         console.debug "prepare setting for module #{name}"
-        settings = @sybil.settingManager.createSettings(name)
+        settings = @sybil.pluginSettingManager.createSettings(name)
         defines = module.settings or {}
         for prop of defines
             if not defines[prop]
