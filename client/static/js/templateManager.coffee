@@ -1,7 +1,7 @@
 tm = new Leaf.TemplateManager()
 App = require "app"
 module.exports = tm
-if window.location.toString().indexOf("?debug")>0
+if window.location.toString().indexOf("?debug") > 0
     tm.enableCache = false
 else
     tm.enableCache = true
@@ -44,3 +44,4 @@ tm.use "archive-list"
         ,"source-detail"
         ,"int-entry"
         ,"string-entry"
+        ,"subscribe-adapter-terminal"

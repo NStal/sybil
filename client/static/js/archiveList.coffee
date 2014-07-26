@@ -46,10 +46,10 @@ class ArchiveList extends Leaf.Widget
         @archiveInfo = info
         query = {}
         query.sourceGuids = info.sourceGuids
-        @_createArchiveLoader(query);
+        @_createArchiveLoader(query)
         @UI.emptyHint$.hide()
         @UI.loadingHint$.hide()
-        @archiveListItems.length = 0;
+        @archiveListItems.length = 0
         @render()
         @more()
     _createArchiveLoader:(query)=>

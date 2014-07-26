@@ -85,7 +85,7 @@
       } else if (obj.__mc_type === "date") {
         return new Date(obj.value);
       } else if (obj.__mc_type === "stream") {
-        return new ReadableStream(option.owner);
+        return new ReadableStream(option.owner, obj.id);
       } else {
         _ = {};
         for (prop in obj) {
@@ -456,11 +456,10 @@
   ReadableStream = (function(_super) {
     __extends(ReadableStream, _super);
 
-    ReadableStream.id = 1000;
-
-    function ReadableStream(messageCenter) {
+    function ReadableStream(messageCenter, id) {
       this.messageCenter = messageCenter;
-      this.id = ReadableStream.id++;
+      this.id = id;
+      ReadableStream.__super__.constructor.call(this);
       this.messageCenter.addStream(this);
     }
 
@@ -484,6 +483,7 @@
 
     function WritableStream(messageCenter) {
       this.messageCenter = messageCenter;
+      WritableStream.__super__.constructor.call(this);
       this.buffers = [];
       this.index = 0;
       this.id = WritableStream.id++;

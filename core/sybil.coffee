@@ -1,44 +1,61 @@
 # this is the entry of sybil
-console = require("../common/logger.coffee").create("Core")
+console = require("../common/logger.coffee").create(__filename)
+fs = require("fs")
+global.env = global.env || {}
+global.env.logger = require "../common/logger.coffee"
+global.env.settings = require "../settings.coffee"
+global.env.httpUtil = require "../common/httpUtil.coffee"
+
+CollectorController = require "./collectorController.coffee"
+Collector = require "../collector/collector.coffee"
 class Sybil extends (require "events").EventEmitter
     Database = require("./db.coffee")
     constructor:()->
-        Collector = require "../collector/collector.coffee"
-        @collectorClub = new Collector.CollectorClub()
+        @collector = new Collector()
+        @collectorController = new CollectorController(@collector)
         @pluginCenter = new (require "./pluginCenter.coffee").PluginCenter(this)
-        @settingManager = new (require("./settingManager.coffee")).SettingManager()
+        @pluginSettingManager = new (require("./settingManager.coffee")).SettingManager()
         @archiveProcessQueue = (require "async").queue(@handleArchive.bind(this),1)
-        @initTasks = new (require "node-tasks")("dbInit","collectorInit")
-    init:()->
-        # 1.load global settings
-        # 2.init database connection
-        # 3.init collectors
-        # 4.init plugins (won't check)
-        @settings = require("../settings.coffee")
-        settingPath = @settings.pluginSettingsPath or require("path").join(__dirname,"../settings/")
-        @settingManager.setDefaultSettingFolder settingPath
-        fs = require("fs")
-        if not fs.existsSync(settingPath)
-            fs.mkdirSync(settingPath)
-        @collectorClub.on "archive",(archive)=>
-            #console.log "archive",archive.guid
+        @collectorController.on "archive",(archive)=>
             @archiveProcessQueue.push archive
-        @collectorClub.once "ready",()=>
-            @initTasks.done("collectorInit")
+        @collectorController.on "subscribe",(source)=>
+            console.log "subscribe source",source
+            @emit "source",source
+    init:()->
+        
+        @initTasks = new (require "node-tasks")("init/db","init/collector","init/plugins")
+        # some dirty works here
+        # 1. load global settings
+        # 2. init database connection
+        # 3. init collectors
+        # 4. init plugins (won't check)
+        # and 
+        # 5. listen events.
+        
+        # 1.
+        @settings = global.env.settings
+        
+        @pluginSettingManager.setDefaultSettingFolder @settings.pluginSettingsPath
+        if not fs.existsSync(@settings.pluginSettingsPath)
+            fs.mkdirSync(settings.pluginSettingsPath)
+        # 2.
         Database.init()
         Database.ready ()=>
-            @initTasks.done("dbInit")
-            # now collectors rely on db model
-            collectors = @settings.collectors
-            for name in collectors
-                @collectorClub.addAndStart(name)
+            @initTasks.done("init/db")
+            @emit "database/ready"
+            # 3.
+            @collectorController.initCollector ()=>
+                @initTasks.done "init/collector"
+            # 4.
+            @pluginCenter.loadPlugins @settings.plugins or ["webApi"],(err)=>
+                @initTasks.done "init/plugins"
         @initTasks.on "done",()=>
             @emit "init"
-            @pluginCenter.loadPlugins @settings.plugins or ["webApi"],(err)=>
-                @isReady = true
-                @emit "ready"
+            @isReady = true
+            @emit "ready"
             
-    # here comes all the sybil apis
+        # 5. listen events
+    # here comes all the sybil common read write apis
     handleArchive:(archive,done)->
         # make sure it's not a nested object
         # ... OK may not enough
@@ -52,18 +69,19 @@ class Sybil extends (require "events").EventEmitter
                 ),1000
             return false
         Database.saveArchive archive,(err,saved)=> 
-            if err and err isnt "duplicate"
+            if err and not (err instanceof Database.Errors.Duplication)
                 console.error "db error",err,"fail to save archive",archive.guid
                 done()
                 return
-            else if err and err is "duplicate"
+            else if err and err instanceof Database.Errors.Duplication
                 #console.debug "duplicated"
                 done()
                 return
             console.debug "new archive",archive.title
             @emit "archive",archive
             done()
-    # though this functions perform just like
+            
+    # though most of these functions perform just like
     # interact with db directly
     # but will make some difference in the future
     getConfig:(name,callback)->
@@ -134,7 +152,10 @@ class Sybil extends (require "events").EventEmitter
     markArchiveAsUnread:(guid,callback)->
         Database.markArchiveAsUnread guid,(err,archive)=>
             callback err,archive
-            @emit "unread",{guid:guid,sourceGuid:archive.sourceGuid}
+            if err
+                console.error err
+            if not err and archive
+                @emit "unread",{guid:guid,sourceGuid:archive.sourceGuid}
     addTagToSource:(guid,tag,callback)->
         Database.addTagToSource guid,tag,(err,item)->
             callback err,item
@@ -175,32 +196,6 @@ class Sybil extends (require "events").EventEmitter
         Database.getCustomArchives query,(err,archives)=>
             @completeArchivesMeta archives,(err,archives)=>
                 callback err,archives
-    subscribe:(source,callback)->
-        @collectorClub.subscribe source.uri,source.name,(err,source)=>
-            if err and err isnt "duplicated"
-                callback err
-                return
-            if source
-                source = source.toJSON()
-                Database.saveSource source,(err,_)=>
-                    if err
-                        callback err
-                        return
-                    Database.updateUnreadCount {guid:source.guid},(err)=>
-                        Database.getSource source.guid,(err,source)=>
-                            callback err,source
-                            @emit "source",source
-            else
-                callback "programmer error"
-    unsubscribe:(guid,callback)->
-        @collectorClub.unsubscribe guid,(err)=>
-            Database.removeSource guid,callback
-    getCustomWorkspaces:(callback)->
-        Database.getCustomWorkspaces (err,workspaces)->
-            callback err,workspaces
-    saveCustomWorkspace:(name,data,callback)->
-        Database.saveCustomWorkspace name,data,(err)->
-            callback err
     completeArchivesMeta:(archives,callback)->
         links = archives.map (archive)->archive.originalLink
         Database.getShareRecordsByLinks links,(err,records)->
@@ -262,41 +257,7 @@ class Sybil extends (require "events").EventEmitter
 
 sybil = new Sybil()
 sybil.init()
-sybil.on "init",()->
-    Database = require "./db.coffee"
-    Database.updateUnreadCount {},(err)->
-        if err
-            console.error err
-            return
-        console.log "sync unread count"
-        # sync db and collectors
-        sources = sybil.collectorClub.getSources()
-        Database.getSources (err,dbSources)=>
-            console.log "sync db with collectors"
-            if err
-                throw err
-            (require "async").each dbSources,((dbSource,done)=>
-                for source in sources 
-                    if source.guid is dbSource.guid
-                        done()
-                        return
-                console.log "add missing source #{dbSource.guid}"
-                sybil.collectorClub.subscribe dbSource.uri,dbSource.collectorName,(err)=>
-                    if err
-                        console.log "fail to sync source",dbSource
-                    console.log "force sync source",dbSource.name
-                    done()
-                ),(err)=>
-                    console.log "sybil is repaired"
-                    sybil.emit "repair"
-        
-#    sybil.subscribe {uri:"http://revlonpc.blog.fc2.com/?xml",name:"rss"},(err,hints)=>
-#        if err and err isnt "duplicated"
-#            console.error err
-#            return
-#        if err and err is "duplicated"
-#            console.error "duplicated"
-#        console.log hints
+
 process.title = "sybil"
 process.on "uncaughtException",(err)->
     console.error err
@@ -307,3 +268,6 @@ process.on "uncaughtException",(err)->
         console.error "exit"
         process.exit(1)
 module.exports = sybil
+
+
+

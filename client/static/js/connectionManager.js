@@ -41,6 +41,7 @@
       } else {
         wsProtocol = "ws:";
       }
+      console.debug("connect at", "" + wsProtocol + "//" + window.location.hostname + ":" + window.location.port + window.location.pathname);
       return this.connection.connect("" + wsProtocol + "//" + window.location.hostname + ":" + window.location.port + window.location.pathname);
     };
 

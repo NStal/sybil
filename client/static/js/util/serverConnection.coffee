@@ -14,7 +14,7 @@ class ServerConnection extends Leaf.EventEmitter
             @emit "ready"
         @websocket.onclose = ()=>
             @close() 
-        @websocket.onerror = ()=>
+        @websocket.onerror = (err)=>
             @close()
             
         @websocket.onmessage = (message)=>

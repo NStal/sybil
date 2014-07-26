@@ -1622,6 +1622,11 @@
           }
         };
       })(this));
+      this.__defineGetter__("Data", (function(_this) {
+        return function() {
+          return _this.renderData;
+        };
+      })(this));
       this.__defineSetter__("renderData", (function(_this) {
         return function(value) {
           if (_this.renderDataModel) {
@@ -1831,7 +1836,6 @@
       var all, caches, remain, remainTemplates, tid, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
       if (this.enableCache) {
         caches = this._fromCacheAll();
-        console.debug("from cache", caches);
         _ref = this.tids;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           tid = _ref[_i];
@@ -1973,7 +1977,7 @@
             }
             if (this.readyState === 4) {
               this.done = true;
-              if ((_ref = this.status) === 200 || _ref === 302 || _ref === 304) {
+              if (!this.status || ((_ref = this.status) === 200 || _ref === 302 || _ref === 304)) {
                 return callback(null, this.tid, this.responseText);
               } else {
                 return callback(this.status, this.tid, null);

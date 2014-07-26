@@ -9,8 +9,9 @@ exports.restart = ()->
     args.unshift scriptPath
     intepreter = process.argv[0]
     child_process.spawn intepreter,args,{env:process.env,detached:true,cwd:process.cwd(),stdio:["ignore",1,2]}
+#    setTimeout (()->
+#        process.exit(0)),0
     process.exit(0)
-
 exports.stop = (code)->
     process.exit(code or 0)
 
@@ -20,14 +21,8 @@ exports.exist = (pid)->
     catch e
         # if permission denied then some one must be running there (in usual case)
         return e.code is 'EPERM'
-exports.background = (callback = ()->true)->
-    if process.stdin and process.stdin.isTTY
-        callback(true)
-        exports.restart()
-        process.exit(0)
-    else
-        callback(false)
-        return
+exports.background = ()->
+    exports.restart()
 exports.ensureDeath = (pid)->
     # try my best to kill the process
     try

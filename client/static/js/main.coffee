@@ -13,6 +13,7 @@ ListView = require "listView"
 SearchView = require "searchView"
 OfflineHinter = require "offlineHinter"
 SettingPanel = require "settingPanel"
+HintStack = require "hintStack"
 App = require("./app")
 
 
@@ -56,6 +57,7 @@ App.init = ()->
     App.sourceView = new SourceView()
     App.listView = new ListView()
     App.searchView = new SearchView()
+    App.hintStack = new HintStack()
 #    App.p2pView = new P2pView()
 #    App.offlineHinter = new OfflineHinter()
 

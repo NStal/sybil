@@ -1,7 +1,7 @@
 requireUpdate = false;
 context = new LeafRequire({root:"./js/"})
 context.debug = true
-context.enableCache = true
+context.enableCache = false
 context.version = "0.0.3"
 if context.version isnt context.getLastVersion()
     console.debug "version update from",context.getLastVersion(),"to",context.version
@@ -46,9 +46,12 @@ context.use "userConfig.js"
     ,"archiveDisplayer.js"
     ,"listView.js"
     ,"searchView.js"
-    ,"offlineHinter.js" 
+    ,"offlineHinter.js"
     ,"settingPanel.js"
     ,"enhancement.js"
+    ,"subscribe/assistant.js"
+    ,"subscribe/adapterTerminal.js"
+    ,"hintStack.js"
 # datas
 context.use "model.js"
     ,"modelSyncManager.js"
@@ -56,6 +59,7 @@ context.use "model.js"
 
 # tests
 context.use "test.js"
+
 context.load ()->
     console.log "loaded"
     App = context.require("app")

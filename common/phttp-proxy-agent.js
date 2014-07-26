@@ -20,26 +20,24 @@ var debug = require('debug')('http-proxy-agent');
  * Module exports.
  */
 
-module.exports = HttpProxyAgent;
+module.exports = PHttpProxyAgent;
 
 /**
- * The `HttpProxyAgent` implements an HTTP Agent subclass that connects to the
+ * The `PHttpProxyAgent` implements an PHTTP Agent subclass that connects to the
  * specified "HTTP proxy server" in order to proxy HTTP requests.
  *
  * @api public
  */
-function HttpProxyAgent (opts) {
-  if (!(this instanceof HttpProxyAgent)) return new HttpProxyAgent(opts);
+function PHttpProxyAgent (opts,rawUrl) {
+  if (!(this instanceof PHttpProxyAgent)) return new PHttpProxyAgent(opts,rawUrl);
   if ('string' == typeof opts) opts = url.parse(opts);
   if (!opts) throw new Error('an HTTP(S) proxy server `host` and `port` must be specified!');
-  debug('creating new HttpProxyAgent instance: %j', opts);
+  debug('creating new PHttpProxyAgent instance: %j', opts);
   Agent.call(this, connect);
-
   var proxy = extend({}, opts);
 
   // if `true`, then connect to the proxy server over TLS. defaults to `false`.
   this.secureProxy = proxy.protocol ? /^https:?$/i.test(proxy.protocol) : false;
-
   // prefer `hostname` over `host`, and set the `port` if needed
   proxy.host = proxy.hostname || proxy.host;
   proxy.port = +proxy.port || (this.secureProxy ? 443 : 80);
@@ -51,10 +49,10 @@ function HttpProxyAgent (opts) {
     delete proxy.path;
     delete proxy.pathname;
   }
-
+    this.rawUrl = rawUrl
   this.proxy = proxy;
 }
-inherits(HttpProxyAgent, Agent);
+inherits(PHttpProxyAgent, Agent);
 
 /**
  * Default options for the "connect" opts object.
@@ -72,13 +70,13 @@ function connect (req, _opts, fn) {
 
   var proxy = this.proxy;
   var secureProxy = this.secureProxy;
-
+    
   // these `opts` are the connect options to connect to the destination endpoint
   var opts = extend({}, defaults, _opts);
-
   // change the `http.ClientRequest` instance's "path" field
   // to the absolute path of the URL that will be requested
   var parsed = url.parse(req.path);
+    
   if (null == parsed.protocol) parsed.protocol = 'http:';
   if (null == parsed.hostname) parsed.hostname = opts.hostname || opts.host;
   if (null == parsed.port) parsed.port = opts.port;
@@ -87,10 +85,11 @@ function connect (req, _opts, fn) {
     // ":80" portion is not on the produced URL
     delete parsed.port;
   }
+    
   var absolute = url.format(parsed);
   // NStal: we use header to pass path in phttp
   req.path = "/";
-  req.setHeader("real-path",new Buffer(absolute).toString("base64"));
+  req.setHeader("real-path",new Buffer(this.rawUrl).toString("base64"));
   // inject the `Proxy-Authorization` header if necessary
 //  var auth = proxy.auth;
 //  if (auth) {

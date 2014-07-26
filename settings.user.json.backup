@@ -1,0 +1,18 @@
+{
+    "dbName":"sybil",
+    "debug":false,
+    "webApiHost":"localhost",
+    "webApiPort":3006,
+    "nickname":"NStal",
+    "email":"nstalmail@gmail.com",
+    "hubServerHost":"sybil.nstal.me",
+    "dbPort":"27017",
+    "hubServerPort":57612,
+    "processTitle":"sybil",
+    "safeGatewayUsername":"wuminghan",
+    "safeGatewayPassword":"P@ssw0rd",
+    "proxies":[
+        "http://localhost:7072/"
+        ,"phttp://nstal.me:12222/"
+    ]
+}

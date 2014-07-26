@@ -255,7 +255,7 @@ class SourceList extends Leaf.Widget
                 if err
                     callback err
                     return
-                @buildFolderData @folderStore.get "folders"
+                @buildFolderData @folderStore.get("folders") or []
             return
         Model.SourceFolder.loadFolderStore (err,store)=>
             if err

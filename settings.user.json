@@ -1,5 +1,5 @@
 {
-    "dbName":"sybil",
+    "dbName":"sybil-weibo",
     "debug":false,
     "webApiHost":"localhost",
     "webApiPort":3006,

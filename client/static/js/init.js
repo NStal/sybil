@@ -10,7 +10,7 @@
 
   context.debug = true;
 
-  context.enableCache = true;
+  context.enableCache = false;
 
   context.version = "0.0.3";
 
@@ -37,7 +37,7 @@
 
   context.use("view.js", "widget/contextMenu.js", "widget/popup.js");
 
-  context.use("userConfig.js", "persistentDataStore.js", "addSourcePopup.js", "sourceView.js", "sourceList.js", "archiveList.js", "sourceDetail.js", "archiveDisplayer.js", "listView.js", "searchView.js", "offlineHinter.js", "settingPanel.js", "enhancement.js");
+  context.use("userConfig.js", "persistentDataStore.js", "addSourcePopup.js", "sourceView.js", "sourceList.js", "archiveList.js", "sourceDetail.js", "archiveDisplayer.js", "listView.js", "searchView.js", "offlineHinter.js", "settingPanel.js", "enhancement.js", "subscribe/assistant.js", "subscribe/adapterTerminal.js", "hintStack.js");
 
   context.use("model.js", "modelSyncManager.js", "i18n.js");
 

@@ -3,6 +3,9 @@ module.exports = {
     dbName:"dbName"
     dbHost:"localhost"
     dbPort:"12309"
+    dbPath:"./db"
+    dbPidPath:"./db/mongod.pid"
+    dbLogPath:"./db/mongod.log"
     dbOption:{}
     collectors:["rss","#pageWatcher"]
     proxies:[]
@@ -20,7 +23,7 @@ module.exports = {
     ]
     get:(name)->
        return dynamic[name] or null
-    nickname:"moe moe Q"
+    nickname:"anonymous"
     email:""
     webApiHost:"localhost"
     safeGatewayIp:"auto"
@@ -36,6 +39,7 @@ module.exports = {
     logWithColor:false
     p2pSharePullInterval:5 * 60 * 1000
     pluginSettingsPath:require("path").join(__dirname,"./settings/")
+    root:__dirname
 }
 
 dynamic = {}

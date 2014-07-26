@@ -63,7 +63,7 @@ class MessageCenter extends EventEmitter
         else if obj.__mc_type is "date"
             return new Date(obj.value)
         else if obj.__mc_type is "stream"
-            return new ReadableStream(option.owner)
+            return new ReadableStream(option.owner,obj.id)
         else
             _ = {}
             for prop of obj
@@ -288,9 +288,8 @@ class MessageCenter extends EventEmitter
 class ReadableStream extends EventEmitter
     # maybe some better id implementation with smaller size
     # and less posibility to conflict between reconnect/reconstruction
-    @id = 1000
-    constructor:(@messageCenter)->
-        @id = ReadableStream.id++
+    constructor:(@messageCenter,@id)->
+        super()
         @messageCenter.addStream(this)
     close:()->
         if @isClose
@@ -301,6 +300,7 @@ class ReadableStream extends EventEmitter
 class WritableStream extends EventEmitter
     @id = 1000
     constructor:(@messageCenter)->
+        super()
         @buffers = []
         @index = 0
         @id = WritableStream.id++

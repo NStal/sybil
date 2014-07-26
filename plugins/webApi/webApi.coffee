@@ -26,12 +26,16 @@ class WebApiServer extends EventEmitter
         @setupHttpServer()
         @setupWebsocketApi()
         @sybil.on "archive",@pushArchive.bind this
-        @sybil.on "source",@pushSource.bind this
         @sybil.on "readLater",@pushReadLater.bind this
         @sybil.on "unreadLater",@pushUnreadLater.bind this
         @sybil.on "archive/listChange",@pushListChange.bind this
         @sybil.on "friend/add",@pushFriendAdd.bind this
         @sybil.on "friend/remove",@pushFriendRemove.bind this
+        cc = @sybil.collectorController
+        cc.on "candidate/requireAuth",@genPush "candidate/requireAuth" 
+        cc.on "candidate/requirePinCode",@genPush "candidate/requirePinCode"
+        cc.on "candidate/fail",@genPush "candidate/fail"
+        cc.on "subscribe",@genPush "source"
         @messageCenters = []
     createMessageCenter:()->
         mc = new MessageCenter()
@@ -230,12 +234,12 @@ class WebApiServer extends EventEmitter
                     err = "server error"
                 callback err,available
         messageCenter.registerApi "unsubscribe",(guid,callback)=>
-            @sybil.unsubscribe guid,(err)->
+            @sybil.collectorController.unsubscribe  guid,(err)->
                 callback err
-        messageCenter.registerApi "subscribe",(source,callback)=>
-            console.log source
-            @sybil.subscribe source,(err,available)->
-                callback err,available
+#        messageCenter.registerApi "subscribe",(source,callback)=>
+#            console.log source
+#            @sybil.subscribe source,(err,available)->
+#                callback err,available
         messageCenter.registerApi "search",(query,callback)=>
             input = query.input
             count = query.count or 100
@@ -341,7 +345,25 @@ class WebApiServer extends EventEmitter
                 return
             @sybil.setSourceDescription data.guid,data.description or null,(err)=>
                 callback err
+        messageCenter.registerApi "detectStream",(uri,callback)=>
+            stream = @sybil.collectorController.detectStream(uri)
+            resultStream = messageCenter.createStream()
+            stream.on "data",(data)->
+                console.debug "message stream with data",data
+                resultStream.write data
+            stream.on "end",()->
+                console.debug "message stream with end"
+                resultStream.end()
+            callback null,resultStream
+        messageCenter.registerApi "authCandidate",(data={},callback)=>
+            @sybil.collectorController.authCandidate data.cid,data.username,data.secret,callback
+        messageCenter.registerApi "setCandidatePinCode",(data={},callback)=>
+            @sybil.collectorController.authCandidate data.cid,data.pinCode,callback
 
+        messageCenter.registerApi "acceptCandidate",(cid,callback)=>
+            @sybil.collectorController.acceptCandidate cid,callback
+        messageCenter.registerApi "declineCandidate",(cid,callback)=>
+            @sybil.collectorController.declineCandidate cid,callback
     pushReadLater:(archive)->
         @boardCastEvent "readLater",archive
     pushUnreadLater:(archive)->
@@ -357,10 +379,17 @@ class WebApiServer extends EventEmitter
         @boardCastEvent "friend/add",friend
     pushFriendRemove:(friend)->
         @boardCastEvent "friend/remove",friend
+    pushCandidate:(candidate)->
+        @boardCastEvent "candidate",candidate
+    genPush:(name)->
+        return (data)=>
+            @boardCastEvent name,data
     boardCastEvent:(name,info)->
         for mc in @messageCenters
             try
                 mc.fireEvent(name,info)
             catch e
+                console.error e
+                console.trace()
                 console.error "fail to fire event"
 exports.WebApiServer = WebApiServer

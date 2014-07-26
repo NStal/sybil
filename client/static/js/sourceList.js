@@ -427,7 +427,7 @@
               callback(err);
               return;
             }
-            return _this.buildFolderData(_this.folderStore.get("folders"));
+            return _this.buildFolderData(_this.folderStore.get("folders") || []);
           };
         })(this));
         return;

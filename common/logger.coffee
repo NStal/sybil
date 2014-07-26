@@ -1,6 +1,7 @@
 # a dirty module to dump
 logPath = "./log"
 moment = require "moment"
+pathModule = require "path"
 file = null
 exports.setLogPath = (name)->
     logPath = name
@@ -10,6 +11,7 @@ exports.setLogPath = (name)->
     process.stderr.pipe(file)
 exports.useColor = false
 exports.create = (name)->
+    name = name.replace(exports.root or "","")
     return new Console(name)
 # format should be
 # 2013-09-03 19:32:40 [module-name] LOG:information [EOL]
@@ -18,6 +20,8 @@ class Console
         @assert = console.assert.bind(console)
         @time = console.time.bind(console)
         @timeEnd = console.timeEnd.bind(console)
+        @trace = console.trace.bind(console)
+        @origin = console
     log:(args...)->
         args.unshift(moment(new Date()).format("YYYY-MM-DD hh:mm:ss"),"LOG:[#{@name}]")
         args.push "[EOL]"

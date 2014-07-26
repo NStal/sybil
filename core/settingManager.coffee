@@ -1,6 +1,6 @@
 EventEmitter = require("events").EventEmitter
 pathModule = require("path")
-SafeFileWriter = require("safe-file-writer");
+SafeFileWriter = require("safe-file-writer")
 
 # Sybil only has one SettingManager
 # Every plugin can has it's own Settings or access globalsettings
@@ -34,7 +34,6 @@ class Settings extends EventEmitter
         if not @path
             throw new Error "can restore without setPath() first"
         @writer = new SafeFileWriter(@path)
-        console.log "inside trial"
         @writer.restore (err,content)=>
             if err
                 console.error "fail to restore settings"
