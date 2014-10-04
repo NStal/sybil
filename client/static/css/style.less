@@ -109,69 +109,7 @@ html *{
     width:30%;
     height:100%;
 }
-.archive-list{
-    .box-sizing;
-    height:100%;
-    overflow:hidden;
-    .flex;
-    .loading-hint{
-        display:none;
-    }
-    .empty-hint{
-	text-align:center;
-	padding:50px;
-	.box-sizing;
-        color:#777;
-    }
-    .place-holder{
-	height:70%;
-    }
-    .container-wrapper{
-        width:100%;
-        height:100%;
-        overflow:auto;
-        .container{
-	    width:100%;
-        }
-    }
-    &.preview-mode{
-        .archive-list-item > *{
-            display:none;
-        }
-        .archive-list-item .header{
-            display:block
-        }
-        .archive-list-item .title{
-            pointer-events:none;
-        }
-        .archive-list-item.collapse .title{
-            pointer-events:auto;
-        }
-        .archive-list-item.collapse > *{
-            display:block;
-        }
-    }
-    .archive-list-item{
-	width:100%;
-	.box-sizing;
-	padding:20px 80px 15px;
-	border-bottom:1px solid @clear-grey;
-        box-shadow:inset 4px 0 0 0 #3BE;
-        .archive;
-        .mark-as-unread:before{
-            text-shadow:1px 1px #eee;
-        }
-        &.read{
-            box-shadow:none;
-        }
-        .header .mark-as-unread:hover{
-            color:@comfortable-black;
-        }
-        &.lock-read .mark-as-unread{
-            color:@comfortable-black;
-        }
-    }
-}
+@import "./widget/archive-list.less";
 @color-font-normal-white:#d9d9d9;
 @color-dark-bg:#404040;
 @color-dark-bg-shadow:#3a3a3a;
@@ -229,6 +167,21 @@ html *{
             overflow-y:auto;
             
         }
+        .source-list-item,.source-list-folder{
+            &.no-update{
+                &>.name{
+                    color:#888;
+                }
+                &>.unread-counter{
+                    display:none;
+                }
+            }
+            &.many-update{
+                &>.title>.unread-counter,&>.unread-counter{
+                    display:none;
+                }
+            }
+        }
         .item{
             .box-sizing;
             @item-height:28px; 
@@ -243,6 +196,24 @@ html *{
             .name:hover{
                 color:white;
                 
+            }
+            .error-hint{
+                display:none;
+                background-color:green;
+                position:absolute;
+                left:2px;
+                top:2px;
+                width:4px;
+                height:4px;
+                border-radius:10px;
+                &.error{
+                    display:block;
+                    background-color:red;
+                }
+                &.warn{
+                    display:block;
+                    background-color:orange;
+                }
             }
             .title{
                 overflow:hidden;
@@ -270,7 +241,7 @@ html *{
 		text-overflow:ellipsis;
 		white-space:nowrap;
                 display:block;
-                max-width:70%;
+                max-width:65%;
                 overflow:hidden;
                 
             }
@@ -406,6 +377,7 @@ html *{
                 .clickable;
             }
             .info{
+                display:none;
                 font-size:16px;
                 color:#888;
                 width:100%;
@@ -420,6 +392,7 @@ html *{
             .preview{
                 .readable;
                 font-size:16px;
+                color:#888;
             }
             border-bottom:1px solid @color-dark-bg-shadow;
             box-shadow:0px 1px @color-dark-bg-light;
@@ -429,6 +402,8 @@ html *{
         }
         .loading-hint{
             display:none;
+            margin:50px auto;
+            width:220px;
         }
         .no-more-hint{
             text-align:center;
@@ -508,6 +483,16 @@ html *{
         min-width:300px;
         max-width:450px;
         overflow:auto;
+        .loading-hint{
+            color:#bbb;
+            width:50%;
+            margin:20px auto;
+            .box .face{
+                box-shadow: inset 0 0 0.3px 1px  rgba(255, 255, 255, 0.1);
+                background: rgba(255,255,255,0.03);
+                border: 0.5px solid #eee;
+            }
+        }
         .list-view-archive-list-item{
             position:relative;
             width:100%;
@@ -539,12 +524,6 @@ html *{
                 overflow:hidden;
             }
             .bar{
-                &>span{
-                    padding:0 4px;
-                }
-                &>span:before{
-                    text-shadow:1px 0 #222;
-                }
                 .action{
                     &:hover{
                         color:@hint-color;
@@ -977,10 +956,9 @@ html *{
     }
 }
 
-.loading-hint {
+cube-loading-hint{
     .perspective(2000px);
-    margin:50px auto;
-    width:220px;
+    display:block;
     @size:20px;
     .text{
         display:block;
@@ -1096,12 +1074,22 @@ html *{
         }
     }
     .readable;
+    .source-type{
+        padding:2px 4px;
+        border-radius:2px;
+        background-color:#999;
+        margin-right:3px;
+        color:#444;
+    }
     .item-content{
         padding-left:20px;
     }
     .description-editor{
         width:100%;
         min-height:100px;
+        textarea{
+            display:block;
+        }
     }
     textarea{
         width:80%;
@@ -1247,16 +1235,39 @@ html *{
         .animation(blink 4s infinite);
     }
 }                    
-.terminal{
-    
-    position:absolute;
-    bottom:20px;
-    right:20px;
-    max-width:300px;
-    .box-sizing;
-    width:30%;
-    color:@color-font-normal-white;
-    background-color:@color-dark-bg;
+
+@import "./widget/hint-stack.less";
+.source-authorize-terminal{
+    .hint-stack-item;
+    .title{
+        text-align:center;
+        padding:10px;
+    }
+    .detail{
+        background-color:#303030;
+        padding:10px;
+        box-shadow:inset 0 0 8px 0 #222;
+    }
+    .hinter{
+        padding:5px;
+        background-color:#333;
+                    
+    }
+    .choice{
+        .flex-row;
+        .flex-wrap;
+        justify-content:space-around;
+        button{
+            width:100px;
+            border:none;
+            background:white;
+            margin:15px;
+            padding:5px 5px;
+        }
+    }
+}
+.subscribe-terminal{
+    .hint-stack-item;
     .title{
         text-align:center;
         padding:10px;
@@ -1302,7 +1313,9 @@ html *{
             padding:8px 8px;
             border:none;
         }
-        button{
-        }
     }
+}
+.subscribe-assistant{
+    .hint-stack-item;
+    padding:10px;
 }

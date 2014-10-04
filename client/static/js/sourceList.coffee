@@ -61,7 +61,6 @@ class SourceListFolder extends SourceListItemBase
         else
             throw new Error "invalid source list folder parameter"
         @model.defaults {collapse:true,children:[]}
-        @use @model
         
         # setup list and children
         @children = Leaf.Widget.makeList @UI.container
@@ -138,6 +137,14 @@ class SourceListFolder extends SourceListItemBase
         (unreadCount += child.source.unreadCount or 0 for child in @children)
         @renderData.name = @model.name
         @renderData.unreadCount = unreadCount
+        
+        style = "no-update"
+        if parseInt(unreadCount) > 0
+            style = "has-update"
+        if parseInt(unreadCount) >= 20
+            style = "many-update"
+        @renderData.statusStyle = style
+        console.debug style,"!!!"
         if not @model.collapse
             @renderData.collapseClass = ""
             @renderData.iconClass = "fa-folder"
@@ -187,7 +194,6 @@ class SourceListItem extends SourceListItemBase
         super App.templates["source-list-item"]
         if source not instanceof Model.Source
             throw new Error "invalid source"
-        @use source
         @source = source
         @node.oncontextmenu = (e)=>
             e.preventDefault()
@@ -212,32 +218,47 @@ class SourceListItem extends SourceListItemBase
         @renderData.name = @source.name
         @renderData.guid = @source.guid
         @renderData.unreadCount = (parseInt(@source.unreadCount) >= 0) and parseInt(@source.unreadCount).toString() or "?"
+        
+        style = "no-update"
+        if parseInt(@source.unreadCount) > 0
+            style = "has-update"
+        if parseInt(@source.unreadCount) >= 20
+            style = "many-update"
+        @renderData.statusStyle = style
         # only rerender the image when src changed
         # it just works for now, but may broken in future
         # don't change the src if it's loaded
-        if @iconLoaded
-            return
-        url = "//www.google.com/s2/favicons?domain=#{@source.uri}&alt=feed"
-        @renderData.sourceIcon = url
-        @UI.sourceIcon.onerror = ()->
-            this.src = "/image/favicon-default.png"
-        self = this
-        @UI.sourceIcon.onload = ()->
-            this.style.display = "inline"
-            self.iconLoaded = true
+        @renderData.state = "ok"
+        if @source.lastError
+            @renderData.state = "warn"
+        if @source.requireLocalAuth
+            @renderData.state = "error" 
+        if not @iconLoaded
+            url = "//www.google.com/s2/favicons?domain=#{@source.uri}&alt=feed"
+            @renderData.sourceIcon = url
+            @UI.sourceIcon.onerror = ()->
+                this.src = "/image/favicon-default.png"
+            self = this
+            @UI.sourceIcon.onload = ()->
+                this.style.display = "inline"
+                self.iconLoaded = true
     onClickNode:(e)->
-        e.preventDefault()
+        e.capture()
         @select()
     remove:()->
         @emit "remove",this
     select:()->
+        if @source.requireLocalAuth
+            SourceAuthorizeTerminal = require("sourceUtil/sourceAuthorizeTerminal")
+            if @source.authorizeTerminal
+                @source.authorizeTerminal.hide()
+            @source.authorizeTerminal = new SourceAuthorizeTerminal(@source)
         @emit "select",this
     destroy:()->
         # parent please remove me! I'm about to destroy!
         @emit "remove"
-        super()
     toJSON:()->
-        json = @source.toJSON({filter:["name","guid","uri","type"]})
+        json = @source.toJSON({fields:["name","guid","uri","type"]})
         json.type = "source"
         return json
 class SourceList extends Leaf.Widget
@@ -256,6 +277,7 @@ class SourceList extends Leaf.Widget
                     callback err
                     return
                 @buildFolderData @folderStore.get("folders") or []
+                callback()
             return
         Model.SourceFolder.loadFolderStore (err,store)=>
             if err
@@ -272,7 +294,8 @@ class SourceList extends Leaf.Widget
             if source instanceof Model.Source
                 return source
             else
-                return new Model.Source(source)
+                return Model.Source.sources.findOne({guid:source.guid})
+        folderModel.children = folderModel.children.filter (item)->item
         folder = new SourceListFolder(folderModel)
         guids = folder.children.map (item)->item.source.guid
         index = 0
@@ -375,7 +398,6 @@ class SourceList extends Leaf.Widget
             folders = (child.toJSON() for child in @children)
             if Leaf.Util.compare folders,@currentFolderData
                 console.debug "no need to save"
-                console.debug folders,@currentFolderData,"~~"
                 return
             console.debug "save folders",folders,JSON.stringify(folders).length
             if @folderStore
@@ -445,6 +467,7 @@ class SourceListDragController extends Leaf.EventEmitter
             @dragContext.addContext item.UI.title
     # apply what getMovePosition returns
     move:(from,to,event)->
+        console.debug "moveing at",from,to,event 
         move = @getMovePosition(from,to,event)
         if move.position is "inside"
             if @hintFolder
@@ -536,7 +559,8 @@ class SourceListDragController extends Leaf.EventEmitter
 # do the initial load at first connection
 class SourceListInitializer extends Leaf.EventEmitter
     constructor:(@list)->
-        App.initialLoad ()=>
+        super()
+        App.afterInitialLoad ()=>
             @loadSources ()=>
                 @loadFolder()
     loadSources:(callback = ()->true )->
@@ -545,12 +569,14 @@ class SourceListInitializer extends Leaf.EventEmitter
                 @list.mergeSource source
             callback()
     loadFolder:()->
-        @list.loadFolder()
+        @list.loadFolder ()=>
+            @emit "done"
 
 # handle server pushed events
 class SourceListSyncManager extends Leaf.EventEmitter
     constructor:(@list)->
-        App.initialLoad ()=>
+        super()
+        App.afterInitialLoad ()=>
             # new source: add to list if not exists
             App.modelSyncManager.on "source",(sourceModel)=>
                 @list.mergeSource sourceModel,true

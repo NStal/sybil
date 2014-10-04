@@ -22,13 +22,29 @@ class AllSourceCollection extends Leaf.Collection
                 setTimeout (()->done()),0
             ),(err)=>
                 callback null
-                
 class Source extends Model
     @sources = new AllSourceCollection()
+    fields:[
+        "name"
+        ,"guid"
+        ,"unreadCount"
+        ,"tags"
+        ,"uri"
+        ,"collectorName"
+        ,"description"
+        ,"totalArchive"
+        ,"statistic"
+        ,"type"
+        ,"lastError"
+        ,"lastErrorDescription"
+        ,"requireLocalAuth"
+        ,"requirePinCode"
+        ,"lastUpdate"
+        ,"lastFetch"
+        ,"nextFetchInterval"]
     constructor:(data)->
         super()
-        @declare ["name","guid","unreadCount","tags","uri","collectorName","description"
-            ,"totalArchive","statistic","type"]
+        @declare 
         @data = data or {}
         @data.type = "source"
         return Source.sources.add this
@@ -57,7 +73,9 @@ class Source extends Model
             console.log "unsubscribed #{@name} #{@guid}"
             @destroy()
             callback()
-        
+    destroy:()->
+        @emit "destroy"
+        @isDestroyed = true
     rename:(name,callback = ()->true)->
         @preset "name",name
         App.messageCenter.invoke "renameSource",{guid:@guid,name:name},(err)=>
@@ -66,6 +84,15 @@ class Source extends Model
             else
                 @confirm()
             callback err
+    forceUpdate:(callback)-> 
+        App.messageCenter.invoke "forceUpdateSource",@guid,(err)=>
+            if err
+                callback err
+                return
+            App.messageCenter.invoke "getSource",@guid,(err,source)=>
+                console.debug "update source to hehe ",source
+                @sets source
+                callback(null)
     describe:(description,callback = ()->true)->
         @preset "description",description
         App.messageCenter.invoke "setSourceDescription",{guid:@guid,description:description},(err)=>

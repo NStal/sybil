@@ -1,0 +1,9 @@
+* sourceList
+** loading a normal rss should works
+** loading a weibo account should works
+** loading a twitter account should works
+** laoding a twitter list should works
+** should be able to create a folder
+** should be able to drag/drop around
+** should be able to drop in/out of folders
+** drop behavior should be saved after reload

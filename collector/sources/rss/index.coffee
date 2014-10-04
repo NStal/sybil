@@ -7,8 +7,7 @@ console = global.env.logger.create(__filename)
 #Errors = errorDoc.create()
 #    .inherit rssUtil.Errors
 #    .generate()
-#exports.Errors =Errors
-
+#exports.Errors = Errors
 
 class RSS extends Source
     @detectStream = (uri)->
@@ -18,13 +17,11 @@ class RSS extends Source
         @detectAsHTML uri,(err,result)=>
             result = result or []
             result.forEach (item)->
-                console.debug "emit data!"
                 stream.emit "data",item
             tasks.done "checkAsHTML"
         @detectAsRss uri,(err,result)=>
             if result
                 stream.emit "data",result
-                console.debug "emit data2!"
             tasks.done "checkAsRss"
         tasks.once "done",()=>
             stream.emit "end"
@@ -38,14 +35,15 @@ class RSS extends Source
                 return new RSS {uri:link}
             callback null,result
     @detectAsRss = (uri,callback)->
-        rssUtil.fetchRss uri,(err,info)->
+        rssUtil.fetchRss {uri:uri,noQueue:true},(err,info)->
             if err
                 callback err
                 return
             source = new RSS {uri:uri}
             source.initializer.setInitializeInfo(info)
             callback null,source
-        
+    @create = (info)->
+        return new RSS(info)
     constructor:(info)->
         super(info)
         @type = "rss"
@@ -58,10 +56,12 @@ class Updater extends Source::Updater
     constructor:(@source)->
         super(@source)
     fetchAttempt:()->
-        console.debug "try fetching #{@source.guid} at #{@nextFetchInterval}"
-        rssUtil.fetchRss @source.uri,(err = null,info = {})=>
-            @fetchError = err
-            @rawFetchedArchives = info.archive or []
+        console.debug "try fetching rss: #{@source.guid} at #{@nextFetchInterval}"
+        rssUtil.fetchRss {uri:@source.uri},(err = null,info = {})=>
+            if err
+                @error new Source.Errors.NetworkError("fail to fetch archive for #{@source.guid}")
+                return
+            @rawFetchedArchives = info.archives or []
             @setState "fetchAttempted"
     parseRawArchive:(raw)->
         if not raw.guid and not raw.link and not raw.title
@@ -88,14 +88,11 @@ class Initializer extends Source::Initializer
         super(@source)
         @initialized = @source.guid?
     atInitializing:()->
-        rssUtil.fetchRss @source.uri,(err,info)=>
+        rssUtil.fetchRss {uri:@source.uri},(err,info)=>
             if err
-                @initialized = false
-                @setState "failed"
+                @error new Source.Errors.NetworkError("fail to fetch initialize info for rss #{@source.uri}")
                 return
             @setInitializeInfo info
-    atFailed:()->
-        @emit "fail"
     setInitializeInfo:(info)->
         @source.name = info.name
         @source.guid = "rss_"+@source.uri

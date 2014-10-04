@@ -8,10 +8,10 @@ console = env.logger.create(__filename)
 cheerio = require "cheerio"
 proxy = global.env.settings.get "proxy"
 Errors = errorDoc.create()
-    .inherit httpUtil.Errors
-    .define "InvalidRssFormat"
-    .define "InvalidURL"
-    .define "InvalidEncoding"
+    .inherit(httpUtil.Errors)
+    .define("InvalidRssFormat")
+    .define("InvalidURL")
+    .define("InvalidEncoding")
     .generate()
 exports.Errors =Errors
 
@@ -21,9 +21,9 @@ exports.detectRssEntry = (url,callback)->
         callback new Errors.InvalidURL("#{url} is not a valid url")
         return
     timeout = 30 * 1000
-    httpUtil.httpGet {url:url,timeout:timeout},(err,res,body)=>
+    httpUtil.httpGet {url:url,timeout:timeout,noQueue:true},(err,res,body)=>
         if err
-            httpUtil.httpGet {url:url,timeout:timeout},(err,res,body)=>
+            httpUtil.httpGet {url:url,timeout:timeout,proxy:proxy,noQueue:true},(err,res,body)=>
                 if err
                     callback err
                     return
@@ -49,21 +49,21 @@ exports.detectRssEntry = (url,callback)->
             return
         callback null,links
 
-exports.fetchRss = (url,callback)->
-    urlObject = urlModule.parse url
+exports.fetchRss = (option,callback)->
+    urlObject = urlModule.parse option.uri
     useProxy = null
     useEncoding = null
-    timeout = 30 * 1000
+    timeout = 60 * 1000
     if urlObject.protocol not in ["http:","https:","feed:"]
         callback new Errors.InvalidURL("unsupport prototcol #{urlObject.protocol}")
         return
-    httpUtil.httpGet {url:url,timeout:timeout},(err,res,body)=>
+    httpUtil.httpGet {url:option.uri,timeout:timeout,noQueue:option.noQueue},(err,res,body)=>
         if err
-            console.debug "direct check fail #{url} #{JSON.stringify(err)} now through proxy #{proxy}"
+            console.debug "direct check fail #{option.uri} #{JSON.stringify(err)} now through proxy #{proxy}"
             err = null
-            httpUtil.httpGet {url:url,timeout:timeout},(err,res,body)=>
+            httpUtil.httpGet {url:option.uri,timeout:timeout,proxy:proxy,noQueue:option.noQueue},(err,res,body)=>
                 if err
-                    console.debug "check fail #{url} through proxy #{proxy}"
+                    console.debug "check fail #{option.uri} through proxy #{proxy}"
                     callback err
                     return
                 useProxy = proxy
@@ -110,7 +110,7 @@ exports.fetchRss = (url,callback)->
             try 
                 data = (new Iconv(useEncoding,"utf-8//TRANSLIT//IGNORE")).convert(bodyBuffer)
             catch e
-                console.error e,"at",url
+                console.error e,"at",option.uri
                 console.error "fail to decode with with #{useEncoding}"
                 callback(new Errors.InvalidEncoding("fail to decode using #{useEncoding}"))
                 return
@@ -126,7 +126,7 @@ exports.fetchRss = (url,callback)->
                 archives.push(data)
             return
         parser.on "error",(err)=>
-            console.error "parse error",err,"at",url
+            console.error "parse error",err,"at",option.uri
             callback(new Errors.InvalidRssFormat("parse error",{via:err}))
         parser.on "end",()=>
             result = {
@@ -135,7 +135,7 @@ exports.fetchRss = (url,callback)->
                 ,encoding:useEncoding
                 ,name:meta.title
                 ,description:meta.description
-                ,url:url
+                ,url:option.uri
             }
             callback(null,result)
         parser.write(data)

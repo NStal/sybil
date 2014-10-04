@@ -14,7 +14,7 @@ class SubscribeTester
         mc = @inf.messageCenter
         mc.on "source",(source)=>
             @serverEvent.emit "subscribe/#{source.uri}"
-        mc.invoke "detectStream","http://bitinn.net",(err,stream)=>
+        mc.invoke "detectStream","http://bitinn.net/",(err,stream)=>
             if err
                 throw err
                 return

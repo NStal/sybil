@@ -1,16 +1,16 @@
 App = require "/app"
-class SubscribeAdapterTerminal extends Leaf.Widget
+HintStack = require "/hintStack"
+class SubscribeAdapterTerminal extends HintStack.HintStackItem
     constructor:(candidate)->
         super App.templates["subscribe-adapter-terminal"]
         console.debug candidate,"from termional"
-        document.body.appendChild @node
-        App.hintStack.push this
         @candidate = candidate
         @Data.mode = "accepter"
         @register()
         @Data.subscribeHint = @candidate.subscribeHint or "Would you like to subscribe #{@candidate.uri}"
         if @candidate.needAuth
             @requireAuth()
+        @show()
     register:()->
         console.debug "register #{@candidate.cid}"
         App.messageCenter.listenBy this,"event/candidate/requireAuth",@handlePossibleCandidateAuth
@@ -40,7 +40,8 @@ class SubscribeAdapterTerminal extends Leaf.Widget
         if e.which is Leaf.Key.enter
             @onClickAuthorize()
     onClickAccept:()->
-        @accept()
+        @accept ()=>
+            @hint "Waiting..."
     onClickDecline:()->
         @decline ()=>
             @hide()
@@ -55,10 +56,6 @@ class SubscribeAdapterTerminal extends Leaf.Widget
     hint:(word)->
         @Data.mode = "hinter"
         @Data.hint = word
-    hide:()->
-        @emit "hide",this
-#        if @node.parentElement
-#            @node.parentElement.removeChild @node
     release:()->
         App.messageCenter.stopListenBy this
     auth:(username,secret,callback = ()->)->
@@ -73,4 +70,6 @@ class SubscribeAdapterTerminal extends Leaf.Widget
     decline:(callback = ()->)->
         App.messageCenter.invoke "declineCandidate",@candidate.cid,(err)=>
             callback(err)
+    error:(error)->
+        return
 module.exports = SubscribeAdapterTerminal

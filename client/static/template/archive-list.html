@@ -9,42 +9,14 @@
       </div>
     </div>
   </div>
-  <!--div class="info">
-    <div class="wrapper">
-      <div class="action">
-        <span class="action-button" data-id="fullMode">full outout</span>
-        <span class="action-button" data-id="sortBySybil">sort by sybil</span>
-        <span class="action-button" data-id="sortByDate">sort by date</span>
-      </div>
-      <div class="detail">
-        <span class="current-archive-title" data-id="currentArchiveTitle"></span>
-      </div>
-    </div>
-  </div-->
   <div class="container-wrapper" data-id="containerWrapper">
+    
+    <widget data-widget="archiveListController"></widget>
     <div class="container" data-id="container">
     </div>
     <div class="place-holder">
-      <div class="loading-hint" data-id="loadingHint">
-        <div class="box" id="box">
-          <div class="face face-left">
-          </div>
-          <div class="face face-right">
-          </div>
-          <div class="face face-top">
-          </div>
-          <div class="face face-bottom">
-          </div>
-          <div class="face face-front">
-          </div>
-          <div class="face face-back">
-          </div>
-        </div>
-        <div class="text">
-          
-          Loading more archives
-        </div>
-      </div>
+      <cube-loading-hint data-id="loadingHint" class="loading-hint" hint="Loading more archives"></cube-loading-hint>
+
       <div class="empty-hint" data-id="emptyHint">
         No unread items
       </div>

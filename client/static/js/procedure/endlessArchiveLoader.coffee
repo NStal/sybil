@@ -43,6 +43,4 @@ class EndlessArchiveLoader extends Leaf.EventEmitter
                 @emit "noMore"
                 @noMore = true
             callback null,archives
-    destroy:()->
-        super()
 module.exports = EndlessArchiveLoader;

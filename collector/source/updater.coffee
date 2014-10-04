@@ -15,30 +15,27 @@ class Updater extends States
         super()
         @setState "void"
         @nextFetchInterval = @source.info.nextFetchInterval or 1
-        @maxFetchInterval = 1000 * 60 * 60 * 12
-        @minFetchInterval = 2#1000 * 60
+        @maxFetchInterval = @maxFetchInterval or 1000 * 60 * 60 * 12
+        @minFetchInterval = @minFetchInterval or 1000 * 30
         @lastFetchedArchiveGuids = []
         @rawFetchedArchives = []
-
-        # see @atWait method for detail explaination
-        lastFetch = (@source.info.lastFetch or new Date).getTime()
+#        @nextFetchInterval = Math.min(Math.max(@minFetchInterval,@nextFetchInterval),@maxFetchInterval)
+         # see @atWait method for detail explaination
+        @lastFetch = (@source.info.lastFetch or new Date)
+        if @lastFetch.getTime
+            @lastFetch = @lastFetch.getTime()
         now = Date.now()
-        @leftInterval = @nextFetchInterval - (now - lastFetch)
-        if @leftInterval <= 0
-            @leftInterval = 1
-    later:(factor)->
-        @nextFetchInterval = @nextFetchInterval * (factor or 1.4)
-        @nextFetchInterval = Math.min(@nextFetchInterval,@maxFetchInterval)
-        @nextFetchInterval = Math.max(@nextFetchInterval,@minFetchInterval)
-    sooner:(factor)->
-        @nextFetchInterval = @nextFetchInterval / (factor or 1.4)
-        @nextFetchInterval = Math.max(@nextFetchInterval,@minFetchInterval)
-        @nextFetchInterval = Math.min(@nextFetchInterval,@maxFetchInterval)
+        console.debug @nextFetchInterval,now,@lastFetch,now-@lastFetch
+        @leftInterval = @nextFetchInterval - (now - @lastFetch)
         
-    resetInterval:()->
-        @nextFetchInterval = 0
-    wait:()->
-        @setState "wait"
+        if @leftInterval <= 0
+            console.debug "left interval too small: #{@leftInterval}. set to 1"
+            @leftInterval = 1
+        console.log @leftInterval,@nextFetchInterval,"updater interval"
+        @standBy()
+    standBy:()->
+        @waitFor "startSignal",()=>
+            @start()
     start:()->
         if @state is not "void"
             console.error "can't start when not at void"
@@ -49,6 +46,19 @@ class Updater extends States
                 @emit "archive",@parseRawArchive raw
             @prefetchArchiveBuffer = []
         @setState "wait"
+
+    later:(factor)->
+        @nextFetchInterval = @nextFetchInterval * (factor or 1.4)
+        @nextFetchInterval = Math.min(@nextFetchInterval,@maxFetchInterval)
+        @nextFetchInterval = Math.max(@nextFetchInterval,@minFetchInterval)
+        console.debug "delay #{@source.guid} to #{@nextFetchInterval}"
+    sooner:(factor)->
+        @nextFetchInterval = @nextFetchInterval / (factor or 1.4)
+        @nextFetchInterval = Math.max(@nextFetchInterval,@minFetchInterval)
+        @nextFetchInterval = Math.min(@nextFetchInterval,@maxFetchInterval)
+        console.debug "shift #{@source.guid} to #{@nextFetchInterval} ealier"
+    resetInterval:()->
+        @nextFetchInterval = 0
     stop:()->
         @isStopped = true
     requireAuth:()->
@@ -65,50 +75,48 @@ class Updater extends States
         # so we should use s temperory @leftInterval = 1200ms at first update
         # if in the same situation we restart at +4000ms then we should start
         # update immediately. so the leftInterval will be 1
-        @nextTimer = setTimeout @fetchAttempt.bind(this),@leftInterval or @nextFetchInterval
+        clearTimeout @nextTimer
+        console.debug "updater #{@source.guid} waiting at #{@leftInterval or @nextFetchInterval}"
+        @nextTimer = setTimeout (()=>
+            @setState "fetching"
+        ),(@leftInterval or @nextFetchInterval)
         if @leftInterval
-            console.debug "Ajdust start at left interval,#{@leftInterval}"
+            console.debug "#{@source.guid} adjust start at left interval,#{@leftInterval}"
         @leftInterval = null
+    atFetching:()->
+        @lastFetch = new Date()
+        @fetchAttempt()
     fetchAttempt:()->
         @setState "fetchAttempted"
     parseRawArchive:(raw)->
         return raw
     atFetchAttempted:()->
-        @lastFetch = new Date()
-        if not @fetchError
-            guids = []
-            hasUpdate = false
-            @rawFetchedArchives.forEach (raw)=>
-                try
-                    archive = @parseRawArchive raw
-                catch e
-                    console.error "fail to parse archive",archive
-                    console.error e
-                    @emit "exception",e
-                    return
-                guids.push archive.guid
-                if archive.guid not in @lastFetchedArchiveGuids
-                    @emit "archive",archive
-                    hasUpdate = true
-            @rawFetchedArchives = []
-            @lastFetchedArchiveGuids = guids
-            if hasUpdate
-                @emit "update"
-                @sooner()
-            else
-                @later()
-            @emit "modify"
-            @wait()
-            return
+        guids = []
+        hasUpdate = false
+        @rawFetchedArchives.forEach (raw)=>
+            try
+                archive = @parseRawArchive raw
+            catch e
+                @error new Errors.ParseError("fail to parse archive",{raw:raw})
+                return
+            guids.push archive.guid
+            if archive.guid not in @lastFetchedArchiveGuids
+                @emit "archive",archive
+                # probably has update
+                # but I don't restore the last guids before the shutdown.
+                # so it may not actually has update if it's the first fetch.
+                # since it's not abig problem I will leave it there
+                hasUpdate = true
+        @rawFetchedArchives = []
+        @lastFetchedArchiveGuids = guids
         
-        @emit "exception",@fetchError
-        if @fetchError instanceof Errors.PermissionDenied
-            @requireAuth()
-        else 
+        if hasUpdate
+            @emit "update"
+            @sooner()
+        else
             @later()
-            @wait()
+        @emit "fetch"
         @emit "modify"
+        @setState "wait"
         return
-        
 module.exports = Updater
-        

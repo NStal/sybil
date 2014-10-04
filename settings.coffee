@@ -18,7 +18,7 @@ module.exports = {
         "safeGateway"
         "settingWebApi"
         "#externalProxy"      # as a reverse proxy to allow remote access
-        "#runtimeShell"
+        "runtimeShell"
         
     ]
     get:(name)->

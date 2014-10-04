@@ -37,10 +37,12 @@ class ArchiveDisplayer extends Leaf.Widget
             @UI.like$.addClass("active")
         else
             @UI.like$.removeClass("active")
-        if @archive.listName is "read later"
+        maybeList = App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
+        @UI.readLater$.text maybeList
+        if @archive.listName is maybeList
             @UI.readLater$.addClass("active")
         else
-            @UI.readLater$.removeClass("active")
+            @UI.readLater$.removeClass("active") 
         if @archive.listName
             @renderData.listText = "list (#{@archive.listName})"
         else
@@ -104,12 +106,15 @@ class ArchiveDisplayer extends Leaf.Widget
             @archive.markAsUnshare (err)=>
                 @render()
     onClickReadLater:()->
-        if @archive.listName isnt "read later"
-            @archive.readLaterArchive (err)=>
+        # the read later button now has a different feature
+        # we may choose a default list for a source as a read later list
+        maybeList = App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
+        if @archive.listName isnt maybeList
+            @archive.changeList maybeList,(err)=>
                 if err then console.error err
                 @render()
         else
-            @archive.unreadLaterArchive (err)=>
+            @archive.changeList null,(err)=>
                 if err then console.error err
                 @render()
     onClickLike:()->
@@ -126,8 +131,10 @@ class ArchiveDisplayer extends Leaf.Widget
             @listSelector = new ArchiveDisplayerListSelector()
             @listSelector.listenBy this,"select",(listModel)=>
                 @archive.changeList listModel.name,(err)=>
+                    App.userConfig.set "#{@archive.sourceGuid}/maybeList",listModel.name
                     @listSelector.active listModel.name
                     @listSelector.hide()
+                    @render()
         @listSelector.updateState()
         @listSelector.show(e)
         if @archive.listName
@@ -147,7 +154,7 @@ class ArchiveDisplayerListSelector extends Popup
         @lists.on "child/add",(item)=>
             item.listenBy this,"select",@select
         @lists.on "child/remove",(item)=>
-            item.destroy()
+            item.stopListenBy this
     updateState:()->
         @lists.length = 0
         for list in Model.ArchiveList.lists.models

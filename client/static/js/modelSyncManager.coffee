@@ -5,7 +5,7 @@ App = require "app"
 class ModelSyncManager extends Leaf.EventEmitter
     constructor:()->
         super()
-        App.initialLoad ()=>
+        App.afterInitialLoad ()=>
             @setupSyncHandlers()
             @setMessageCenter App.messageCenter
     setMessageCenter:(mc)->
@@ -19,6 +19,21 @@ class ModelSyncManager extends Leaf.EventEmitter
         @mc.listenBy this,"event/archive/listChange",(info)=>
             console.debug "recieve event","listChange",info
             @emit "listChange",info
+        @mc.listenBy this,"event/source/requireLocalAuth",(source)=>
+            console.debug "recieve require localauth",source
+            results = Model.Source.sources.find({guid:source.guid})
+            if results.length is 0
+                return
+            results[0].sets(source)
+            @emit "source/requireLocalAuth",results[0]
+        @mc .listenBy this,"event/source/authorized",(source)=>
+            console.debug "recieve authorized",source
+            results = Model.Source.sources.find({guid:source.guid})
+            if results.length is 0
+                return
+            results[0].sets(source)
+            @emit "source/authorized",results[0]
+            
     setupSyncHandlers:()->
         # not all event are recieved via backends
         # some event like read and unread are directly fired

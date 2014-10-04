@@ -35,6 +35,9 @@ class WebApiServer extends EventEmitter
         cc.on "candidate/requireAuth",@genPush "candidate/requireAuth" 
         cc.on "candidate/requirePinCode",@genPush "candidate/requirePinCode"
         cc.on "candidate/fail",@genPush "candidate/fail"
+        cc.on "source/modify",@genPush "source/modify"
+        cc.on "source/requireLocalAuth",@genPush "source/requireLocalAuth"
+        cc.on "source/authorized",@genPush "source/authorized"
         cc.on "subscribe",@genPush "source"
         @messageCenters = []
     createMessageCenter:()->
@@ -364,6 +367,10 @@ class WebApiServer extends EventEmitter
             @sybil.collectorController.acceptCandidate cid,callback
         messageCenter.registerApi "declineCandidate",(cid,callback)=>
             @sybil.collectorController.declineCandidate cid,callback
+        messageCenter.registerApi "authSource",(data,callback)=>
+            @sybil.collectorController.authSource data.guid,data.username,data.secret,callback
+        messageCenter.registerApi "forceUpdateSource",(guid,callback)=>
+            @sybil.collectorController.forceUpdateSource guid,callback
     pushReadLater:(archive)->
         @boardCastEvent "readLater",archive
     pushUnreadLater:(archive)->
@@ -383,6 +390,7 @@ class WebApiServer extends EventEmitter
         @boardCastEvent "candidate",candidate
     genPush:(name)->
         return (data)=>
+            console.debug "gen push",name
             @boardCastEvent name,data
     boardCastEvent:(name,info)->
         for mc in @messageCenters

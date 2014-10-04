@@ -1,6 +1,10 @@
 # this is the entry of sybil
 console = require("../common/logger.coffee").create(__filename)
 fs = require("fs")
+
+# Setup some global vars to prevent relative requires
+# which is hard to manipulate, but also be careful don't
+# introduce too many of them.
 global.env = global.env || {}
 global.env.logger = require "../common/logger.coffee"
 global.env.settings = require "../settings.coffee"
@@ -95,9 +99,12 @@ class Sybil extends (require "events").EventEmitter
             callback err
     getSource:(guid,callback)->
         Database.getSource guid,(err,source)->
+            delete source.properties
             callback err,source
     getSources:(callback)->
         Database.getSources (err,sources)->
+            for source in sources
+                delete source.properties
             callback err,sources
     renameSource:(guid,name,callback)->
         Database.renameSource guid,name,(err)->
@@ -265,9 +272,16 @@ process.on "uncaughtException",(err)->
     console.error "fatal error"
     if not sybil.settings.preventCrash
         console.error "uncaughtException not acceptable"
-        console.error "exit"
-        process.exit(1)
+        console.error "quit"
+        # Usually we wait the stderr to be flushed and then quit the program.
+        # To flush it, we write a "exit" string to it and wait
+        # this string to be flushed, which also indicates that
+        # all previous content has been flushed.
+        process.stderr.write "exit",()->
+            process.exit(1)
+        # on the other hand, in case the fs is blocked, thus blocked the program to exit,
+        # we force it to exit after some time, to prevent broken data.
+        setTimeout (()->
+            process.exit(1)
+            ),1000
 module.exports = sybil
-
-
-

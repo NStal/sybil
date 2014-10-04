@@ -2,11 +2,9 @@ States = require "../states.coffee"
 createError = require "create-error"
 # Overview:
 # Initialize is a one time business
-# if not success than it's failed.
+# if not success than it's failed(panic other than authorization failed).
 # 
 # Event
-# fail:
-#     when failed
 # initialized:
 #     at initialized, complete all missing property of model,
 #     and at least tried to fetch archive once, there may be
@@ -23,7 +21,6 @@ createError = require "create-error"
 #     Note: it's important that only set guid when successfully
 #     AND REMEMBER TO BLOCK duplicate initialze call
 #     initialized
-# failed
 class Initializer extends States
     constructor:(@source)->
         super()
@@ -33,8 +30,11 @@ class Initializer extends States
         # and emit "archive" when source is ready and confirmed
         @source.updater.prefetchArchiveBuffer = []
         @initialized = false
+    standBy:()->
+        @waitFor "startSignal",()=>
+            @start()
     start:()->
-        @reset()
+        @source.updater.stop()
         @initialize()
     initialize:()->
         if @state is "initializing"
@@ -43,8 +43,8 @@ class Initializer extends States
         return true
     reset:()->
         @setState "void"
-    atFailed:()->
-        @emit "fail"
+    atInitializing:()->
+        @setState "initialized"
     atInitialized:()->
         @emit "initialized"
 module.exports = Initializer

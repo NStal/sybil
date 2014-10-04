@@ -43,9 +43,13 @@ class CollectorController extends EventEmitter
         @collector.sourceManager.on "archive",(archive)=>
             @emit "archive",archive
         @collector.sourceManager.on "source/modify",(source)=>
-            console.debug "modify source"
-            Database.updateSource source
-
+            Database.updateSource source,()=>
+                @emit "source/modify",source
+        @collector.sourceManager.on "source/requireLocalAuth",(source)=>
+            @emit "source/requireLocalAuth",source
+        @collector.sourceManager.on "source/authorized",(source)=>
+            @emit "source/authorized",source
+        
         return
     initCollector:(callback = ()-> )->
         console.log "start sync unread count"
@@ -94,5 +98,10 @@ class CollectorController extends EventEmitter
         @collector.sourceSubscribeManager.accept cid,callback
     declineCandidate:(cid,callback)->
         @collector.sourceSubscribeManager.decline cid,callback
-        
+    authSource:(guid,username,secret,callback)->
+        @collector.sourceManager.setSourceLocalAuth guid,username,secret,callback
+    forceUpdateSource:(guid,callback)->
+        @collector.sourceManager.forceUpdateSource guid,callback
 module.exports = CollectorController
+
+

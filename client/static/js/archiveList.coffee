@@ -3,8 +3,10 @@ App = require "app"
 ScrollChecker = require "util/scrollChecker"
 async = require "lib/async"
 EndlessArchiveLoader = require("procedure/endlessArchiveLoader")
+CubeLoadingHint = require("/widget/cubeLoadingHint")
 class ArchiveList extends Leaf.Widget
     constructor:(template)->
+        @include CubeLoadingHint
         super(template or App.templates["archive-list"])
         @_appendQueue = async.queue(((item,done)=>
             @archiveListItems.push item
@@ -12,7 +14,7 @@ class ArchiveList extends Leaf.Widget
                 done()
                 ),4)
             ),1)
-
+        
         # not implemented
         @sort = "latest"
         
@@ -25,12 +27,13 @@ class ArchiveList extends Leaf.Widget
         @scrollChecker = new ScrollChecker @UI.containerWrapper
         @scrollChecker.listenBy this,"scroll",@onScroll
         @archiveListItems = Leaf.Widget.makeList @UI.container
-        @archiveListItems.on "child/remove",(child)=>
-            child.destroy()
+        
+        @archiveListController = new ArchiveListController(null,this)
+        @initSubWidgets()
+        
         App.userConfig.on "change/previewMode",@applyPreviewMode.bind(this)
         App.userConfig.init "useResourceProxyByDefault",false
         App.userConfig.init "enableResourceProxy",true
-       
     applyPreviewMode:()=>
         if not @archiveInfo
             return
@@ -48,7 +51,7 @@ class ArchiveList extends Leaf.Widget
         query.sourceGuids = info.sourceGuids
         @_createArchiveLoader(query)
         @UI.emptyHint$.hide()
-        @UI.loadingHint$.hide()
+        @UI.loadingHint.hide()
         @archiveListItems.length = 0
         @render()
         @more()
@@ -59,8 +62,8 @@ class ArchiveList extends Leaf.Widget
         @archiveLoader.reset({query:query,viewRead:@viewRead,sort:@sort,count:@loadCount})
         @archiveLoader.listenBy this,"archive",@appendArchive
         @archiveLoader.listenBy this,"noMore",@onNoMore
-        @archiveLoader.listenBy this,"startLoading",()=>@UI.loadingHint$.show()
-        @archiveLoader.listenBy this,"endLoading",()=>@UI.loadingHint$.hide()
+        @archiveLoader.listenBy this,"startLoading",()=>@UI.loadingHint.show()
+        @archiveLoader.listenBy this,"endLoading",()=>@UI.loadingHint.hide()
         return @archiveLoader
     appendArchive:(archive)=>
         @UI.emptyHint$.hide()
@@ -75,25 +78,26 @@ class ArchiveList extends Leaf.Widget
         else
             @UI.toggleViewAll$.text("view all")
     clear:()->
-        # so the rest task in the queue won't be append
-        # becase the id changed
-        if @archiveLoader
-            @archiveLoader.destroy()
         @archiveLoader = null
         @UI.containerWrapper.scrollTop = 0
         @UI.emptyHint$.show()
         @UI.title$.hide()
-    more:()->
+    more:(callback = ()->)->
         if not @archiveLoader
+            callback("not ready")
             return
         if @archiveLoader.noMore
+            callback("no more")
             return
         @archiveLoader.more (err)=>
             if err
                 if err is "isLoading"
+                    callback "loading"
                     return
                 App.showError err
+                callback "fail"
                 return
+            callback()
     onNoMore:()->
         @UI.emptyHint$.show()
         
@@ -133,8 +137,6 @@ class ArchiveList extends Leaf.Widget
             App.userConfig.set "previewModeFor"+@archiveInfo.name,not previewMode
             @applyPreviewMode()
     onScroll:()->
-        if @UI.containerWrapper.scrollHeight - @UI.containerWrapper.scrollTop - @UI.containerWrapper.clientHeight < @UI.containerWrapper.clientHeight*2
-            @more()
         divider = @UI.containerWrapper.scrollTop
         divider += $(window).height()/3
         for item in @archiveListItems
@@ -207,7 +209,55 @@ class ArchiveListItem extends require("archiveDisplayer")
             console.debug "mark as unread done->render"
             console.debug @lockRead,@archive.hasRead,"is the state"
             @render()
-        
+class ArchiveListController extends Leaf.Widget
+    constructor:(template,archiveList)->
+        super(template or App.templates["archive-list-controller"])
+        @archiveList = archiveList
+        @archiveList.scrollChecker.listenBy this,"scroll",()=>
+            @updatePosition()
+    updatePosition:()->
+        if @archiveList.archiveListItems.length - 5 >= 0
+            last = @archiveList.archiveListItems[@archiveList.archiveListItems.length - 5]
+        else
+            last = @archiveList.archiveListItems[0]
+        if not last
+            return
+        if last.node.offsetTop < @archiveList.UI.containerWrapper.scrollTop
+            @archiveList.more (err)->
+                console.debug "load more",err
+    onClickPrevious:()->
+        @scrollToItem @getPreviousItem()
+        console.debug "click? previous"
+    onClickNext:()->
+        if @isLast @getCurrentItem()
+            @archiveList
+        @scrollToItem @getNextItem()
+        console.debug "click next?"
+    scrollToItem:(item)->
+        if not item
+            return
+        top = item.node.offsetTop
+        @archiveList.UI.containerWrapper.scrollTop = top
+    getCurrentItem:()->
+        top = @archiveList.UI.containerWrapper.scrollTop
+        currentItem = @archiveList.archiveListItems[0]
+        for item in @archiveList.archiveListItems
+            if item.node.offsetTop > top
+                break
+            currentItem = item
+        return currentItem
+    getPreviousItem:()->
+        current = @getCurrentItem()
+        for item,index in @archiveList.archiveListItems
+            if item is current
+                return @archiveList.archiveListItems[index-1] or null
+    getNextItem:()->
+        current = @getCurrentItem()
+        for item,index in @archiveList.archiveListItems
+            if item is current
+                return @archiveList.archiveListItems[index+1] or null
+    isLast:(item)->
+        return @archiveList.archiveListItems[@archiveList.archiveListItems-1] is item
 #window.ArchiveListItem = ArchiveListItem
 #window.ArchiveList = ArchiveList
 module.exports = ArchiveList

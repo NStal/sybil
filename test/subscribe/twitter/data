@@ -1,0 +1,7 @@
+session[username_or_email]:nstalorz
+session[password]:lenFriedBK201
+remember_me:1
+return_to_ssl:true
+scribe_log:
+redirect_after_login:/
+authenticity_token:a64e79434d28b28e929fbeec1c97806baabe9ff1

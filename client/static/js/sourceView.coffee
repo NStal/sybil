@@ -1,9 +1,9 @@
 SwipeChecker = require("util/swipeChecker")
+SourceList = require("sourceList")
+ArchiveList = require("archiveList")
+SourceDetail = require("sourceDetail")
 class SourceView extends require("view")
     constructor:()->
-        SourceList = require("sourceList")
-        ArchiveList = require("archiveList")
-        SourceDetail = require("sourceDetail")
         @sourceList = new SourceList()
         @archiveList = new ArchiveList()
         @sourceList.on "select",(info)=>

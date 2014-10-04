@@ -6,6 +6,7 @@
 # pinReady: pin code image is downloaded and
 # posted: login posted, check success or retcode to do the correct things
 
+Source = require "../../source/source.coffee"
 EventEmitter = (require "events").EventEmitter
 querystring = require "querystring"
 createError = require "create-error"
@@ -17,12 +18,7 @@ cheerio = require "cheerio"
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
 ErrorDoc = require "error-doc"
-Errors = exports.Errors = ErrorDoc.create()
-    .define "ParseError"
-    .define "Timeout"
-    .define "NetworkError"
-    .define "UnkownError"
-    .generate()
+Errors = exports.Errors = Source.Errors
 exports.fetch = (info = {},callback)->
     cookie = info.cookie
     timeout = info.timeout or 30 * 1000
@@ -43,7 +39,7 @@ exports.fetch = (info = {},callback)->
                 callback new Errors.ParseError("fail to parse result vai #{e}",{via:e})
                 return
             if result.ok isnt 1
-                callback new Errors.UnkownError("result.ok isnt 1")
+                callback new Errors.AuthorizationFailed("result.ok isnt 1")
                 return
             callback null,result.mblogList or []
     hasTimeout = false

@@ -4,7 +4,7 @@
 # 3. Connect to the sybil websocket API
 # 3.5 (app ready)
 # 4. Sync the required data like source/list/nodes
-#
+# 
 View = require "view"
 ViewSwitcher = View.ViewSwitcher
 AddSourcePopup = require "addSourcePopup"
@@ -37,7 +37,7 @@ App.connect = ()->
         @messageCenter.setConnection(@connectionManager.connection)
     @connectionManager.on "disconnect",()=>
         @messageCenter.unsetConnection()
-App.initialLoad = (callback)->
+App.afterInitialLoad = (callback)->
     if @initialLoaded
         callback()
     else
@@ -84,6 +84,8 @@ App.showError = (str)->
     console.error str
     return
     alert str
+App.toast = (str)->
+    console.log "TOAST:",str
 App.confirm = (str,callback)->
     if confirm(str)
         callback true
@@ -97,9 +99,10 @@ App.persistentDataStoreManager = new (require "persistentDataStore").Manager()
 App.userConfig = new (require "userConfig")
 App.modelSyncManager = new (require "modelSyncManager")
 
-
+    
 $ ()->
     App.templateManager.start()
+    console.debug "start tm"
     App.templateManager.on "ready",(templates)->
         App.templates = templates
         App.init()

@@ -9,10 +9,10 @@ module.exports = new EventEmitter()
 exports = module.exports
 
 Errors = ErrorDoc.create()
-    .define "Duplication"
-    .define "NotReady"
-    .define "NotFound"
-    .define "InvalidParameter"
+    .define("Duplication")
+    .define("NotReady")
+    .define("NotFound")
+    .define("InvalidParameter")
     .generate()
 exports.Errors = Errors
 toMD5 = (string)->

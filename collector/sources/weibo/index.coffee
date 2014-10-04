@@ -2,6 +2,7 @@ Source = require "../../source/source.coffee"
 urlModule = require "url"
 EventEmitter = (require "events").EventEmitter
 http = require "http"
+httpUtil = global.env.httpUtil
 weiboUtil = require "./weiboUtil.coffee"
 console = env.logger.create __filename
 class Weibo extends Source
@@ -14,6 +15,8 @@ class Weibo extends Source
             stream.emit "data", new Weibo({uri:uri})
             stream.emit "end"
         return stream
+    @create = (info)->
+        return new Weibo(info)
     constructor:(info = {})->
         super(info)
         @type = "weibo"
@@ -25,13 +28,14 @@ class Updater extends Source::Updater
     fetchAttempt:()->
         console.debug "try fetching #{@source.guid} at #{@nextFetchInterval}"
         if not @source.authorizer.authorizeInfo.cookie
-            @emit "requireAuth"
+            @error new Source.Errors.AuthorizationFailed("weibo updater need authorize")
             return
         weiboUtil.fetch {cookie:@source.authorizer.authorizeInfo.cookie},(err,result)=>
             if err
-                @fetchError = err
+                if err instanceof Source.Errors.Timeout
+                    err = new Source.Errors.NetworkError("timeout",{via:err})
+                @error err
                 return
-            @fetchError = null
             @rawFetchedArchives = result
             @setState "fetchAttempted"
     parseRawArchive:(raw)->
@@ -67,9 +71,8 @@ class Initializer extends Source::Initializer
         super(@source)
     atInitializing:()->
         if not @source.authorizer.cookie
-            console.log "require Auth by initializer"
-            @reset()
-            @emit "requireAuth"
+            console.debug "need auth???ASDASD"
+            @error new Source.Errors.AuthorizationFailed("initialize weibo need auth")
             return
         requestUrl = "http://m.weibo.cn/scriptConfig?online=1&t=#{Date.now()}"
         env.httpUtil.httpGet {
@@ -80,12 +83,11 @@ class Initializer extends Source::Initializer
             ,timeout:1000 * 10
         },(err,res,content)=>
             if err
-                @lastError = err
-                @setState "fail"
+                @error Source.Errors.NetworkError("fail to initailize weibo #{@source.uri} due to network error");
                 return
             result = @parseInitContent content.toString()
             if not result
-                @setState "fail"
+                @error Source.Errors.ParseError("fail to parse initial result",{raw:result})
                 return
             @source.guid = "weibo_#{result.id}"
             @source.name = "#{result.name}'s Weibo Timeline"
@@ -118,39 +120,30 @@ CookieJar = tough.CookieJar
 class Authorizer extends Source::Authorizer
     constructor:(@source)->
         super(@source)
-        console.log "AUTHORIZER OF WEIBO",@state
         @jar = new CookieJar()
         @userAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
         @timeout = 1000 * 10
+        @on "state",(state)->
+            console.debug "WEIBO:::change state",state
     prelogin:()->
         @requirePinCode = false
         url = "https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4&"
-        option = urlModule.parse url
+        option = {}
         option.method = "GET"
         option.headers = {
             Referer:url
             ,"User-Agent":@userAgent
             ,Cookie:@jar.getCookiesSync(url).join("; ")
         }
-        req = https.request option,(res)=>
-            rawCookie = []
-            cookie = res.headers["set-cookie"]
-            if cookie instanceof Array
-                rawCookie = cookie
-            else if not cookie
-                rawCookie = []
-            else
-                rawCookie = [cookie]
-            rawCookie.forEach (rc)=>
-                @jar.setCookieSync rc,url
-            buffers = []
-            res.on "data",(data)->
-                buffers.push data
-            res.on "end",()=>
-                result = (Buffer.concat buffers).toString()
-                # check pin code in fureture here
-                @setState "prelogined"
-        req.end()
+        option.url = url
+        option.timeout = @timeout
+        option.jar = @jar
+        httpUtil.httpGet option,(err,res,content)=>
+            # maybe get pin code here
+            if err
+                @error new Source.Errors.NetworkError()
+                return
+            @setState "prelogined"
     loginAttempt:()->
         postData = {
             uname:@username
@@ -158,36 +151,25 @@ class Authorizer extends Source::Authorizer
             ,check:1
             ,backUrl:"http://m.weibo.cn"
         }
-        postString = querystring.stringify postData
         loginUrl = "https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4"
-        option = urlModule.parse loginUrl
+        option = {}
+        option.url = loginUrl
+        option.data = postData
         option.method = "POST"
+        option.jar = @jar
         option.headers = {
             "Referer":loginUrl
-            ,"Content-Length":postString.length
             ,"User-Agent":@userAgent
-            ,"Cookie":@jar.getCookiesSync(loginUrl).join("; ")
-            ,"Content-Type":"application/x-www-form-urlencoded"
         }
-        req = https.request option,(res)=>
-            rawCookie = []
-            cookie = res.headers["set-cookie"]
-            if cookie instanceof Array
-                rawCookie = cookie
-            else if not cookie
-                rawCookie = []
-            else
-                rawCookie = [cookie]
-            rawCookie.forEach (rc)=>
-                @jar.setCookieSync rc,loginUrl
-            buffers = []
-            res.on "data",(data)=>
-                buffers.push data
-            res.on "end",()=>
-                result = (Buffer.concat buffers).toString()
-                @mobileRedirectLoginLocation = res.headers["location"]
-                @checkLogin()
-        req.end(postString)
+        option.timeout = @timeout
+        httpUtil.httpPost option,(err,res,content)=>
+            
+            if err
+                @error new Source.Errors.NetworkError("fail to login due to netweork error",{via:err})
+                return
+            @mobileRedirectLoginLocation = res.headers["location"]
+            console.log err,res.headers,content.toString()
+            @checkLogin()
     checkLogin:()->
         try
             info = urlModule.parse @mobileRedirectLoginLocation,true
@@ -199,14 +181,13 @@ class Authorizer extends Source::Authorizer
             @loginError = null
             @cookie = "gsid_CTandWM=#{gsid}; expires=Sat, 27-Apr-2024 01:38:02 GMT; path=/; domain=.weibo.cn; httponly"
             @authorizeInfo = {@cookie}
+
             #configString = "TTT_USER_CONFIG_H5=%7B%22ShowMblogPic%22%3A1%2C%22ShowUserInfo%22%3A1%2C%22MBlogPageSize%22%3A%2250%22%2C%22ShowPortrait%22%3A1%2C%22CssType%22%3A0%2C%22Lang%22%3A1%7D; expires=Sat, 27-Apr-2024 01:38:02 GMT; path=/; domain=.weibo.cn; httponly"
             #@jar.setCookieSync cookieString,"http://weibo.cn/"
             #@jar.setCookieSync configString,"http://weibo.cn/"
+            @setState "authorized"
         else
-            @authorized = false
-            console.log Source.Errors
-            @loginError = new Source.Errors.AuthorizationFailed()
-        @setState "loginChecked"
+            @error new Source.Errors.AuthorizationFailed("fail to authorize")
 Weibo::Updater = Updater
 Weibo::Initializer = Initializer
 Weibo::Authorizer = Authorizer

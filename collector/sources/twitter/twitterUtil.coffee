@@ -1,51 +1,71 @@
 async = require "async"
-States = require "../../"
+States = require "../../states.coffee"
 ErrorDoc = require "error-doc"
 tough = require "tough-cookie"
 loadash = require "lodash"
+httpUtil = global.env.httpUtil
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
-
+console = console = env.logger.create __filename
+cheerio = require "cheerio"
 exports.Errors = Errors = ErrorDoc.create()
     .define "ConnectionNotAvailable"
     .define "Timeout"
+    .define "UnkownError"
     .generate()
 exports.getAvailableProxy = (callback)->
     proxies = exports.proxies.slice(0)
     proxies.unshift(null)
-    async.eachSeries proxies,((proxy,done)=>
+    if exports.lastAvailableProxy in proxies
+        proxies = proxies.filter (item)->item isnt exports.lastAvailableProxy
+        proxies.unshift exports.lastAvailableProxy
+    timeout = 20 * 1000
+    async.each proxies,((proxy,done)=>
         complete = (info)->
             done(info)
             complete = ()->
-        setTimeout (()->complete()),1000 * 10
-        httpUtil.httpGet {url:"https://twitter.com",proxy},(err,res)->
+        setTimeout (()->complete()),timeout
+        console.debug "test proxy",proxy
+        httpUtil.httpGet {url:"https://twitter.com",proxy,timeout},(err,res)->
             if not err
                 exports.lastAvailableProxy = proxy
+                console.debug "pick proxy",proxy
                 complete("done")
                 callback null,proxy
             else
+                console.debug "test proxy #{proxy} with err",err
                 complete()
         ),(result)=>
             if result is "done"
+                
                 return
             callback new Error("Not proxy available")
-exports.setPossibleProxies = (proxies or [])->
+exports.setPossibleProxies = (proxies = [])->
     @proxies = proxies.slice(0)
 exports.setPossibleProxies(global.env.settings.proxies)
 
+exports.renderDisplayContent = (data)->
+    entities = data.extended_entities or data.entities or {}
+    medias = entities.media or []
+    if medias instanceof Array
+        for media in medias
+            images.push media.media_url
+    
+    return data.archive.text
 # states
 # void
 # proxyAttemped
 class exports.TwitterRequestClient extends States
     constructor:()->
         super()
+        @userAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
         @proxy = exports.lastAvailableProxy or null
         # available states
         # void,success,fail
         @setState "void"
         @lastRequestState = "void"
     prepare:()->
-        if @states is "prepareing" or @state is "prepared"
+        if @state is "prepareing" or @state is "prepared"
             return
         if @lastRequestState isnt "success"
             @setState "preparing"
@@ -67,10 +87,10 @@ class exports.TwitterRequestClient extends States
         @emit "exception",@lastError
         @emit "notAvailable"
     request:(option,callback)->
-        if @states is "prepared"
+        if @state is "prepared"
             @_request option,callback
             return
-        timeout = option.timeout or 15 * 1000
+        timeout = option.timeout or 20 * 1000
         hasTimeout = false
         timer = setTimeout (()->
             hasTimeout = true
@@ -78,23 +98,28 @@ class exports.TwitterRequestClient extends States
             callback = ()->
             ),timeout
         @once "ready",()=>
-            if not hasTimeout
-                clearTimeout timer
-                @_request option,callback
+            if hasTimeout
+                return
+            clearTimeout timer
+            @_request option,callback
         @prepare()
     _request:(option = {},callback)->
-        if @states isnt "prepared"
+        if @state isnt "prepared"
             @prepare()
             callback new Errors.ConnectionNotAvailable("proxy not ready")
             return
         option.method = option.method or "GET"
         option.headers = option.headers or {}
-        option.headers["user-agent"] = option.headers["user-agent"] or @userAgent
+        if option.jar and not option.headers.cookie
+            console.debug "send cookie with url",option.url,"cookie:",option.jar.getCookieStringSync(option.url)
+            option.headers["cookie"] = option.jar.getCookieStringSync(option.url)
+        option.proxy = @proxy
+#        option.headers["user-agent"] = option.headers["user-agent"] or @userAgent
         if option.method is "GET"
             method = "httpGet"
         else
             method = "httpPost"
-        httpUtil[method] option,(err,res,body)->
+        httpUtil[method] option,(err,res,body)=>
             if err
                 @lastRequestState = "fail"
                 @lastError = err

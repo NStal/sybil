@@ -4,9 +4,9 @@ sourceList = require "./sourceList.coffee"
 errorDoc = require "error-doc"
 async = require "async"
 console = env.logger.create __filename
-# we will do many complicated user interaction here.
-# source in this buffer are waiting to be tested
-# or waiting to be confirmed/abondoned by user.
+# We will do many complicated user interaction here.
+# Sources in this manager are waiting to be tested
+# or waiting to be accept/declined by user.
 # 
 # Events
 # subscribe: (source)
@@ -14,11 +14,12 @@ console = env.logger.create __filename
 #     it should already be initialized and authorized
 #     you can even expect it to has some pre buffered 
 #     archives at source.updater.prefetchArchiveBuffer
-#
+#     , which may be set by Source::Initializer
+# 
 # determine: (adapter)
 #     The adapter is ready to be accept or decline
 #     we may display the adapter.source information
-#     to user to hint him to determine
+#     to user to hint him to determine.
 #
 # requireLocalAuth: (adapterInfo)
 #     please get username and secret from user and call
@@ -28,6 +29,7 @@ console = env.logger.create __filename
 #     please display adapterInfo.pinCodeInfo to user
 #     and call setAdapterPinCode(cid,pinCode,callback)
 #     with the user recognized PinCode.
+# 
 # fail: (adapterInfo)
 #    fail to init the source in adapter, and this is the last
 #    time you receive any information from the adapter, it
@@ -52,9 +54,13 @@ class SourceSubscribeManager extends EventEmitter
             async.each sourceList.List,((Source,done)=>
                 subStream = Source.detectStream uri
                 if not subStream
+                    console.debug "#{Source.name} bypass #{uri}"
                     done()
                     return
+                else
+                    console.debug "#{Source.name} match #{uri}"
                 subStream.on "data",(source)=>
+                    console.debug "get source for subscribe #{uri} #{source.uri}"
                     if not source
                         throw new Error "no source"
                     existAdapter = null
@@ -72,11 +78,11 @@ class SourceSubscribeManager extends EventEmitter
                     stream.emit "data",adapter.getInfo()
                     adapter.start()
                 subStream.on "end",()->
+                    console.debug "substream #{Source.name} end"
                     done()
                 ),()->
-                    console.debug "stream end"
+                    console.debug "source scribe for #{uri} ends"
                     stream.emit "end"
-        console.log "return stream"
         return stream
     detect:(uri,callback)->
         stream = @detectStream uri
@@ -85,16 +91,6 @@ class SourceSubscribeManager extends EventEmitter
             result.push adapter
         stream.on "end",()->
             callback null,result
-    test:(type,uri,callback)->
-        Source = sourceList.Map[type]
-        if not Source
-            callback new Errors.InvalidSource "Unkown source type #{type}"
-            return
-        source = new Source {uri,uri}
-        adapter = new SubscribeAdapter source
-        @addAdapter adapter
-        callback null,adapter
-        adapter.start()
     addAdapter:(adapter)->
         console.log "add adapter",adapter.cid
         @adapters.push adapter
@@ -124,6 +120,11 @@ class SourceSubscribeManager extends EventEmitter
     getCandidates:()->
         return @adapters.map (adapter)->
             return adapter.getInfo()
+    getAdapter:(cid)->
+        for adapter in @adapters
+            if adapter.cid is cid
+                return adapter
+        return null
     setAdapterLocalAuth:(cid,username,secret,callback)-> 
         exists = @adapters.some (adapter)->
             if adapter.cid is cid

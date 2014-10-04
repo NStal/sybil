@@ -3,9 +3,9 @@
 fs = require "fs"
 
 http = require "http"
-http.globalAgent.maxSockets = 200;
+http.globalAgent.maxSockets = 100 * 100;
 https = require "https"
-https.globalAgent.maxSockets = 200;
+https.globalAgent.maxSockets = 100* 100;
 settings = require("./settings.coffee")
 logger = require("./common/logger.coffee")
 try
@@ -48,4 +48,6 @@ if settings.logPath and not settings.debug
 
 # save pid
 fs.writeFileSync(pidPath,process.pid)
+
+# finally, start it!
 require("./core/sybil.coffee")

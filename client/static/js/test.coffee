@@ -26,25 +26,35 @@ App = require "app"
 #
 #App.on "connect",()->
 #    App.settingPanel.test()
-App.on "connect",()->
-    setTimeout (()->
-        App.addSourcePopup.show()
-        App.addSourcePopup.UI.input.value = "http://bitinn.net/"
-        App.addSourcePopup.onClickSubmit()
-    ),100
-#    
-#    setTimeout (()->
-#        App.viewSwitcher.switchTo "p2p view"
-#        App.userConfig.set "enableResourceProxy",true
-#        App.userConfig.set "useResourceProxyByDefault",true
-#        App.viewSwitcher.switchTo "list view"
-#        App.viewSwitcher.switchTo "search view"
-    
-#        App.searchView.searchList.UI.searchKeywordInput.value = "nodejs"
-#        App.searchView.searchList.onClickSearchButton()
-        
+if window.location.toString().indexOf("debug") > 0
+#    App.once "structureReady",()=>
+#        App.sourceView.sourceList.initialLoader.once "done",()->
+#            console.debug "~~~"
+#            for item in App.sourceView.sourceList.children
+#                if item.showSourceDetail
+#                    item.showSourceDetail()
+#                    break
+    true
+#    App.on "connect",()->
+#        App.sourceView.archiveList.UI.loadingHint.show()
+#        setTimeout (()->
+#            App.addSourcePopup.show()
+#            App.addSourcePopup.UI.input.value = "http://bitinn.net/"
+#            App.addSourcePopup.onClickSubmit()
 #        ),100
-
-
-# Enhancement goes here
-# Remember the last view and recovers it
+    #    
+    #    setTimeout (()->
+    #        App.viewSwitcher.switchTo "p2p view"
+    #        App.userConfig.set "enableResourceProxy",true
+    #        App.userConfig.set "useResourceProxyByDefault",true
+    #        App.viewSwitcher.switchTo "list view"
+    #        App.viewSwitcher.switchTo "search view"
+        
+    #        App.searchView.searchList.UI.searchKeywordInput.value = "nodejs"
+    #        App.searchView.searchList.onClickSearchButton()
+            
+    #        ),100
+    
+    
+    # Enhancement goes here
+    # Remember the last view and recovers it

@@ -1,7 +1,7 @@
 EventEmitter = require("events").EventEmitter
 pathModule = require("path")
 SafeFileWriter = require("safe-file-writer")
-
+console = global.env.logger.create __filename
 # Sybil only has one SettingManager
 # Every plugin can has it's own Settings or access globalsettings
 # Every Settings can have many SettingEntry with a Validator
@@ -93,8 +93,8 @@ class Settings extends EventEmitter
                 # if this invalid value are overwrite by the anyother value,
                 # if overwrited then great, if not we write it back to file
                 @dumpdata[key] = data[key]
-                console.warn "fail to restore setting entry #{key}:#{data}"
-                console.warn "ignore it"
+                console.log "fail to restore setting entry #{key}:#{data}"
+                console.log "ignore it"
     toValidJSON:()->
         # contain only validated data
         data = {}

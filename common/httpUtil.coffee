@@ -14,6 +14,7 @@ urlModule = require "url"
 zlib = require "zlib"
 errorDoc = require "error-doc"
 createError = require "create-error"
+console = env.logger.create(__filename)
 _ = require "underscore"
 Errors = errorDoc.create()
     .use(errorDoc.Errors.IOError)
@@ -26,11 +27,13 @@ Errors = errorDoc.create()
 exports.Errors = Errors
 
 httpGetQueue = async.queue ((job,done)->
+    console.debug "httpGetQueueLength solve #{job.option.url} at waiting",httpGetQueue.length()
     exports._httpGet job.option,(err)->
         job.done = true
-        done()
         job.callback.apply {},arguments
-    ),50
+        done()
+        
+    ),12
     
 exports.httpGet = (option,callback)->
     if option.noQueue
@@ -42,6 +45,7 @@ exports._httpGet = (option,callback)->
     url = option.url
     proxy = option.proxy or null
     useStream = option.useStream or false
+    jar = option.jar or null
     if typeof option.maxRedirect isnt "number"
         option.maxRedirect = 3
     else
@@ -64,7 +68,8 @@ exports._httpGet = (option,callback)->
     headers = option.headers or {}
     if not headers["user-agent"]
         headers["user-agent"] = exports.defaultAgent
-
+    if not headers["cookie"] and jar
+        headers["cookie"] = jar.getCookieStringSync url
     _urlObject = urlModule.parse(url)
     requestOption = {}
     requestOption.path = _urlObject.path
@@ -74,8 +79,22 @@ exports._httpGet = (option,callback)->
     requestOption.headers = headers
     requestOption.agent = agent
     req = scheme.request requestOption,(res)=>
+        if jar
+            cookie = res.headers["set-cookie"]
+            if cookie instanceof Array
+                rawCookie = cookie
+            else if not cookie
+                rawCookie = []
+            else
+                rawCookie = [cookie]
+            rawCookie.forEach (rc)=>
+                try
+                    jar.setCookieSync rc,option.url
+                catch e
+                    # broken server set cookie
+                    # fail silently
+                    true
         if res.headers["location"] and not option.noAutoRedirect
-            process.exit()
             newUrl = require("url").resolve(url,res.headers["location"])
             ro = _.clone(option)
             ro.headers = ro.headers or {}
@@ -141,6 +160,8 @@ exports._prepareScheme = (option)->
 exports.httpPost = (option,callback)->
     url = option.url
     proxy = option.proxy or null
+    jar = option.jar or null
+
     useStream = option.useStream or false
     timeout = option.timeout or 1000 * 30
     postContent = option.data or ""
@@ -160,6 +181,8 @@ exports.httpPost = (option,callback)->
     headers = option.headers or {}
     if not headers["user-agent"]
         headers["user-agent"] = exports.defaultAgent
+    if not headers["cookie"] and jar
+        headers["cookie"] = jar.getCookieStringSync url
     if not headers["content-type"]
         headers["content-type"] = "application/x-www-form-urlencoded"
     headers["content-length"] = postContent.length
@@ -172,6 +195,22 @@ exports.httpPost = (option,callback)->
     requestOption.headers = headers
     requestOption.agent = agent
     req = scheme.request requestOption,(res)=>
+        if jar
+            cookie = res.headers["set-cookie"]
+            if cookie instanceof Array
+                rawCookie = cookie
+            else if not cookie
+                rawCookie = []
+            else
+                rawCookie = [cookie]
+            rawCookie.forEach (rc)=>
+                try
+                    jar.setCookieSync rc,option.url
+                catch e
+                    true
+                    # broken server set cookie
+                    # fail silently
+
         if res.headers["content-encoding"]
             _enc = res.headers["content-encoding"].toLowerCase().trim()
             if _enc is "gzip"

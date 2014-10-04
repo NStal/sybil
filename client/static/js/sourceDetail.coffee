@@ -1,5 +1,6 @@
 App = require "app"
 Popup = require "widget/popup"
+moment = require "/lib/moment"
 class SourceDetail extends Popup
     constructor:()->
         @sourceStatistic = new SourceStatistic()
@@ -9,9 +10,18 @@ class SourceDetail extends Popup
             @source.stopListenBy this
         @source = source
         @source.listenBy this,"change",this.render
+        @reset()
         @render()
         @source.queryStatisticInfo()
+    reset:()->
+        @renderData.refreshStyle = ""
     render:()->
+        @renderData = {
+            "errorDescription":@source.lastError and @source.lastError.name or @source.lastErrorDescription or "None"
+            "lastUpdate":@source.lastUpdate and moment(@source.lastUpdate).fromNow() or "Never"
+            "lastFetch":@source.lastFetch and moment(@source.lastFetch).fromNow() or "Never"
+            "fetchInterval":@source.nextFetchInterval and moment.duration(@source.nextFetchInterval).humanize() or "Never"
+        }
         @UI.name$.text @source.name
         @UI.uri$.text @source.uri
         @UI.uri$.attr "href",@source.uri
@@ -46,6 +56,23 @@ class SourceDetail extends Popup
         @node$.hide()
     onClickClose:()->
         @hide()
+    onClickForceUpdateButton:()->
+        source = @source
+        console.debug "source update"
+        @renderData.refreshStyle = "fa-spin"
+        source.forceUpdate (err)=>
+            console.debug "source update done hehe?",err,"??"
+            
+            @renderData.refreshStyle = ""
+            if source isnt @source
+                # current source has changed, ignore the result
+                return
+            if err
+                @source.lastError = err
+                @source.lastErrorDescription = err.message
+            else
+                App.toast "refreshed"
+                return
     onClickNameEditButton:()->
         name = prompt("would you like to rename #{@source.name}",@source.name).trim()
         if not name
@@ -65,7 +92,8 @@ class SourceDetail extends Popup
         @UI.descriptionEditor$.hide()
         @UI.description$.show()
         
-        
+#class SourceRuningState extends Leaf.Widget
+    
 class SourceStatistic extends Leaf.Widget
     constructor:()->
         super "<canvas></canvas>"
@@ -99,4 +127,3 @@ class SourceStatistic extends Leaf.Widget
         
 #window.SourceDetail = SourceDetail
 module.exports = SourceDetail
-        

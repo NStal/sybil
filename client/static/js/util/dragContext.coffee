@@ -2,8 +2,8 @@
 # "start"   : then drag the node will emit a "start" event on drag context
 # "drop"    : drop the node at a droppable will emit a "drop" event on drag context
 # "release" : release mouse when it's not on a droppable will emit a "release" event instead
-# "hover    : "hover at a droppable when dragging will emit a "hover" event on drag context
-# "move"    : when dragging the "move" will always been emitted when mouse moved
+# "hover    : "hover" at a droppable when dragging will emit a "hover" event on drag context
+# "move"    : when dragging,the "move" will always been emitted whenever mouse moved
 # if addDraggingShadow is called, the shadow element will always follow the mouse
 # when the dragging continues
 
@@ -117,8 +117,8 @@ class DroppableState extends Leaf.EventEmitter
         super()
         @onMove = @_onMove.bind(this)
         @onUp = @_onUp.bind(this)
-        @node.addEventListener "mousemove",@onMove
-        @node.addEventListener "mouseup",@onUp
+        @node.addEventListener "mousemove",@onMove,true
+        @node.addEventListener "mouseup",@onUp,true
     _onMove:(e)->
         if @parent.currentDraggableState
             e.preventDefault()
@@ -140,8 +140,8 @@ class DraggableState extends Leaf.EventEmitter
         @onDown = @_onDown.bind(this)
         @node.onmousemove = @onMove
         @node.onmousedown = @onDown
-        @node.addEventListener "mousemove",@onMove
-        @node.addEventListener "mousedown",@onDown
+        @node.addEventListener "mousemove",@onMove,true
+        @node.addEventListener "mousedown",@onDown,true
     _onMove:(e)->
         if @parent.currentDraggableState
             return true
@@ -158,7 +158,7 @@ class DraggableState extends Leaf.EventEmitter
     destroy:()->
         @node.removeEventListener "mousemove",@onMove
         @node.removeEventListener "mousedown",@onDown
-        @node = null 
+        @node = null
         @parent = null
         
 module.exports = DragContext

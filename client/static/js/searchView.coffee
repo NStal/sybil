@@ -5,6 +5,7 @@ ArchiveDisplayer = require "archiveDisplayer"
 SwipeChecker = require "util/swipeChecker"
 EndlessSearchArchiveLoader = require("procedure/endlessSearchArchiveLoader")
 async = require "lib/async"
+CubeLoadingHint = require "/widget/cubeLoadingHint"
 class SearchView extends View
     constructor:()->
         @searchList = new SearchList()
@@ -30,9 +31,9 @@ class SearchView extends View
 
 class SearchList extends Leaf.Widget
     constructor:()->
+        @include CubeLoadingHint
         super App.templates["search-list"]
         @resultList = Leaf.Widget.makeList @UI.resultList
-        @resultList.on "child/remove",(child)=>child.destroy()
         @UI.searchKeywordInput$.keydown (e)=>
             if e.which is Leaf.Key.enter
                 @onClickSearchButton()
@@ -78,9 +79,9 @@ class SearchList extends Leaf.Widget
             return
         if @searcher.isLoading
             return
-        @UI.loadingHint$.show()
+        @UI.loadingHint.show()
         @searcher.more (err,archives)=> 
-            @UI.loadingHint$.hide()
+            @UI.loadingHint.hide()
             if err
                 App.showError err
                 return
@@ -98,7 +99,6 @@ class SearchListItem extends Leaf.Widget
     constructor:(@archive)->
         super App.templates["search-list-item"]
         @archive.listenBy this,"change",@render
-        @use archive
         @render()
     render:()->
         @UI.title$.text(@archive.title)

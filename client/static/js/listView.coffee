@@ -4,6 +4,7 @@ Model = require "model"
 View = require "view"
 ArchiveDisplayer = require "archiveDisplayer"
 ScrollChecker = require "util/scrollChecker"
+CubeLoadingHint = require("/widget/cubeLoadingHint")
 moment = require "lib/moment"
 class ListView extends View
     constructor:()->
@@ -15,10 +16,12 @@ class ListView extends View
                 @show()
         @list.on "select",(list)=>
             @archives.load list.archiveList
+            @slideTo(1)
             # enable auto slide after first slide
             # so we will still at left most position
             # when user first check in at list view
         @archives.on "archive",()=>
+            console.debug "slide to 1"
             @slideTo(1)
         @archives.on "select",(archiveListItem)=>
             @archiveDisplayer.display archiveListItem.archive
@@ -69,7 +72,7 @@ class List extends Leaf.Widget
     constructor:()->
         super App.templates["list-view-list"]
         @lists = Leaf.Widget.makeList(@UI.container)
-        App.initialLoad ()=>
+        App.afterInitialLoad ()=>
             Model.ArchiveList.sync ()=>
                 @emit "init"
         # WARN: no add currently
@@ -113,14 +116,16 @@ class ListItem extends Leaf.Widget
     onClickNode:()=>
         @select()
         
-class ArchiveList extends Leaf.Widget.List
+class ArchiveList extends Leaf.Widget
     constructor:()->
+        @include CubeLoadingHint
         super App.templates["list-view-archive-list"]
-        @on "child/add",(archiveListItem)=>
+        @archives = Leaf.Widget.makeList @UI.archives
+        @archives.on "child/add",(archiveListItem)=>
             archiveListItem.listName = @currentList.name
             archiveListItem.listenBy this,"select",()=>
                 @emit "select",archiveListItem
-        @on "child/remove",(item)=>
+        @archives.on "child/remove",(item)=>
             # we don't remove it instead we should a delete dash at middle of it
             return
             #item.destroy()
@@ -135,32 +140,37 @@ class ArchiveList extends Leaf.Widget.List
         @currentList = list
         @currentList.listenBy this,"add",@prependArchive
         @currentList.listenBy this,"remove",@removeArchive
-        @length  = 0
+        @archives.length  = 0
         @noMore = false
+        @UI.loadingHint.hide()
         @more()
             
     more:()->
         if @noMore
             return
         loadCount = 20
+        list = @currentList
+        @UI.loadingHint.show()
         @currentList.getArchives {offset:@length,count:loadCount},(err,archives)=>
+            if @currentList isnt list
+                return
+            @UI.loadingHint.hide()
             for archive in archives
-                @push new ArchiveListItem(archive)
+                @archives.push new ArchiveListItem(archive)
             if archives.length isnt loadCount
                 @noMore = true
-        list = @currentList
 
     prependArchive:(archive)->
-        for item in this
+        for item in @archives
             if item.archive.guid is archive.guid
                 if item.isDone
                     item.isDone = false
                     item.render()
                 return
         @emit "archive"
-        @unshift new ArchiveListItem(archive)
+        @archives.unshift new ArchiveListItem(archive)
     removeArchive:(archive)->
-        for item,index in this
+        for item,index in @archives
             if item.archive.guid is archive.guid
                 if not item.isDone
                     item.isDone = true
@@ -173,7 +183,7 @@ class ArchiveListItem extends Leaf.Widget
         super App.templates["list-view-archive-list-item"]
         @render()
         @isDone = false
-        @use @archive
+        
     onClickNode:()->
         @select()
     select:()->
@@ -185,7 +195,7 @@ class ArchiveListItem extends Leaf.Widget
         @UI.title$.text @archive.title
         #@UI.via$.text "via "+ parseUri(@archive.originalLink).host
         @UI.content$.text @genPreview @archive.content
-        @UI.date$.text moment(@archive.createDate).format("YYYY-MM-DD")
+#        @UI.date$.text moment(@archive.createDate).format("YYYY-MM-DD")
         if not @isDone
             @node$.removeClass("clear")
         else
@@ -213,8 +223,9 @@ class ArchiveListItem extends Leaf.Widget
     genPreview:(content)->
         container = document.createElement("div")
         container.innerHTML = content
-        result = $(container).text().trim().substring(0,80)
-        if result.length is 80
+        maxLength = 50
+        result = $(container).text().trim().substring(0,maxLength)
+        if result.length is maxLength
             result += "..."
         else if result.length is 0
             result = "( empty )"

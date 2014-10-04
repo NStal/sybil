@@ -37,7 +37,6 @@ ContextMenu.show = (who)->
 ContextMenu.showByEvent = (e,selections)->
     if @menu
         @menu.remove()
-        @menu.destroy()
     @mask.show()
     @mask.on "hide",()=>
         @mask.hide()

@@ -17,7 +17,7 @@ class SubscribeTester
     start:()->
         mc = @inf.messageCenter
         mc.on "event/source",(source)=>
-            @serverEvent.emit "subscribe/#{source.uri}"
+            @serverEvent.emit "subscribe/#{source.uri}",source
         mc.on "event/candidate/requireAuth",(candidate)=>
             @serverEvent.emit "auth/#{candidate.cid}",candidate
         mc.invoke "detectStream","http://weibo.com/",(err,stream)=>

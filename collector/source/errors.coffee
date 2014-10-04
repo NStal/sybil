@@ -1,11 +1,13 @@
-createError = require "create-error"
-Errors = {
-    PermissionDenied:createError("PermissionDenied")
-    ,AuthorizationFailed:createError("AuthorizationFailed")
-    ,NetworkError:createError("NetworkError")
-    ,TimeoutError:createError("TimeoutError")
-    ,InvalidPinCode:createError("InvalidPinCode")
-    ,InvalidSource:createError("InvalidSource")
-    ,NotExists:createError("NotExists")
-}
-module.exports = Errors;
+ErrorDoc = require "error-doc"
+module.exports = Errors = ErrorDoc.create()
+    .define("PermissionDenied")
+    .define("AuthorizationFailed")
+    .define("NetworkError")
+    .define("Timeout")
+    .define("InvalidPinCode")
+    .define("InvalidSource")
+    .define("NotExists")
+    .define("UnkownError")
+    .define("ParseError")
+    .define("LogicError")
+    .generate()

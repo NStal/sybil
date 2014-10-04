@@ -16,6 +16,4 @@ class EndlessSearchArchiveLoader extends EndlessArchiveLoader
                 return
             callback null,archives.map (data)->
                 return new Model.Archive(data)
-    destroy:()->
-        super()
 module.exports = EndlessSearchArchiveLoader;

@@ -1,0 +1,292 @@
+{
+    "name": "leaf-require",
+    "js": {
+        "main": "main.js",
+        "root": "./js/",
+        "files": [
+            {
+                "path": "addSourcePopup.js",
+                "hash": "5377bc"
+            },
+            {
+                "path": "app.js",
+                "hash": "02e45f"
+            },
+            {
+                "path": "archiveDisplayer.js",
+                "hash": "2cb4cf"
+            },
+            {
+                "path": "archiveList.js",
+                "hash": "98ffb1"
+            },
+            {
+                "path": "connectionManager.js",
+                "hash": "ab2bdb"
+            },
+            {
+                "path": "contextMenu.js",
+                "hash": "51a854"
+            },
+            {
+                "path": "customArchiveList.js",
+                "hash": "04a548"
+            },
+            {
+                "path": "customSourceList.js",
+                "hash": "e4b046"
+            },
+            {
+                "path": "customView.js",
+                "hash": "c14280"
+            },
+            {
+                "path": "enhancement.js",
+                "hash": "7aa698"
+            },
+            {
+                "path": "hintStack.js",
+                "hash": "c43e6b"
+            },
+            {
+                "path": "i18n.js",
+                "hash": "5917c4"
+            },
+            {
+                "path": "init.js",
+                "hash": "407e66"
+            },
+            {
+                "path": "listView.js",
+                "hash": "5b03c3"
+            },
+            {
+                "path": "load.js",
+                "hash": "83b90a"
+            },
+            {
+                "path": "main.js",
+                "hash": "6fb827"
+            },
+            {
+                "path": "manageView.js",
+                "hash": "019e45"
+            },
+            {
+                "path": "messageCenter.js",
+                "hash": "975564"
+            },
+            {
+                "path": "mobile.js",
+                "hash": "83b90a"
+            },
+            {
+                "path": "model.js",
+                "hash": "b2a7ca"
+            },
+            {
+                "path": "model.old.js",
+                "hash": "544564"
+            },
+            {
+                "path": "modelSyncManager.js",
+                "hash": "710717"
+            },
+            {
+                "path": "models.js",
+                "hash": "9bf968"
+            },
+            {
+                "path": "offlineHinter.js",
+                "hash": "bd8fcb"
+            },
+            {
+                "path": "p2pView.js",
+                "hash": "03bad3"
+            },
+            {
+                "path": "persistentConfig.js",
+                "hash": "86e617"
+            },
+            {
+                "path": "persistentDataStore.js",
+                "hash": "3718fc"
+            },
+            {
+                "path": "readLaterList.js",
+                "hash": "e88422"
+            },
+            {
+                "path": "searchView.js",
+                "hash": "1a4c80"
+            },
+            {
+                "path": "selectors.js",
+                "hash": "7d4ea9"
+            },
+            {
+                "path": "serverConnection.js",
+                "hash": "211027"
+            },
+            {
+                "path": "settingPanel.js",
+                "hash": "5e1cc1"
+            },
+            {
+                "path": "sourceDetail.js",
+                "hash": "cb8d80"
+            },
+            {
+                "path": "sourceList.js",
+                "hash": "3e3fa7"
+            },
+            {
+                "path": "sourceView.js",
+                "hash": "ec8d6a"
+            },
+            {
+                "path": "swipeCheker.js",
+                "hash": "19f416"
+            },
+            {
+                "path": "tagArchiveList.js",
+                "hash": "4d1963"
+            },
+            {
+                "path": "tagList.js",
+                "hash": "0d1273"
+            },
+            {
+                "path": "tagView.js",
+                "hash": "c5b85f"
+            },
+            {
+                "path": "templateManager.js",
+                "hash": "e1b933"
+            },
+            {
+                "path": "test.js",
+                "hash": "7abe2c"
+            },
+            {
+                "path": "userConfig.js",
+                "hash": "356c80"
+            },
+            {
+                "path": "view.js",
+                "hash": "c72e62"
+            },
+            {
+                "path": "viewSwitcher.js",
+                "hash": "83b90a"
+            },
+            {
+                "path": "lib/async.js",
+                "hash": "2ff89a"
+            },
+            {
+                "path": "lib/hammer.min.js",
+                "hash": "85e022"
+            },
+            {
+                "path": "lib/jquery.js",
+                "hash": "e12881"
+            },
+            {
+                "path": "lib/leaf-require.js",
+                "hash": "944c84"
+            },
+            {
+                "path": "lib/leaf.js",
+                "hash": "197c68"
+            },
+            {
+                "path": "lib/lodash.js",
+                "hash": "d73901"
+            },
+            {
+                "path": "lib/md5.js",
+                "hash": "0a26bb"
+            },
+            {
+                "path": "lib/moment.js",
+                "hash": "c46160"
+            },
+            {
+                "path": "lib/parseUri.js",
+                "hash": "c81726"
+            },
+            {
+                "path": "lib/sanitizer.js",
+                "hash": "ea5381"
+            },
+            {
+                "path": "procedure/endlessArchiveLoader.js",
+                "hash": "e557e1"
+            },
+            {
+                "path": "procedure/endlessSearchArchiveLoader.js",
+                "hash": "00d3d3"
+            },
+            {
+                "path": "sourceUtil/adapterTerminal.js",
+                "hash": "ef37a6"
+            },
+            {
+                "path": "sourceUtil/sourceAuthorizeTerminal.js",
+                "hash": "ca5c39"
+            },
+            {
+                "path": "sourceUtil/subscribeAssistant.js",
+                "hash": "14827f"
+            },
+            {
+                "path": "util/delayWorker.js",
+                "hash": "d12cd2"
+            },
+            {
+                "path": "util/dragContext.js",
+                "hash": "06711f"
+            },
+            {
+                "path": "util/messageCenter.js",
+                "hash": "2e4e08"
+            },
+            {
+                "path": "util/scrollChecker.js",
+                "hash": "897fa9"
+            },
+            {
+                "path": "util/serverConnection.js",
+                "hash": "6f9b03"
+            },
+            {
+                "path": "util/swipeChecker.js",
+                "hash": "c80599"
+            },
+            {
+                "path": "util/task.js",
+                "hash": "74153e"
+            },
+            {
+                "path": "util/textGhost.js",
+                "hash": "a789f2"
+            },
+            {
+                "path": "widget/contextMenu.js",
+                "hash": "1361a7"
+            },
+            {
+                "path": "widget/cubeLoadingHint.js",
+                "hash": "2299b0"
+            },
+            {
+                "path": "widget/popup.js",
+                "hash": "4932f4"
+            }
+        ]
+    },
+    "debug": false,
+    "cache": false,
+    "version": "0.1.10"
+}

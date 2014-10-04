@@ -6,7 +6,7 @@ class SettingPanel extends Leaf.Widget
         @hide()
         @groups = Leaf.Widget.makeList @UI.settingGroups
         @adjust()
-        App.initialLoad ()=>
+        App.afterInitialLoad ()=>
             @sync()
     show:()->
         @node$.show()

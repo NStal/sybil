@@ -16,3 +16,5 @@ todo.org
 releaseUtil
 *.log
 db/*
+./test/subscribe/*
+
