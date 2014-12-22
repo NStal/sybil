@@ -7,7 +7,7 @@ exports.register = (dep,callback)->
     username = settings.safeGatewayUsername or "sybil"
     password = settings.safeGatewayPassword or "libys"
     gateway = new Gateway({username:username,password:password,port:dep.webApi.httpPort,ip:getExternalIp()})
-    console.log "!!!!!!!!!","http://localhost:#{dep.webApi.httpPort}/"
+    console.log "safe gateway start at","http://localhost:#{dep.webApi.httpPort}/"
     gateway.addRoute new Gateway.Route("all","/","http://localhost:#{dep.webApi.httpPort}/")
     gateway.on "ready",()->
         callback null,gateway
@@ -98,8 +98,8 @@ getExternalIp = ()->
 #        if new Buffer(kv[1],"base64").toString().trim() is "#{@username}:#{@password}"
 #            return true
 #        return false
-#        
-#        
+#
+#
 #    setup:()->
 #        @host = @_getExternalIp()
 #        #todo check port availability
@@ -118,18 +118,18 @@ getExternalIp = ()->
 #                res.setHeader "WWW-Authenticate",'Basic realm="your username and password"'
 #                res.end("Authorization required!")
 #                return
-#                
+#
 #            WebApiInterface.getRequest req.path,(err,apiRes,stream)->
 #                if err
 #                    res.status(503)
 #                    res.end("server error")
 #                    return
-#                
+#
 #                if not req.cookies.basicAuth
 #                    res.cookie("basicAuth",req.headers["authorization"])
 #                res.writeHead apiRes.statusCode,apiRes.headers
 #                stream.pipe(res)
-#        
+#
 #        @httpServer.listen @port,@host,()=>
 #            @emit "ready"
 #    setupConnection:(connection)->
@@ -167,5 +167,3 @@ getExternalIp = ()->
 #                if not address.internal and address.family.toLowerCase() is "ipv4"
 #                    return address.address
 #        return null
-
-            

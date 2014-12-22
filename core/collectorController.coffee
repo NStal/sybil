@@ -13,43 +13,51 @@ console = global.env.logger.create(__filename)
 # 4. auth done
 # 5. setPinCode done
 # 6. unsubscribe
-# 
+#
 # Passive Interactions
 # 1. "requireAuth" done => candidate/subscribe done
 # 2. "requirePinCode" => candidate/requireAuth done
 # 3. "subscribe" => candidate/subscribe done
 # 4. "archive" => "archive" done
 # 5. "fail" => candidate/fail done
-# 
+#
 class CollectorController extends EventEmitter
     constructor:(@collector)->
         super()
-        
         @collector.on "subscribe",(source)=>
             Database.saveSource source,(err,source)=>
                 if err
-                    console.error err
+                    if err.name is "Duplication"
+                        @emit "duplicate",source
+                    else
+                        console.error err
                     return
-                console.log source.unreadCount,"?"
                 @emit "subscribe",source
         ssm = @collector.sourceSubscribeManager
+        ssm.on "candidate/subscribe",(info)=>
+            @emit "candidate/subscribe",info
         ssm.on "requireLocalAuth",(info)=>
-            console.log "SSM require auth",info
             @emit "candidate/requireAuth",info
-        ssm.on "requirePinCode",(info)=>
-            @emit "candidate/requirePinCode",info
+        ssm.on "requireCaptcha",(info)=>
+            @emit "candidate/requireCaptcha",info
         ssm.on "fail",(info)=>
-            @emit "candidate/fail"
+            @emit "candidate/fail",info
+        ssm.on "cancel",(info)=>
+            @emit "candidate/cancel"
         @collector.sourceManager.on "archive",(archive)=>
             @emit "archive",archive
         @collector.sourceManager.on "source/modify",(source)=>
+            # Source collector may not modify some property of source
+            # once it's created. Because this property maybe changed by user manually.
+            delete source.name
             Database.updateSource source,()=>
                 @emit "source/modify",source
         @collector.sourceManager.on "source/requireLocalAuth",(source)=>
             @emit "source/requireLocalAuth",source
+        @collector.sourceManager.on "source/requireCaptcha",(source)=>
+            @emit "source/requireCaptcha",source
         @collector.sourceManager.on "source/authorized",(source)=>
             @emit "source/authorized",source
-        
         return
     initCollector:(callback = ()-> )->
         console.log "start sync unread count"
@@ -61,11 +69,10 @@ class CollectorController extends EventEmitter
             console.log "start init source"
             @initLoadSource (err)=>
                 console.log "done init source"
-                
                 if err
                     callback err
                 callback
-                
+
     unsubscribe:(guid,callback)->
         @removeSource guid,callback
     removeSource:(guid,callback = ()->)->
@@ -93,15 +100,15 @@ class CollectorController extends EventEmitter
     authCandidate:(cid,username,secret,callback)->
         @collector.sourceSubscribeManager.setAdapterLocalAuth cid,username,secret,callback
     setCandidatePinCode:(cid,pinCode,callback)->
-        @collector.sourceSubscribeManager.setAdapterPinCode cid,pinCode,callback
+        @collector.sourceSubscribeManager.setAdapterCaptcha cid,pinCode,callback
     acceptCandidate:(cid,callback)->
         @collector.sourceSubscribeManager.accept cid,callback
     declineCandidate:(cid,callback)->
         @collector.sourceSubscribeManager.decline cid,callback
+    retryCandidate:(cid,retry,callback)->
+        @collector.sourceSubscribeManager.retry cid,retry,callback
     authSource:(guid,username,secret,callback)->
         @collector.sourceManager.setSourceLocalAuth guid,username,secret,callback
     forceUpdateSource:(guid,callback)->
         @collector.sourceManager.forceUpdateSource guid,callback
 module.exports = CollectorController
-
-

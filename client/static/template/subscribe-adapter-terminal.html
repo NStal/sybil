@@ -1,6 +1,6 @@
 <div class="subscribe-terminal" data-class="mode">
   <div class="accepter">
-    <div class="title" data-id="title">
+    <div class="title">
       Subscribe
     </div>
     <div class="detail">
@@ -11,8 +11,20 @@
       <button data-id="decline" class="">Ignore</button>
     </div>
   </div>
+  <div class="failure">
+    <div class="title">
+      Failed
+    </div>
+    <div class="detail">
+      <p data-text="failureHint"></p>
+    </div>
+    <div class="choice"> 
+      <button data-id="retry" class="">Retry</button>
+      <button data-id="cancel" class="">Cancel</button>
+    </div>
+  </div>
   <div class="authenticator">
-    <div class="title" data-id="title">
+    <div class="title">
       Authentication
     </div>
     <div class="detail">
@@ -21,10 +33,22 @@
       <input type="password" name="" data-id="secret" value="" placeholder="service secret" />
     </div>
     <div class="choice">
-      <button data-id="authorize" class="">authorize</button>
-      <button data-id="refuse" class="">refuse</button>
+      <button data-id="authorize" class="">Authorize</button>
+      <button data-id="refuse" class="">No</button>
     </div>
   </div>
-  <div class="hinter" data-text="hint">
+  <div class="hinter">
+    <div class="title" data-text="hintTitle">
+    </div>
+    <div class="detail">
+      <p data-text="hint"></p>
+    </div>
+  </div>
+  <div class="waiter">
+    <div class="title" data-text="waitTitle">
+    </div>
+    <div class="detail">
+      <cube-loading-hint data-id="loadingHint" class="loading-hint white" hint="waiting..."></cube-loading-hint hint="waiting...">
+    </div>
   </div>
 </div>

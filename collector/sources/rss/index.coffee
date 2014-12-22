@@ -11,6 +11,8 @@ console = global.env.logger.create(__filename)
 
 class RSS extends Source
     @detectStream = (uri)->
+        if not /(http:\/\/)|(https:\/\/)|(feed:\/\/)/.test uri
+            return null
         stream = new EventEmitter()
         tasks = new Tasks("checkAsRss","checkAsHTML")
         sources = []
@@ -18,12 +20,15 @@ class RSS extends Source
             result = result or []
             result.forEach (item)->
                 stream.emit "data",item
+            console.debug "as html done"
             tasks.done "checkAsHTML"
         @detectAsRss uri,(err,result)=>
             if result
                 stream.emit "data",result
+            console.debug "as rss done"
             tasks.done "checkAsRss"
         tasks.once "done",()=>
+            console.debug "really done!"
             stream.emit "end"
         return stream
     @detectAsHTML = (uri,callback)->
@@ -35,12 +40,13 @@ class RSS extends Source
                 return new RSS {uri:link}
             callback null,result
     @detectAsRss = (uri,callback)->
-        rssUtil.fetchRss {uri:uri,noQueue:true},(err,info)->
+        timeout = 20 * 1000
+        rssUtil.fetchRss {uri:uri,noQueue:true,timeout:timeout},(err,info)->
             if err
                 callback err
                 return
             source = new RSS {uri:uri}
-            source.initializer.setInitializeInfo(info)
+            #source.initializer.setInitializeInfo(info)
             callback null,source
     @create = (info)->
         return new RSS(info)
@@ -48,21 +54,21 @@ class RSS extends Source
         super(info)
         @type = "rss"
         @properties = {}
-        @authorized = true
-        @authorizeInfo = null
-        @hasError = null
 
 class Updater extends Source::Updater
     constructor:(@source)->
         super(@source)
-    fetchAttempt:()->
+    atFetching:(sole)->
         console.debug "try fetching rss: #{@source.guid} at #{@nextFetchInterval}"
         rssUtil.fetchRss {uri:@source.uri},(err = null,info = {})=>
+            @_fetchHasCheckSole = true
+            if not @checkSole sole
+                return
             if err
                 @error new Source.Errors.NetworkError("fail to fetch archive for #{@source.guid}")
                 return
-            @rawFetchedArchives = info.archives or []
-            @setState "fetchAttempted"
+            @data.rawFetchedArchives = info.archives or []
+            @setState "fetched"
     parseRawArchive:(raw)->
         if not raw.guid and not raw.link and not raw.title
             throw new Error("no guid provide for archve")
@@ -75,7 +81,9 @@ class Updater extends Source::Updater
             ,guid:"rss_" + raw.guid || raw.link || raw.title
             ,type:"rss"
             ,collectorName:"rss"
-            ,authorName:raw.author
+            ,author:{
+                name:raw.author
+            }
             ,originalLink:raw.link
             ,sourceName:@source.name
             ,sourceGuid:@source.guid
@@ -86,20 +94,21 @@ class Updater extends Source::Updater
 class Initializer extends Source::Initializer
     constructor:(@source)->
         super(@source)
-        @initialized = @source.guid?
-    atInitializing:()->
+        @data.initialized = @source.guid?
+    atInitializing:(sole)->
         rssUtil.fetchRss {uri:@source.uri},(err,info)=>
+            if not @checkSole sole
+                return
             if err
                 @error new Source.Errors.NetworkError("fail to fetch initialize info for rss #{@source.uri}")
                 return
             @setInitializeInfo info
     setInitializeInfo:(info)->
-        @source.name = info.name
-        @source.guid = "rss_"+@source.uri
-        @source.updater.prefetchArchiveBuffer = info.archives or []
-        @initialized = true
+        @data.name = info.name
+        @data.guid = "rss_"+@source.uri
+        @data.prefetchArchiveBuffer = info.archives or []
         @setState "initialized"
-    
+
 # we currently don't support rss auth
 # so just don't implement it
 class Authorizer extends Source::Authorizer

@@ -1,13 +1,17 @@
-# option
-# url        : url to fetch
-# proxy      : what kind of proxy to use string like phttp://localhost:3223/
-# timeout    : timeout
-# headers    : custom headers
-# useStream  : return a stream instead of downloaded content
-# maxRedirect: max redirect for 30X status code
-# acceptCache: return Object {cache:true} when recieve not modified
-# noQueue    : send request event the queue is full
-
+# httpUtil.httpGet(option,callback)
+# option {
+#    url        : url to fetch
+#    proxy      : what kind of proxy to use string like phttp://localhost:3223/
+#    timeout    : timeout
+#    headers    : custom headers
+#    useStream  : return a stream instead of downloaded content
+#    maxRedirect: max redirect for 30X status code
+#    acceptCache: return Object {cache:true} when recieve not modified
+#    noQueue    : send request event the queue is full
+#}
+# 
+# callback(err,res,content)
+# callback(err,res,stream)  if useStream is set
 async = require "async"
 ProxyAgent = require "proxy-agent"
 urlModule = require "url"
@@ -33,10 +37,11 @@ httpGetQueue = async.queue ((job,done)->
         job.callback.apply {},arguments
         done()
         
-    ),12
+    ),20
     
 exports.httpGet = (option,callback)->
     if option.noQueue
+        console.debug "instant http request for #{option.url}, proxy #{option.proxy or 'None'}"
         exports._httpGet option,callback
         return
     httpGetQueue.push {option:option,callback:callback}
@@ -62,7 +67,7 @@ exports._httpGet = (option,callback)->
         _callback = ()->
     scheme = exports._prepareScheme(option)
     if not scheme
-        callback new Errors.InvalidProtocol "fail to parse scheme"
+        callback new Errors.InvalidProtocol "fail to parse scheme with url:#{option.url}"
         return
     agent = exports._prepareAgent(option)
     headers = option.headers or {}
@@ -79,6 +84,9 @@ exports._httpGet = (option,callback)->
     requestOption.headers = headers
     requestOption.agent = agent
     req = scheme.request requestOption,(res)=>
+        if req.initialTimeout
+            clearTimeout req.initialTimeout
+            req.initialTimeout = null
         if jar
             cookie = res.headers["set-cookie"]
             if cookie instanceof Array
@@ -119,7 +127,7 @@ exports._httpGet = (option,callback)->
         if useStream
             callback null,res,pipeline
             return
-            
+        
         buffers = []
         pipeline.on "readable",()->
             while data = pipeline.read()
@@ -129,7 +137,7 @@ exports._httpGet = (option,callback)->
         pipeline.on "end",()->                    
             buffer = Buffer.concat buffers
             callback null,res,buffer
-    hasTimeout = false
+    req.hasTimeout = false
     req.on "error",(err)->
         # Note:
         # errer after recieve header but useStream
@@ -137,17 +145,28 @@ exports._httpGet = (option,callback)->
         # which means you are responsible for completeness check
         # also when timeout it error will be ECONNRESET when not content recieved
         # the ECONNRESET will also be suppressed by timeout
-        if hasTimeout
-            callback new Errors.Timeout("maximum time #{timeout} exists")
+        console.debug "http error",err
+        if req.hasTimeout
             return
         callback new Errors.IOError("request error",{via:err})
-    req.setTimeout timeout,()->
-        hasTimeout = true
+    # this is for initial timeout
+    req.initialTimeout = setTimeout (()->
+        console.debug "reach initial timeout #{url}"
+        req.hasTimeout = true
         req.abort()
+        callback new Errors.Timeout("maximum time #{timeout} exists")
+        ),timeout
+    # this is for TCP timeout
+    req.setTimeout timeout,()->
+        req.hasTimeout = true
+        req.abort()
+        callback new Errors.Timeout("maximum time #{timeout} exists")
     req.end()
 exports._prepareScheme = (option)->
     scheme = null
     url = option.url
+    if not url
+        return null
     if url.indexOf("https") is 0
         scheme = require "https"
     else if url.indexOf("http") is 0
@@ -175,7 +194,7 @@ exports.httpPost = (option,callback)->
         _callback = ()->
     scheme = exports._prepareScheme(option)
     if not scheme
-        callback new Errors.InvalidProtocol "fail to parse scheme"
+        callback new Errors.InvalidProtocol "fail to parse scheme with url:#{option.url}"
         return
     agent = exports._prepareAgent(option)
     headers = option.headers or {}
@@ -237,7 +256,7 @@ exports.httpPost = (option,callback)->
         pipeline.on "end",()->                    
             buffer = Buffer.concat buffers
             callback null,res,buffer
-    hasTimeout = false
+    req.hasTimeout = false
     req.on "error",(err)->
         # Note:
         # errer after recieve header but useStream
@@ -245,13 +264,15 @@ exports.httpPost = (option,callback)->
         # which means you are responsible for completeness check
         # also when timeout it error will be ECONNRESET when not content recieved
         # the ECONNRESET will also be suppressed by timeout
-        if hasTimeout
-            callback new Errors.Timeout("maximum time #{timeout} exists")
+        if req.hasTimeout
             return
         callback new Errors.IOError("request error",{via:err})
+    # note unlike get request we don't have initial timeout for post
+    # request we maybe posting something very large, initial timeout is not reasonable
     req.setTimeout timeout,()->
-        hasTimeout = true
+        req.hasTimeout = true
         req.abort()
+        callback new Errors.Timeout("maximum time #{timeout} exists")
     req.end(postContent)
 exports._prepareAgent = (option)->
     if not option.proxy

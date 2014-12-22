@@ -42,9 +42,9 @@
         endDate = Date.now();
         if (endDate - this.startDate < 1000) {
           if (this.startPoint[0] - this.endPoint[0] > swipeFloor) {
-            this.emit("swipeleft");
+            this.emit("swipeleft", e);
           } else if (this.startPoint[0] - this.endPoint[0] < -swipeFloor) {
-            this.emit("swiperight");
+            this.emit("swiperight", e);
           }
         }
       }

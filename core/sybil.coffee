@@ -1,21 +1,22 @@
 # this is the entry of sybil
 console = require("../common/logger.coffee").create(__filename)
+pathModule = require "path"
 fs = require("fs")
 
 # Setup some global vars to prevent relative requires
 # which is hard to manipulate, but also be careful don't
 # introduce too many of them.
-global.env = global.env || {}
-global.env.logger = require "../common/logger.coffee"
-global.env.settings = require "../settings.coffee"
-global.env.httpUtil = require "../common/httpUtil.coffee"
+# setup global environments
+require "./env.coffee"
 
 CollectorController = require "./collectorController.coffee"
 Collector = require "../collector/collector.coffee"
 class Sybil extends (require "events").EventEmitter
     Database = require("./db.coffee")
     constructor:()->
+        @sourceList = require "../collector/sourceList.coffee"
         @collector = new Collector()
+        @collector.setCustomSourceFolder pathModule.join global.env.root,"customSources"
         @collectorController = new CollectorController(@collector)
         @pluginCenter = new (require "./pluginCenter.coffee").PluginCenter(this)
         @pluginSettingManager = new (require("./settingManager.coffee")).SettingManager()
@@ -26,19 +27,18 @@ class Sybil extends (require "events").EventEmitter
             console.log "subscribe source",source
             @emit "source",source
     init:()->
-        
+
         @initTasks = new (require "node-tasks")("init/db","init/collector","init/plugins")
         # some dirty works here
         # 1. load global settings
         # 2. init database connection
         # 3. init collectors
         # 4. init plugins (won't check)
-        # and 
+        # and
         # 5. listen events.
-        
-        # 1.
+
         @settings = global.env.settings
-        
+
         @pluginSettingManager.setDefaultSettingFolder @settings.pluginSettingsPath
         if not fs.existsSync(@settings.pluginSettingsPath)
             fs.mkdirSync(settings.pluginSettingsPath)
@@ -57,11 +57,9 @@ class Sybil extends (require "events").EventEmitter
             @emit "init"
             @isReady = true
             @emit "ready"
-            
-        # 5. listen events
-    # here comes all the sybil common read write apis
+
     handleArchive:(archive,done)->
-        # make sure it's not a nested object
+        # make sure it's a serialized
         # ... OK may not enough
         if archive.toJSON and typeof archive.toJSON is "function"
             archive = archive.toJSON()
@@ -72,7 +70,7 @@ class Sybil extends (require "events").EventEmitter
                 done()
                 ),1000
             return false
-        Database.saveArchive archive,(err,saved)=> 
+        Database.saveArchive archive,(err,saved)=>
             if err and not (err instanceof Database.Errors.Duplication)
                 console.error "db error",err,"fail to save archive",archive.guid
                 done()
@@ -84,7 +82,7 @@ class Sybil extends (require "events").EventEmitter
             console.debug "new archive",archive.title
             @emit "archive",archive
             done()
-            
+
     # though most of these functions perform just like
     # interact with db directly
     # but will make some difference in the future
@@ -209,7 +207,7 @@ class Sybil extends (require "events").EventEmitter
             if err
                 callback err
                 return
-            for archive in archives 
+            for archive in archives
                 archive.meta = archive.meta or {}
                 archive.meta.shareRecords = archive.meta.shareRecords or []
                 for record in records

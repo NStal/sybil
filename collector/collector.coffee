@@ -1,7 +1,7 @@
 EventEmitter = (require "events").EventEmitter
 SourceManager = require "./sourceManager.coffee"
 SourceSubscribeManager = require "./sourceSubscribeManager.coffee"
-SourceList = require "./sourceList.coffee"
+SourceList = (require "./sourceList.coffee")
 # All event emit from this module should be json serializable
 # Consider this module are sort of edge interface of the
 # collector system.
@@ -20,10 +20,15 @@ class Collector extends EventEmitter
             # ensure JSON serializable
             @emit "subscribe",source.toSourceModel()
             @sourceManager.add source
+        @sourceMap = SourceList.getMap()
+#        @debug()
+    setCustomSourceFolder:(folder)->
+        SourceList.loadSourcesInFolder folder
+        @sourceMap = SourceList.getMap()
     loadSource:(sourceInfo)->
         # load and create source instance from information
         # previously saved to database or something like that
-        Source = SourceList.Map[sourceInfo.type or sourceInfo.collectorName]
+        Source = @sourceMap[sourceInfo.type or sourceInfo.collectorName]
         if not Source
             console.error "Source type not supported"
             return null
@@ -39,5 +44,11 @@ class Collector extends EventEmitter
                 @sourceManager.remove source
                 return source
         return null
-    
+    debug:()->
+        Source = require("./source/source.coffee")
+        Source::_isDebugging = true
+        Source::Authorizer::_isDebugging = true
+        Source::Updater::_isDebugging = true
+        Source::Initializer::_isDebugging = true
+        SourceSubscribeManager.SubscribeAdapter::_isDebugging = true
 module.exports = Collector

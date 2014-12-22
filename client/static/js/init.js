@@ -17,4 +17,6 @@
     });
   });
 
+  window.SybilMainContext = context;
+
 }).call(this);

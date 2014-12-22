@@ -39,7 +39,8 @@
     };
 
     AddSourcePopup.prototype.show = function() {
-      return this.node$.show();
+      this.node$.show();
+      return this.UI.input$.focus();
     };
 
     AddSourcePopup.prototype.hide = function() {

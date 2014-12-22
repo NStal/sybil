@@ -70,7 +70,6 @@
     App.addSourcePopup = new AddSourcePopup();
     App.addSourcePopup.appendTo(document.body);
     App.offlineHinter = new OfflineHinter();
-    App.settingPanel = new SettingPanel();
     App.sourceView = new SourceView();
     App.listView = new ListView();
     App.searchView = new SearchView();

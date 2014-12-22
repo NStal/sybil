@@ -264,7 +264,7 @@
       list = this.currentList;
       this.UI.loadingHint.show();
       return this.currentList.getArchives({
-        offset: this.length,
+        offset: this.archives.length,
         count: loadCount
       }, (function(_this) {
         return function(err, archives) {

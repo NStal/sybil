@@ -1,4 +1,10 @@
 httpUtil = require "../../common/httpUtil.coffee"
+urlModule = require "url"
+pathModule = require "path"
+
+# This file is a mess.
+# I will refactor it later or never.
+
 exports.requires = ["webApi"]
 exports.register = (dep,callback)->
     if not dep.webApi
@@ -36,6 +42,7 @@ exports.register = (dep,callback)->
                     res.status(591)
                     res.end("unreachable with force proxy")
                     return
+                fixHeaderFilename url,remoteRes
                 res.writeHead(remoteRes.statusCode or 503,remoteRes.headers)
                 stream.pipe(res)
         else
@@ -48,9 +55,17 @@ exports.register = (dep,callback)->
                             res.status(591)
                             res.end("unreachable with both direct and proxy")
                             return
+                        fixHeaderFilename url,remoteRes
                         res.writeHead(remoteRes.statusCode or 503,remoteRes.headers)
                         stream.pipe(res)
                     return
+                fixHeaderFilename url,remoteRes
                 res.writeHead(remoteRes.statusCode or 503,remoteRes.headers)
                 stream.pipe(res)
     callback null,{}
+
+fixHeaderFilename = (url,remoteRes)->
+    obj = urlModule.parse(url)
+    name = pathModule.basename obj.pathname
+    if name and not remoteRes.headers["content-disposition"]
+        remoteRes.headers["content-disposition"] = "attachment; filename=#{name}"

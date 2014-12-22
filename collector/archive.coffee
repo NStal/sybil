@@ -14,9 +14,10 @@ class Archive
     toJSON:()->
         return {
             guid:@guid
-            ,collectorName:@collectorName
+            ,type:@type
             ,createDate:@createDate
             ,fetchDate:@fetchDate
+            ,author:@author or null
             ,authorName:@authorName
             ,authorAvatar:@authorAvatar
             ,authorLink:@authorLink

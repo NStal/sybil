@@ -32,9 +32,11 @@ class WebApiServer extends EventEmitter
         @sybil.on "friend/add",@pushFriendAdd.bind this
         @sybil.on "friend/remove",@pushFriendRemove.bind this
         cc = @sybil.collectorController
+        cc.on "candidate/subscribe",@genPush "candidate/subscribe"
         cc.on "candidate/requireAuth",@genPush "candidate/requireAuth" 
-        cc.on "candidate/requirePinCode",@genPush "candidate/requirePinCode"
+        cc.on "candidate/requireCaptcha",@genPush "candidate/requireCaptcha"
         cc.on "candidate/fail",@genPush "candidate/fail"
+        cc.on "candidate/cancel",@genPush "candidate/cancel"
         cc.on "source/modify",@genPush "source/modify"
         cc.on "source/requireLocalAuth",@genPush "source/requireLocalAuth"
         cc.on "source/authorized",@genPush "source/authorized"
@@ -360,13 +362,17 @@ class WebApiServer extends EventEmitter
             callback null,resultStream
         messageCenter.registerApi "authCandidate",(data={},callback)=>
             @sybil.collectorController.authCandidate data.cid,data.username,data.secret,callback
-        messageCenter.registerApi "setCandidatePinCode",(data={},callback)=>
-            @sybil.collectorController.authCandidate data.cid,data.pinCode,callback
+        messageCenter.registerApi "setCandidateCaptcha",(data={},callback)=>
+            @sybil.collectorController.authCandidate data.cid,data.captcha,callback
 
         messageCenter.registerApi "acceptCandidate",(cid,callback)=>
             @sybil.collectorController.acceptCandidate cid,callback
         messageCenter.registerApi "declineCandidate",(cid,callback)=>
             @sybil.collectorController.declineCandidate cid,callback
+        messageCenter.registerApi "retryCandidate",(data = {},callback)=>
+            cid = data.cid
+            retry = data.retry
+            @sybil.collectorController.retryCandidate cid,retry,callback
         messageCenter.registerApi "authSource",(data,callback)=>
             @sybil.collectorController.authSource data.guid,data.username,data.secret,callback
         messageCenter.registerApi "forceUpdateSource",(guid,callback)=>

@@ -36,7 +36,7 @@
     SourceDetail.prototype.render = function() {
       var item, perweek, result, _i, _len, _ref;
       this.renderData = {
-        "errorDescription": this.source.lastError && this.source.lastError.name || this.source.lastErrorDescription || "None",
+        "errorDescription": this.source.lastError && JSON.stringify(this.source.lastError) || this.source.lastErrorDescription || "None",
         "lastUpdate": this.source.lastUpdate && moment(this.source.lastUpdate).fromNow() || "Never",
         "lastFetch": this.source.lastFetch && moment(this.source.lastFetch).fromNow() || "Never",
         "fetchInterval": this.source.nextFetchInterval && moment.duration(this.source.nextFetchInterval).humanize() || "Never"

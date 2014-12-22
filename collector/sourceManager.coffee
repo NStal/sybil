@@ -20,17 +20,33 @@ class SourceManager extends EventEmitter
             return
         @sources.push source
         source.on "archive",(archive)=>
+            console.log "gbet archive",archive.guid
+            @emit "source/archive",source,archive
             @emit "archive",archive
         source.on "modify",()=>
             @emit "source/modify",source.toSourceModel()
-        source.on "requireLocalAuth",()=>
+        source.on "wait/localAuth",()=>
             @emit "source/requireLocalAuth",source.toSourceModel()
+        source.on "wait/captcha",()=>
+            @emit "source/requireCaptcha",source.toSourceModel()
+        source.on "wait",()=>
+            @emit "source/modify",source.toSourceModel()
         source.on "authorized",()=>
             @emit "source/authorized",source.toSourceModel()
-        source.updater.start()
+        source.on "panic",()=>
+            @emit "source/modify",source.toSourceModel()
+            @emit "source/panic",source.toSourceModel()
+        # for recovered source it should be waiting for start signal
+        if source.isWaitingFor "startSignal"
+            source.give "startSignal"
+        # For newly detected source should always
+        # be at initialized state and waiting for a startUpdateSignal
+        if source.isWaitingFor "startUpdateSignal"
+            source.give "startUpdateSignal"
+
     remove:(source)->
         @sources = @sources.filter (target)->return target isnt source
-        source.stop()
+        source.reset()
         source.removeAllListeners()
     forceUpdateSource:(guid,callback)->
         found = @sources.some (source)->
@@ -40,14 +56,54 @@ class SourceManager extends EventEmitter
             return false
         if not found
             callback new Errors.NotExists("source of guid #{guid} not found")
-    setSourceLocalAuth:(guid,username,secret,callback)->
+    setSourceCaptcha:(guid,captcha,callback)->
         found = @sources.some (source)->
             if source.guid is guid
-                source.setLocalAuth username,secret
-                callback null
+                if source.isWaitingFor "captcha"
+                    source.give "captcha",captcha
+                    callback null
+                else
+                    callback Errors.InvalidAction "source is not waiting for a captcha"
                 return true
             return false
         if not found
             callback new Errors.NotExists("source of guid #{guid} not found")
-        
+
+    setSourceLocalAuth:(guid,username,secret,callback)->
+        found = @sources.some (source)->
+            if source.guid is guid
+                if source.isWaitingFor "localAuth"
+                    source.give "localAuth",username,secret
+                    callback null
+                else
+                    callback Errors.InvalidAction "source is not waiting for a `localAuth`"
+                return true
+            return false
+        if not found
+            callback new Errors.NotExists("source of guid #{guid} not found")
+    # Using the source inside SourceManager to update
+    # the given model.
+    # Why do I do this?
+    #
+    # Some properties like Source.unreadCount which is important
+    # for user experience but has nothing to do with the collector.
+    # Collector don't maintain a unread count, because it has no knowledge of
+    # the old archives. So it's not reasonable
+    # to use Collector.Source as a source model cache.
+    #
+    # But some latest error will only be precisely available at Collector.Source such as
+    # latest error or lastFetch time. This kinds of properties are import to frontend
+    # as well.
+    #
+    # So I provide a expandSourceInfo method to update the information of a given model from
+    # database by  the knowledge in SourceManager.Source.
+    expandSourceInfo:(model)->
+        for source in @sources
+            if source.uri is model.uri
+                m = source.toSourceModel()
+                for prop of m
+                    if m.hasOwnProperty prop
+                        model[prop] = m[prop]
+                return model
+        return model
 module.exports = SourceManager

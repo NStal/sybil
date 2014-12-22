@@ -22,6 +22,7 @@
         height:100%;
         overflow:auto;
         position:relative;
+        margin-top:45px;
         .container{
 	    width:100%;
         }
@@ -65,17 +66,24 @@
     }
     .archive-list-controller{
         position:fixed;
-        right:8px;
-        bottom:120px;
+        @offset:20px;
+        right:@offset;
+        bottom:15%;
         border-radius:4px;
         background-color:@color-dark-bg;
         color:white;
         font-size:24px;
         z-index:100;
         overflow:hidden;
+        opacity:0.5;
+        .transition(all,400ms);
+        &.left-mode{
+            right:auto;
+            left:@offset;
+        }
         .tab-button{
             display:block;
-            padding:6px 10px;
+            padding:14px 20px;
             .clickable;
             border-bottom:1px solid rgba(255,255,255,0.2);
             &:active{

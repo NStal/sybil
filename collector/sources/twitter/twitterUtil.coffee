@@ -45,13 +45,16 @@ exports.setPossibleProxies = (proxies = [])->
 exports.setPossibleProxies(global.env.settings.proxies)
 
 exports.renderDisplayContent = (data)->
-    entities = data.extended_entities or data.entities or {}
+    entities = data.archive.extended_entities or data.archive.entities or {}
     medias = entities.media or []
+    images = []
     if medias instanceof Array
         for media in medias
             images.push media.media_url
-    
-    return data.archive.text
+    $content = cheerio.load "<div class='tweet'>#{data.archive.text}</div>"
+    for image in images
+        $content(".tweet").append "<img src='#{image}'/>"
+    return $content.html()
 # states
 # void
 # proxyAttemped
@@ -111,7 +114,6 @@ class exports.TwitterRequestClient extends States
         option.method = option.method or "GET"
         option.headers = option.headers or {}
         if option.jar and not option.headers.cookie
-            console.debug "send cookie with url",option.url,"cookie:",option.jar.getCookieStringSync(option.url)
             option.headers["cookie"] = option.jar.getCookieStringSync(option.url)
         option.proxy = @proxy
 #        option.headers["user-agent"] = option.headers["user-agent"] or @userAgent

@@ -44,23 +44,25 @@ class TwitterList extends Source
     @test = (uri)->
         return (new RegExp("twitter.com/([^/]+)/lists/([^/]+)$","i")).test(uri)
     
-class Updater extends Source::Updater
+class TwitterListUpdater extends Source::Updater
     constructor:(@source)->
         super(@source)
         @timeout = 60 * 1000
         @minFetchInterval = 10 * 1000
         @userAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
         
-    fetchAttempt:()->
-        console.debug "fetch attempt"
-        if not @source.authorizer.authorizeInfo.cookie
+    atFetching:(sole)->
+        if not @data.authorizeInfo.cookie
             @error new Errors.AuthorizationFailed("twitter initialize need authorize")
             return
         path = urlModule.parse(@source.uri).path
         pageUrl = urlModule.resolve "https://mobile.twitter.com/",path
         
         @source.getCSRFToken pageUrl,(err,code)=>
-            console.error err,code
+            
+            @_fetchHasCheckSole = true
+            if not @checkSole sole
+                return
             if err
                 @error err
                 return
@@ -87,14 +89,15 @@ class Updater extends Source::Updater
             }
             console.debug "initial request"
             @source.client.request option,(err,res,content)=>
-                console.debug "done inital request",err
+                if not @checkSole sole
+                    return
                 if err
                     @error new Errors.NetworkError("fail to initialize",{via:err})
                     return
                 
                 content = content.toString()
-                if res.headers["location"] or content.length < 2 * 1024
-                    @emit "requireAuth"
+                if res.headers["location"]
+                    @error new Errors.AuthorizationFailed "recieve redirect maybe authorization outdated"
                     return
                 try
                     data = JSON.parse content.toString()
@@ -108,24 +111,26 @@ class Updater extends Source::Updater
                 if not data or not (data instanceof Array)
                     @error new Errors.AuthorizationFailed("lauching data not array likely to be authorization failed",{data:data})
                     return
-                @rawFetchedArchives = data
-                @setState "fetchAttempted"
+                @data.rawFetchedArchives = data
+                @setState "fetched"
     parseRawArchive:(data)->
         raw = data
         user = data.user
         originalLink = "https://twitter.com/#{user.screen_name}/status/#{raw.id}"
         title = user.screen_name
-        content = raw.text
-        displayContent = twitterUtil.renderDisplayContent({archive:data})
+        content = twitterUtil.renderDisplayContent({archive:data})
+        displayContent = content
         result =  {
             guid:"#{@source.type}_#{originalLink}"
             ,collectorName:@source.type
             ,type:@source.type
             ,createDate:new Date(raw.created_at) # it's hard to parse
             ,fetchDate:new Date()
-            ,authorName:user.screen_name
-            ,authorAvatar:user.profile_image_url
-            ,authorLink:"{raw.user.profile_url}"
+            ,author:{
+                name:user.screen_name
+                ,avatar:user.profile_image_url
+                ,link:user.profile_url
+            }
             ,originalLink:originalLink
             ,sourceName:@source.name
             ,sourceUrl:"https://twitter.com/"
@@ -141,18 +146,20 @@ class Updater extends Source::Updater
         }
         return result
             
-class Initializer extends Source::Initializer
+class TwitterListInitializer extends Source::Initializer
     constructor:(@source)->
         super(@source)
         @userAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
-    atInitializing:()->
-        if not @source.authorizer.authorizeInfo.cookie
+    atInitializing:(sole)->
+        if not @data.authorizeInfo.cookie
             @error new Errors.AuthorizationFailed("twitter initialize need authorize")
             return
         path = urlModule.parse(@source.uri).path
         pageUrl = urlModule.resolve "https://mobile.twitter.com/",path
         console.debug "start csrf"
         @source.getCSRFToken pageUrl,(err,code)=>
+            if not @checkSole sole
+                return
             if err
                 @error err
                 return
@@ -177,9 +184,9 @@ class Initializer extends Source::Initializer
                 }
                 ,method:"POST"
             }
-            console.debug "init attempted",option
             @source.client.request option,(err,res,content)=>
-                console.debug "init attempt",err,!!content and content.length
+                if not @checkSole sole
+                    return
                 if err
                     @error new Errors.NetworkError("fail to initialize",{via:err})
                     return
@@ -193,10 +200,9 @@ class Initializer extends Source::Initializer
                     @error new Errors.ParseError("fail to parse init content")
                     return
                     
-                @source.guid = "twitterList_"+@source.uri
-                @source.name = "Twitter list \"#{list}\" via #{user}"
-                @source.updater.prefetchArchiveBuffer = result.archives
-                console.debug "initialized",@source.guid,@source.name,@source.uri
+                @data.guid = "twitterList_"+@source.uri
+                @data.name = "Twitter list \"#{list}\" via #{user}"
+                @data.prefetchArchiveBuffer = result.archives
                 @setState "initialized"
     parseInitContent:(content)->
         try
@@ -220,13 +226,13 @@ urlModule = require "url"
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
 httpUtil = global.env.httpUtil
-class Authorizer extends Source::Authorizer
+class TwitterListAuthorizer extends Source::Authorizer
     constructor:(@source)->
         super(@source)
         @jar = @source.jar 
         @timeout = 1000 * 60
-    prelogin:()->
-        @requirePinCode = false
+    atPrelogin:(sole)->
+        @data.requireCaptcha = false
         preLoginUrl = "https://twitter.com/"
         option = {}
         option.url = preLoginUrl
@@ -238,6 +244,8 @@ class Authorizer extends Source::Authorizer
             ,"user-agent":null
         }
         @source.client.request option,(err,res,content)=>
+            if not @checkSole sole
+                return
             if err
                 @error new Errors.NetworkError("fail to prelogin",{via:err})
                 return
@@ -252,16 +260,16 @@ class Authorizer extends Source::Authorizer
                 @error new Errors.ParseError("fail to get prelogin data")
                 return
                 # check pin code in fureture here
-            @preloginData = data
+            @data.preloginData = data
             @setState "prelogined"
-    loginAttempt:()->
+    atLogining:(sole)->
         postData = {
-            "session[username_or_email]":@username
-            ,"session[password]":@secret
+            "session[username_or_email]":@data.username
+            ,"session[password]":@data.secret
             ,remember_me:1
             ,return_to_ssl:"true"
             ,redirect_after_login:"/"
-            ,authenticity_token:@preloginData.formAuthenticityToken
+            ,authenticity_token:@data.preloginData.formAuthenticityToken
         }
         loginUrl = "https://twitter.com/sessions"
         option = {url:loginUrl}
@@ -274,25 +282,24 @@ class Authorizer extends Source::Authorizer
         }
         console.debug "try login atttemp"
         @source.client.request option,(err,res,content)=>
-            console.debug "prelogin attempt"
+            if not @checkSole sole
+                return
             if err
                 @error new Errors.NetworkError("fail to get prelogin data",{via:err})
                 return
             
             content = content.toString()
-            @postSessionResult = content
-            if @postSessionResult.indexOf("error") > 0
+            @data.postSessionResult = content
+            if @data.postSessionResult.indexOf("error") > 0
                 @error new Errors.AuthorizationFailed("invalid authentication info")
                 return
                 
-            @authorized = true
-            @loginError = null
-            @cookie = @jar.getCookieStringSync("https://twitter.com")
-            @authorizeInfo = {@cookie}
+            @data.authorized = true
+            @data.cookie = @jar.getCookieStringSync("https://twitter.com")
+            @data.authorizeInfo = {cookie:@data.cookie}
             @setState "authorized"
-    checkLogin:()->
-TwitterList::Updater = Updater
-TwitterList::Initializer = Initializer
-TwitterList::Authorizer = Authorizer
+TwitterList::Updater = TwitterListUpdater
+TwitterList::Initializer = TwitterListInitializer
+TwitterList::Authorizer = TwitterListAuthorizer
 
 module.exports = TwitterList

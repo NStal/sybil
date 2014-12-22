@@ -17,6 +17,7 @@
 
     function ArchiveDisplayer(template) {
       ArchiveDisplayer.__super__.constructor.call(this, template);
+      this.useDisplayContent = true;
     }
 
     ArchiveDisplayer.prototype.setArchive = function(archive) {
@@ -25,8 +26,7 @@
       }
       this.archive = archive;
       this.archive.listenBy(this, "change", this.render);
-      this.render();
-      return this.useDisplayContent = true;
+      return this.render();
     };
 
     ArchiveDisplayer.prototype._renderShareInfo = function(profile, howmany) {

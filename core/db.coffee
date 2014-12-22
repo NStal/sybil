@@ -454,6 +454,8 @@ exports.getCustomArchives = (query,callback)->
             finalQuery[prop] = query.properties[prop]
     console.log finalQuery,"~~~",{limit:query.limit or 10000,skip:query.offset or 0}
     cursor = Collections.archive.find finalQuery,{limit:query.limit or 10000,skip:query.offset or 0}
+    if not cursor.noSort
+        cursor.sort({createDate:-1})
     # here maybe some performance issue one day
     # but we are designed for single user
     # so it may not be a problem here

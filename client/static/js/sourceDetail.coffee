@@ -17,7 +17,7 @@ class SourceDetail extends Popup
         @renderData.refreshStyle = ""
     render:()->
         @renderData = {
-            "errorDescription":@source.lastError and @source.lastError.name or @source.lastErrorDescription or "None"
+            "errorDescription":@source.lastError and JSON.stringify(@source.lastError) or @source.lastErrorDescription or "None"
             "lastUpdate":@source.lastUpdate and moment(@source.lastUpdate).fromNow() or "Never"
             "lastFetch":@source.lastFetch and moment(@source.lastFetch).fromNow() or "Never"
             "fetchInterval":@source.nextFetchInterval and moment.duration(@source.nextFetchInterval).humanize() or "Never"

@@ -23,9 +23,9 @@
         <span class="title clickable" data-id="title"></span>
       </div>
       <ul class="view-selector" data-id="viewSelector"></ul>
-      <div class="button fa fa-gear" data-id="settingButton">
+      <!--div class="button fa fa-gear" data-id="settingButton">
         
-      </div>
+      </div-->
     </div>
     <div class="setting-panel">
       <div class="wrapper">
@@ -83,7 +83,9 @@
       </div>
     </div>
     <div class="offline-hinter show">
-      <span class="text">connection lost, trying to recover...</span>
+      
+      <cube-loading-hint class="loading-hint white" hint="disconnected, trying to recover..."></cube-loading-hint>
+      <!--span class="text">connection lost, trying to recover...</span-->
     </div>
     <div class="landing active">
       <div class="middle">

@@ -38,9 +38,11 @@ class Source extends Model
         ,"lastError"
         ,"lastErrorDescription"
         ,"requireLocalAuth"
-        ,"requirePinCode"
+        ,"requireCaptcha"
+        ,"captcha"
         ,"lastUpdate"
         ,"lastFetch"
+        ,"panic"
         ,"nextFetchInterval"]
     constructor:(data)->
         super()

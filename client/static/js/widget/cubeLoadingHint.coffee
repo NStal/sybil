@@ -8,6 +8,10 @@ class CubeLoadingHint extends Leaf.Widget
         @UI.hint$.text params.hint or ""
         @expose "show"
         @expose "hide"
+        @expose "hint"
+    onSetHint:(hint)->
+        console.debug "on set hint",hint
+        @UI.hint$.text hint or ""
     show:()->
         @node$.css {display:"block"}
     hide:()->

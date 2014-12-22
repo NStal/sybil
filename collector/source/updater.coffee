@@ -2,72 +2,72 @@ States = require "../states.coffee"
 Errors = require "./errors.coffee"
 console = global.env.logger.create(__filename)
 # Events
-# exception: any none fatal error
-# requireAuth: please auth the Source.Authorizer than call start
-# archive: has a new archive arrived
-# update: has updates
 #
 # Require Implements
-# fetchAttempt()         : set @fetchError, set rawFetchedArchives
-# parseRawArchive(raw)   : return standard archive by what fetch attempt set
+# fetched()         : set @fetchError, set rawFetchedArchives
+# parseRawArchive(raw)   : return one standard archive what was fetched.
+
+# You should always assign data to @data
+# And you will benefit from the States sub class
 class Updater extends States
     constructor:(@source)->
         super()
-        @setState "void"
-        @nextFetchInterval = @source.info.nextFetchInterval or 1
         @maxFetchInterval = @maxFetchInterval or 1000 * 60 * 60 * 12
         @minFetchInterval = @minFetchInterval or 1000 * 30
-        @lastFetchedArchiveGuids = []
-        @rawFetchedArchives = []
-#        @nextFetchInterval = Math.min(Math.max(@minFetchInterval,@nextFetchInterval),@maxFetchInterval)
-         # see @atWait method for detail explaination
-        @lastFetch = (@source.info.lastFetch or new Date)
-        if @lastFetch.getTime
-            @lastFetch = @lastFetch.getTime()
-        now = Date.now()
-        console.debug @nextFetchInterval,now,@lastFetch,now-@lastFetch
-        @leftInterval = @nextFetchInterval - (now - @lastFetch)
-        
-        if @leftInterval <= 0
-            console.debug "left interval too small: #{@leftInterval}. set to 1"
-            @leftInterval = 1
-        console.log @leftInterval,@nextFetchInterval,"updater interval"
+        @timeFactor = 1.4
+        @reset()
         @standBy()
+    reset:()->
+        if @data.nextTimer
+            clearTimeout @data.nextTimer
+        super()
+        @data.nextFetchInterval = 1
+        @data.lastFetchedArchiveGuids = []
+        @data.rawFetchedArchives = []
+        @data.lastFetch = 0
+        @data.leftInterval = 1
+        @data.maxFetchInterval = @maxFetchInterval or 24 * 60 * 60 * 1000
+        @data.minFetchInterval = @minFetchInterval or 30 * 1000
+        @data.timeFactor = @timeFactor or 1.4
+
     standBy:()->
         @waitFor "startSignal",()=>
-            @start()
-    start:()->
+            @setState "start"
+    atStart:()->
         if @state is not "void"
             console.error "can't start when not at void"
             return
-        @isStopped = false
-        if @prefetchArchiveBuffer and @prefetchArchiveBuffer.length > 0
-            for raw in @prefetchArchiveBuffer
-                @emit "archive",@parseRawArchive raw
-            @prefetchArchiveBuffer = []
-        @setState "wait"
+        # some prefecth archive may be already supplied by
+        # the initializer.
+        if @data.prefetchArchiveBuffer instanceof Array
+            archives = []
+            for raw in @data.prefetchArchiveBuffer
+                archive = @parseRawArchive raw
+                if @state is "panic"
+                    return
+                archives.push archive
+                @emit "archive",archive
+            @data.prefetchArchiveBuffer = []
+            @emit "init/archives",archives
+        @setState "sleep"
+    later:(factor = @data.timeFactor)->
+        @data.nextFetchInterval = @data.nextFetchInterval * (factor or 1.4)
+        @data.nextFetchInterval = Math.min(@data.nextFetchInterval,@data.maxFetchInterval)
+        @data.nextFetchInterval = Math.max(@data.nextFetchInterval,@data.minFetchInterval)
+        console.debug "delay #{@source.guid} to #{@data.nextFetchInterval}"
+    sooner:(factor = @data.timeFactor)->
+#        console.debug @data.nextFetchInterval,@data.minFetchInterval,@data.minFetchInterval
+        @data.nextFetchInterval = @data.nextFetchInterval / (factor or 1.4)
+        @data.nextFetchInterval = Math.max(@data.nextFetchInterval,@data.minFetchInterval)
+        @data.nextFetchInterval = Math.min(@data.nextFetchInterval,@data.maxFetchInterval)
 
-    later:(factor)->
-        @nextFetchInterval = @nextFetchInterval * (factor or 1.4)
-        @nextFetchInterval = Math.min(@nextFetchInterval,@maxFetchInterval)
-        @nextFetchInterval = Math.max(@nextFetchInterval,@minFetchInterval)
-        console.debug "delay #{@source.guid} to #{@nextFetchInterval}"
-    sooner:(factor)->
-        @nextFetchInterval = @nextFetchInterval / (factor or 1.4)
-        @nextFetchInterval = Math.max(@nextFetchInterval,@minFetchInterval)
-        @nextFetchInterval = Math.min(@nextFetchInterval,@maxFetchInterval)
-        console.debug "shift #{@source.guid} to #{@nextFetchInterval} ealier"
+        console.debug "shift #{@source.guid} to #{@data.nextFetchInterval} ealier"
     resetInterval:()->
-        @nextFetchInterval = 0
+        @data.nextFetchInterval = 0
     stop:()->
-        @isStopped = true
-    requireAuth:()->
-        @setState "waitAuth"
-        @emit "requireAuth"
-    atWait:()->
-        if @isStopped
-            @setState "void"
-            return
+        @reborn()
+        @standBy()
+    atSleep:(sole)->
         # if we just cover from last restart
         # we may won't recalculate the retry time
         # for example: we update at +1000ms with nextInterval == 2000ms
@@ -75,48 +75,62 @@ class Updater extends States
         # so we should use s temperory @leftInterval = 1200ms at first update
         # if in the same situation we restart at +4000ms then we should start
         # update immediately. so the leftInterval will be 1
-        clearTimeout @nextTimer
-        console.debug "updater #{@source.guid} waiting at #{@leftInterval or @nextFetchInterval}"
-        @nextTimer = setTimeout (()=>
-            @setState "fetching"
-        ),(@leftInterval or @nextFetchInterval)
-        if @leftInterval
-            console.debug "#{@source.guid} adjust start at left interval,#{@leftInterval}"
-        @leftInterval = null
-    atFetching:()->
-        @lastFetch = new Date()
-        @fetchAttempt()
-    fetchAttempt:()->
-        @setState "fetchAttempted"
+        clearTimeout @data.nextTimer
+        console.debug "#{@source.guid} sleep during  #{@data.leftInterval or @data.nextFetchInterval}"
+
+        @data.nextTimer = setTimeout (()=>
+            if not @checkSole sole
+                return
+            @setState "prepareFetch"
+        ),(@data.leftInterval or @data.nextFetchInterval)
+        @data.leftInterval = null
+    atPrepareFetch:()->
+        @data.lastFetch = Date.now()
+        @setState "fetching"
+    atFetching:(sole)->
+        setTimeout (()=>
+            if not @checkSole sole
+                return
+            @_fetchHasCheckSole = true
+            @setState "fetched"
+        ),0
     parseRawArchive:(raw)->
         return raw
-    atFetchAttempted:()->
+    atFetched:()->
         guids = []
         hasUpdate = false
-        @rawFetchedArchives.forEach (raw)=>
+        if not @_fetchHasCheckSole
+            # I hope
+            throw new Error "You should call @checkSole(sole) at any async callback to prevent broken state machine. And as a proof of you acknoledgement, you should set @_fetchHashCheckSole to get rid of this error"
+        hasError = @data.rawFetchedArchives.some (raw)=>
             try
                 archive = @parseRawArchive raw
             catch e
-                @error new Errors.ParseError("fail to parse archive",{raw:raw})
-                return
+                @error new Errors.ParseError("fail to parse archive",{raw:raw,via:e})
+                return true
+            if @state is "panic"
+                return true
             guids.push archive.guid
-            if archive.guid not in @lastFetchedArchiveGuids
+            if archive.guid not in @data.lastFetchedArchiveGuids
                 @emit "archive",archive
                 # probably has update
                 # but I don't restore the last guids before the shutdown.
                 # so it may not actually has update if it's the first fetch.
                 # since it's not abig problem I will leave it there
                 hasUpdate = true
-        @rawFetchedArchives = []
-        @lastFetchedArchiveGuids = guids
-        
+            return false
+        if hasError
+            return
+        @data.rawFetchedArchives = []
+        @data.lastFetchedArchiveGuids = guids
         if hasUpdate
+            @data.lastUpdate = Date.now()
             @emit "update"
             @sooner()
         else
             @later()
         @emit "fetch"
         @emit "modify"
-        @setState "wait"
+        @setState "sleep"
         return
 module.exports = Updater

@@ -80,13 +80,11 @@ body,html{
         }
         &>.title{
             @button-height:32px;
-            .wrapper:hover{
-                height:80+@button-height*3;
-            }
             .action-button{
                 display:block;
                 width:60%;
-                margin:3px auto;
+                margin:0 auto;
+                padding:0 8px;
                 text-align:left;
                 height:@button-height;
                 line-height:@button-height;
@@ -190,5 +188,11 @@ body,html{
             .transform-scale(0.3,0.3,1); 
             left:-10px;
         }
+    }
+}
+
+.context-menu{
+    .context-menu-item{
+        padding:10px 20px;
     }
 }

@@ -23,7 +23,13 @@
       this.UI.hint$.text(params.hint || "");
       this.expose("show");
       this.expose("hide");
+      this.expose("hint");
     }
+
+    CubeLoadingHint.prototype.onSetHint = function(hint) {
+      console.debug("on set hint", hint);
+      return this.UI.hint$.text(hint || "");
+    };
 
     CubeLoadingHint.prototype.show = function() {
       return this.node$.css({

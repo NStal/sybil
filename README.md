@@ -1,54 +1,36 @@
 sybil
 =====
 
-Sybil is an good reader that can run on your desktop or your server. It's an internet application that build with the following concerns:
+## Sybil is a reader.
 
-1. Information gathering is management.
-   So it will privde good statistic and management utils.
+## 
+Features:
+1. Support RSS.
+2. Support custom crawler, like `Twitter`, `Twitter lists`, `Weibo`, or what ever you like to [write in minutes](./doc/dev/custom-source.md).
+3. Have a [plugin system](./doc/user/install-plugin.md) , [easy to extend](./doc/dev/write-a-local-plugin.md), friendly to [third party tools](./doc/dev/write-a-remote-plugin.md).
+4. [Support data export](./doc/user/backup.md).
+5. Run on server or desktop.
+6. Provide [good management](./doc/user/basic-usage.md) to your information sources.
+7. Support latest desktop and mobile browser.
+8. Support proxy.
 
-2. Don't rely on a single point to provide the service just like Google Reader teach us.
-   So it uses plugin enhancement to provide extra convenience but still works well without any third party's service.
+Limits:
+1. For this very moment, sybil is available on linux. OSX and Windows will be supported in near future.
+2. APIs are still not stable and may be changed reasonably.
 
-3. Backup is important.
-   Build in backup script.
+## Install
+1. Download by your OS version [here](./doc/download.md).
+2. Extract content to a folder comfortable.
+3. Enter the root folder of the previously extracted folder.
+4. You should see a file named sybil.
+5. Run `sybil` with console or double click it file.
+6. Follow the instructions what ever it comes up with, it should take seconds to finish if you don't care.
 
-4. Future is the internet between people.
-   A p2p network to discover new source from other sybil user.
-   Support linux and mac.
+## Development.
 
-He provides following basic feature:
-
-1. RSS fetching and a good plugin system to allow other RSS like resouce fetching (twitter/weibo/bbs).
-2. Basic folder management.
-3. Custom search.
-4. A friend/sharing system based on a p2p network.
-5. Again a good plugin system.
-6. Backup utils.
-
-And some small handy feature:
-
-* http proxy.
-* external access with basic auth support.
-* a build in local proxy to get rid of some referer problem.
-* build in read it later list.
-* handy tools to import OPML.
-* local image proxy.
-
-
-Limitations:
-
-* only support latest firefox and webkit based browser.
-
-## Install 
-1. Download the Mac or Linux version of sybil.
-2. Uncompress to an folder.
-3. run sybil with console or double click it to run in console.
-4. follow the instruction in console.
-
-## Install form source.
-
-## road map.
-You are interesting in this project you may want to view the next step of it here.
+## Road map or todos.
+1. support OSX.
+2. enable kad/p2p share networks after active user base reach 2k.
 
 ## User guide
 You can post questions here https://groups.google.com/forum/#!forum/sybil-reader
@@ -63,8 +45,7 @@ You can post questions here https://groups.google.com/forum/#!forum/sybil-reader
 3. [Write a remote plugin](./doc/dev/write-a-remote-plugin.md)
 4. [Write a local plugin](./doc/dev/write-a-local-plugin.md)
 
-## support development.
-1. <del>Donate.</del>
-2. <del>Buy a license of 0.1$USD/month or 0.5CNY/month.</del>
-3. [Report bugs or feature request](https://github.com/NStal/sybil/issues)
+
+
+
 

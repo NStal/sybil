@@ -51,7 +51,7 @@
     }
 
     ViewSwitcher.prototype.switchTo = function(name) {
-      var has, view, _i, _len, _ref;
+      var has, oldView, view, _i, _len, _ref;
       has = false;
       _ref = View.views;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -65,14 +65,21 @@
         if (this.currentView) {
           this.currentView.hide();
         }
+        oldView = this.currentView;
+        this.emit("viewChange", view);
         this.currentView = view;
+        if (oldView && oldView.onSwitchOff) {
+          oldView.onSwitchOff();
+        }
         view.show();
         this.UI.title$.text(name);
-        this.emit("viewChange", view);
+        if (view.onSwitchTo) {
+          view.onSwitchTo();
+        }
         return;
       }
       if (!has) {
-        throw "view " + name + " not found";
+        throw new Error("view " + name + " not found");
       }
     };
 

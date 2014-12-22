@@ -19,4 +19,21 @@ class SourceView extends require("view")
             @node$.removeClass "show-list"
         @UI.sourceListOverlay$.click ()=>
             @node$.removeClass "show-list"
+        @km = new Leaf.KeyEventManager(window)
+        @km.on "keydown",(e)=>
+            use = true
+            if e.which is Leaf.Key.p and e.altKey
+                @archiveList.archiveListController.onClickPrevious()
+            else if e.which is Leaf.Key.n and e.altKey
+                @archiveList.archiveListController.onClickNext()
+            else
+                use = false
+            if use
+                e.capture()
+    onSwitchTo:()->
+        @km.active()
+        @isActive = true
+    onSwitchOff:()->
+        @km.deactive()
+        @isActive = false
 module.exports = SourceView

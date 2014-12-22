@@ -2092,13 +2092,11 @@ html {
   overflow: hidden;
   opacity: 1;
 }
-.source-view .archive-list > .title .wrapper:hover {
-  height: 176px;
-}
 .source-view .archive-list > .title .action-button {
   display: block;
   width: 60%;
-  margin: 3px auto;
+  margin: 0 auto;
+  padding: 0 8px;
   text-align: left;
   height: 32px;
   line-height: 32px;
@@ -2213,4 +2211,7 @@ html {
   -o-transform: scale3d(0.3, 0.3, 1);
   -ms-transform: scale3d(0.3, 0.3, 1);
   left: -10px;
+}
+.context-menu .context-menu-item {
+  padding: 10px 20px;
 }

@@ -76,7 +76,7 @@ class PluginCenter extends EventEmitter
                 dependsMap[pluginName] = @pluginMap[pluginName].provide
                 done()
                 return
-            @_loadPlugin pluginName,(err,item)->
+            @_loadPlugin pluginName,(err,item)=>
                 # save to dependsMap and latter pass to current.register
                 dependsMap[pluginName] = item
                 done(err)
@@ -92,6 +92,8 @@ class PluginCenter extends EventEmitter
                         callback err
                         return
                     dependsMap.settings = settings
+                    if not dependsMap.sybil
+                        dependsMap.sybil = @sybil
                     current.module.register dependsMap,(err,me)->
                         if err
                             callback err

@@ -20,10 +20,13 @@ exports.detectRssEntry = (url,callback)->
     if urlObject.protocol not in ["http:","https:","feed:"]
         callback new Errors.InvalidURL("#{url} is not a valid url")
         return
-    timeout = 30 * 1000
+    timeout = 20 * 1000
     httpUtil.httpGet {url:url,timeout:timeout,noQueue:true},(err,res,body)=>
         if err
+
+            console.debug "Rss direct detect fail #{url} #{JSON.stringify(err)} now through proxy #{proxy}"
             httpUtil.httpGet {url:url,timeout:timeout,proxy:proxy,noQueue:true},(err,res,body)=>
+                console.debug "detect as rss entry fail for #{url}"
                 if err
                     callback err
                     return
@@ -53,17 +56,17 @@ exports.fetchRss = (option,callback)->
     urlObject = urlModule.parse option.uri
     useProxy = null
     useEncoding = null
-    timeout = 60 * 1000
+    timeout = option.timeout or 20 * 1000 
     if urlObject.protocol not in ["http:","https:","feed:"]
         callback new Errors.InvalidURL("unsupport prototcol #{urlObject.protocol}")
         return
     httpUtil.httpGet {url:option.uri,timeout:timeout,noQueue:option.noQueue},(err,res,body)=>
         if err
-            console.debug "direct check fail #{option.uri} #{JSON.stringify(err)} now through proxy #{proxy}"
+            console.debug "direct check fail #{option.uri} #{JSON.stringify(err)} now through proxy #{proxy}" 
             err = null
             httpUtil.httpGet {url:option.uri,timeout:timeout,proxy:proxy,noQueue:option.noQueue},(err,res,body)=>
                 if err
-                    console.debug "check fail #{option.uri} through proxy #{proxy}"
+                    console.debug "fetch fail #{option.uri} through proxy #{proxy}"
                     callback err
                     return
                 useProxy = proxy
@@ -109,6 +112,7 @@ exports.fetchRss = (option,callback)->
         if useEncoding not in ["utf-8","utf8"]
             try 
                 data = (new Iconv(useEncoding,"utf-8//TRANSLIT//IGNORE")).convert(bodyBuffer)
+                                                                                             
             catch e
                 console.error e,"at",option.uri
                 console.error "fail to decode with with #{useEncoding}"

@@ -2,7 +2,7 @@
 # init: nothing has done will try ask user secret
 # localAuthed: username and secret is given try prelogin
 # prelogined: prelogin data fetched
-# prepared: after prelogin no pincode is needed or already go throught the pin code recognize process, next step is post login
+# prepared: after prelogin no captcha is needed or already go throught the pin code recognize process, next step is post login
 # pinReady: pin code image is downloaded and
 # posted: login posted, check success or retcode to do the correct things
 
@@ -39,7 +39,7 @@ exports.fetch = (info = {},callback)->
                 callback new Errors.ParseError("fail to parse result vai #{e}",{via:e})
                 return
             if result.ok isnt 1
-                callback new Errors.AuthorizationFailed("result.ok isnt 1")
+                callback new Errors.AuthorizationFailed("result.ok isnt 1 result is #{JSON.stringify result}")
                 return
             callback null,result.mblogList or []
     hasTimeout = false
@@ -55,7 +55,7 @@ exports.fetch = (info = {},callback)->
 
 
 exports.renderDisplayContent = (raw)=>
-    $text = cheerio.load "<p class='tweet'>#{raw.text}</p>"
+    $text = cheerio.load "<div class='tweet'>#{raw.text}</div>"
     $text("a").each ()->
         href = $text(this).attr("href")
         $text(this).attr("href",urlModule.resolve("http://weibo.com/",href))
@@ -66,3 +66,7 @@ exports.renderDisplayContent = (raw)=>
         retweet = exports.renderDisplayContent raw.retweeted_status 
         $text(".tweet").append retweet
     return $text.html()
+exports.gb2utf8 = (buffer)->
+    Iconv = (require "iconv").Iconv
+    data = (new Iconv("gb2312","utf-8//TRANSLIT//IGNORE")).convert(buffer)
+    return data

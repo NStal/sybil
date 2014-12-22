@@ -66,6 +66,15 @@
       })(this)), 500);
     };
 
+    HintStackItem.prototype.attract = function() {
+      this.node$.animate({
+        bottom: 10
+      });
+      return this.node$.animate({
+        bottom: 0
+      });
+    };
+
     return HintStackItem;
 
   })(Leaf.Widget);

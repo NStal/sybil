@@ -17,6 +17,7 @@ class AddSourcePopup extends Leaf.Widget
         @hide()
     show:()->
         @node$.show()
+        @UI.input$.focus()
     hide:()->
         @node$.hide()
 

@@ -151,7 +151,7 @@ class ArchiveList extends Leaf.Widget
         loadCount = 20
         list = @currentList
         @UI.loadingHint.show()
-        @currentList.getArchives {offset:@length,count:loadCount},(err,archives)=>
+        @currentList.getArchives {offset:@archives.length,count:loadCount},(err,archives)=>
             if @currentList isnt list
                 return
             @UI.loadingHint.hide()

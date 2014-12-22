@@ -1,6 +1,7 @@
 Model = require("model")
 App = require "app"
 ScrollChecker = require "util/scrollChecker"
+SwipeChecker = require "util/swipeChecker"
 async = require "lib/async"
 EndlessArchiveLoader = require("procedure/endlessArchiveLoader")
 CubeLoadingHint = require("/widget/cubeLoadingHint")
@@ -14,23 +15,25 @@ class ArchiveList extends Leaf.Widget
                 done()
                 ),4)
             ),1)
-        
+
         # not implemented
         @sort = "latest"
-        
+
         # should we view readed archive?
-        @viewRead = false 
-        # for endlessl oad archive 
+        @viewRead = false
+        # for endlessl oad archive
         @loadCount = 10
-        
+
         # mark reads on scroll
         @scrollChecker = new ScrollChecker @UI.containerWrapper
         @scrollChecker.listenBy this,"scroll",@onScroll
         @archiveListItems = Leaf.Widget.makeList @UI.container
-        
+
         @archiveListController = new ArchiveListController(null,this)
         @initSubWidgets()
-        
+        App.modelSyncManager.on "archive",(archive)=>
+            if @archiveInfo and archive.sourceGuid in @archiveInfo.sourceGuids
+                @showUpdateHint()
         App.userConfig.on "change/previewMode",@applyPreviewMode.bind(this)
         App.userConfig.init "useResourceProxyByDefault",false
         App.userConfig.init "enableResourceProxy",true
@@ -39,10 +42,16 @@ class ArchiveList extends Leaf.Widget
             return
         globalPreviewMode = App.userConfig.get("previewMode",false)
         infoPreviewMode = App.userConfig.get("previewModeFor"+@archiveInfo.name,globalPreviewMode)
+
+        @disableMarkAsRead = true
+        @archiveListController.saveLocation()
         if infoPreviewMode
             @node$.addClass("preview-mode")
         else
             @node$.removeClass("preview-mode")
+
+        @archiveListController.restoreLocation()
+        @disableMarkAsRead = false
 
     load:(info)->
         @clear()
@@ -54,11 +63,31 @@ class ArchiveList extends Leaf.Widget
         @UI.loadingHint.hide()
         @archiveListItems.length = 0
         @render()
+        @emit "load"
+        @hideUpdateHint()
         @more()
+    showUpdateHint:()->
+        @refreshHintShowInterval ?= 1000 * 7
+        @UI.refreshHint$.addClass("show")
+        if @_updateHintTimer
+            @_updateHintTimer = null
+            clearTimeout @_updateHintTimer
+        @_updateHintTimer = setTimeout @hideUpdateHint.bind(this),@refreshHintShowInterval
+    hideUpdateHint:()->
+        clearTimeout @_updateHintTimer
+        @_updateHintTimer = null
+        @UI.refreshHint$.removeClass("show")
+    onClickRefreshHint:()->
+        @load(@archiveInfo)
+        @hideUpdateHint()
+    onClickHideRefreshHint:(e)->
+        if e
+            e.capture()
+        @hideUpdateHint()
     _createArchiveLoader:(query)=>
         if @archiveLoader
             @archiveLoader.stopListenBy this
-        @archiveLoader = new EndlessArchiveLoader() 
+        @archiveLoader = new EndlessArchiveLoader()
         @archiveLoader.reset({query:query,viewRead:@viewRead,sort:@sort,count:@loadCount})
         @archiveLoader.listenBy this,"archive",@appendArchive
         @archiveLoader.listenBy this,"noMore",@onNoMore
@@ -100,7 +129,7 @@ class ArchiveList extends Leaf.Widget
             callback()
     onNoMore:()->
         @UI.emptyHint$.show()
-        
+
     onClickMarkAllAsRead:()->
         async.eachLimit @archiveInfo.sourceGuids,3,((guid,done)=>
             source = Model.Source.sources.get(guid)
@@ -137,17 +166,22 @@ class ArchiveList extends Leaf.Widget
             App.userConfig.set "previewModeFor"+@archiveInfo.name,not previewMode
             @applyPreviewMode()
     onScroll:()->
+        # Maybe I should give the controll of this behavior
+        # to @archiveListController.
         divider = @UI.containerWrapper.scrollTop
         divider += $(window).height()/3
+        # if for some reason someone want to disable it.
+        if @disableMarkAsRead
+            return
         for item in @archiveListItems
             top = item.node.offsetTop
             bottom = item.node.offsetTop + item.node.clientHeight
-            
+
             #console.log divider,top,bottom
             if divider > top and not item.archive.hasRead
                 item.markAsRead()
                 console.log "mark as read",item.archive.guid
-        
+
 class ArchiveListItem extends require("archiveDisplayer")
     constructor:(archive)->
         super App.templates["archive-list-item"]
@@ -185,7 +219,7 @@ class ArchiveListItem extends require("archiveDisplayer")
         e.stopPropagation()
         @onClickMarkAsUnread()
     render:()->
-        super() 
+        super()
         if @lockRead
             @node$.addClass("lock-read")
         else
@@ -209,12 +243,25 @@ class ArchiveListItem extends require("archiveDisplayer")
             console.debug "mark as unread done->render"
             console.debug @lockRead,@archive.hasRead,"is the state"
             @render()
+
+# Control some list level behavior, most of them
+# should have something to do with the scroller.
 class ArchiveListController extends Leaf.Widget
     constructor:(template,archiveList)->
         super(template or App.templates["archive-list-controller"])
         @archiveList = archiveList
+        @swipeChecker = new SwipeChecker(@node)
+        @swipeChecker.on "swipeleft",(e)=>
+            @node$.addClass "left-mode"
+        @swipeChecker.on "swiperight",(e)=>
+            e.preventDefault()
+            e.stopImmediatePropagation()
+            @node$.removeClass "left-mode"
         @archiveList.scrollChecker.listenBy this,"scroll",()=>
             @updatePosition()
+        @locationStacks = []
+        @archiveList.on "load",()=>
+            @locationStacks = []
     updatePosition:()->
         if @archiveList.archiveListItems.length - 5 >= 0
             last = @archiveList.archiveListItems[@archiveList.archiveListItems.length - 5]
@@ -226,18 +273,29 @@ class ArchiveListController extends Leaf.Widget
             @archiveList.more (err)->
                 console.debug "load more",err
     onClickPrevious:()->
-        @scrollToItem @getPreviousItem()
-        console.debug "click? previous"
+        # try scroll to top of the current item
+        # only scroll to previous item when beginning of the
+        # current item is visible
+        current =  @getCurrentItem()
+        adjust = 5
+        if @isItemTopVisible current,adjust
+            @scrollToItem @getPreviousItem()
+        else
+            @scrollToItem current
     onClickNext:()->
         if @isLast @getCurrentItem()
-            @archiveList
+            @archiveList.UI.containerWrapper.scrollTop = @getCurrentItem().node.offsetTop + @getCurrentItem().node.offsetHeight
+            return
         @scrollToItem @getNextItem()
-        console.debug "click next?"
     scrollToItem:(item)->
         if not item
             return
         top = item.node.offsetTop
         @archiveList.UI.containerWrapper.scrollTop = top
+    isItemTopVisible:(item,adjust = 0)->
+        top = @archiveList.UI.containerWrapper.scrollTop
+        console.log item.node.offsetTop + adjust > top
+        return item.node.offsetTop + adjust > top
     getCurrentItem:()->
         top = @archiveList.UI.containerWrapper.scrollTop
         currentItem = @archiveList.archiveListItems[0]
@@ -257,7 +315,15 @@ class ArchiveListController extends Leaf.Widget
             if item is current
                 return @archiveList.archiveListItems[index+1] or null
     isLast:(item)->
-        return @archiveList.archiveListItems[@archiveList.archiveListItems-1] is item
+        return @archiveList.archiveListItems[@archiveList.archiveListItems.length - 1] is item
+    saveLocation:()->
+        current = @getCurrentItem()
+        if current
+            @locationStacks.push current
+    restoreLocation:()->
+        item = @locationStacks.pop()
+        if item
+            @scrollToItem item
 #window.ArchiveListItem = ArchiveListItem
 #window.ArchiveList = ArchiveList
 module.exports = ArchiveList

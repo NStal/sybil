@@ -44,7 +44,34 @@
           return _this.node$.removeClass("show-list");
         };
       })(this));
+      this.km = new Leaf.KeyEventManager(window);
+      this.km.on("keydown", (function(_this) {
+        return function(e) {
+          var use;
+          use = true;
+          if (e.which === Leaf.Key.p && e.altKey) {
+            _this.archiveList.archiveListController.onClickPrevious();
+          } else if (e.which === Leaf.Key.n && e.altKey) {
+            _this.archiveList.archiveListController.onClickNext();
+          } else {
+            use = false;
+          }
+          if (use) {
+            return e.capture();
+          }
+        };
+      })(this));
     }
+
+    SourceView.prototype.onSwitchTo = function() {
+      this.km.active();
+      return this.isActive = true;
+    };
+
+    SourceView.prototype.onSwitchOff = function() {
+      this.km.deactive();
+      return this.isActive = false;
+    };
 
     return SourceView;
 

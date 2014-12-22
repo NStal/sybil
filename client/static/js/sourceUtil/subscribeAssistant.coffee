@@ -4,8 +4,10 @@
 App = require "/app"
 AdapterTerminal = require "./adapterTerminal"
 HintStack = require "/hintStack"
+CubeLoadingHint = require "/widget/cubeLoadingHint"
 class SubscribeAssistant extends HintStack.HintStackItem
     constructor:(@uri)->
+        @include CubeLoadingHint
         super App.templates["subscribe-assistant"]
         @show()
         @terminals = []
@@ -21,20 +23,25 @@ class SubscribeAssistant extends HintStack.HintStackItem
             stream.on "end",()=>
                 console.debug "end stream"
                 console.debug @terminals.length,@terminals.map (item)->item.candidate
+                
                 if @terminals.length is 0
                     @setHint "No source available detected from the url #{@uri}"
-                    @delayHide()
                     @emit "none"
-                    return
                 else if @terminals.length is 1
+                    @setHint "One source detected auto accept."
                     @terminals[0].accept()
-                @setHint "Some source detected"
+                else
+                    @setHint "Some source detected"
                 @delayHide()
     setHint:(content)->
+        @attract()
+        @UI.loadingHint$.hide()
         @UI.hint$.text content
-    delayHide:()->
-        hideDelayTime = 1000 * 3
-        @hide()
+    delayHide:(time)->
+        hideDelayTime = time or 1000 * 3
+        setTimeout (()=>
+            @hide()
+            ),hideDelayTime
     spawnAdapterTerminal:(candidate)->
         terminal = new AdapterTerminal(candidate)
         @terminals.push terminal

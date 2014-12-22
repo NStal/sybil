@@ -31,13 +31,18 @@ class ViewSwitcher extends Leaf.Widget
                 return
             if @currentView
                 @currentView.hide()
+            oldView = @currentView
+            @emit "viewChange",view
             @currentView = view 
+            if oldView and oldView.onSwitchOff
+                oldView.onSwitchOff()
             view.show()
             @UI.title$.text(name)
-            @emit "viewChange",view
+            if view.onSwitchTo
+                view.onSwitchTo()
             return
         if not has
-            throw "view #{name} not found"
+            throw new Error "view #{name} not found"
     onClickTitle:(e)->
         e.stopImmediatePropagation()
         e.preventDefault()

@@ -6,6 +6,7 @@
 
   if (window.location.toString().indexOf("debug") > 0) {
     true;
+    App.on("connect", function() {});
   }
 
 }).call(this);

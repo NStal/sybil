@@ -21,23 +21,29 @@ class Weibo extends Source
         super(info)
         @type = "weibo"
     
-class Updater extends Source::Updater
+class WeiboUpdater extends Source::Updater
     constructor:(@source)->
         super(@source)
-        @minFetchInterval = 30 * 1000
-    fetchAttempt:()->
-        console.debug "try fetching #{@source.guid} at #{@nextFetchInterval}"
-        if not @source.authorizer.authorizeInfo.cookie
+        @minFetchInterval = 2 * 60 * 1000
+    atFetching:(sole)->
+        if not @data.authorizeInfo or not @data.authorizeInfo.cookie
             @error new Source.Errors.AuthorizationFailed("weibo updater need authorize")
             return
-        weiboUtil.fetch {cookie:@source.authorizer.authorizeInfo.cookie},(err,result)=>
+        weiboUtil.fetch {cookie:@data.authorizeInfo.cookie},(err,result)=>
+            @_fetchHasCheckSole = true
+            if not @checkSole sole
+                return
             if err
                 if err instanceof Source.Errors.Timeout
                     err = new Source.Errors.NetworkError("timeout",{via:err})
+                    console.log err
+                    {message:"timeout"
+                    name:"NetworkError"
+                    via:err}
                 @error err
                 return
-            @rawFetchedArchives = result
-            @setState "fetchAttempted"
+            @data.rawFetchedArchives = result
+            @setState "fetched"
     parseRawArchive:(raw)->
         originalLink = "http://weibo.com/#{raw.user.id}/#{raw.bid}"
         title = raw.user.screen_name
@@ -49,9 +55,11 @@ class Updater extends Source::Updater
             ,type:@source.type
             ,createDate:new Date() # it's hard to parse
             ,fetchDate:new Date()
-            ,authorName:raw.user.screen_name
-            ,authorAvatar:raw.user.profile_image_url
-            ,authorLink:"http://weibo.com#{raw.user.profile_url}"
+            ,author:{
+                name:raw.user.screen_name
+                ,avatar:raw.user.profile_image_url
+                ,link:"http://weibo.com#{raw.user.profile_url}"
+            }
             ,originalLink:"http://weibo.com/#{raw.user.id}/#{raw.bid}"
             ,sourceName:@source.name
             ,sourceUrl:"http://weibo.com/"
@@ -59,26 +67,25 @@ class Updater extends Source::Updater
             ,title:title
             ,content:content
             ,displayContent:displayContent
-            ,contentType:"html"
+            ,contentType:"text/html"
             ,attachments:[]
             ,meta:{
                 raw:raw
             }
         }
             
-class Initializer extends Source::Initializer
+class WeiboInitializer extends Source::Initializer
     constructor:(@source)->
         super(@source)
     atInitializing:()->
-        if not @source.authorizer.cookie
-            console.debug "need auth???ASDASD"
+        if not @data.authorizeInfo or not @data.authorizeInfo.cookie
             @error new Source.Errors.AuthorizationFailed("initialize weibo need auth")
             return
         requestUrl = "http://m.weibo.cn/scriptConfig?online=1&t=#{Date.now()}"
         env.httpUtil.httpGet {
             url:requestUrl
             ,headers:{
-                Cookie:@source.authorizer.authorizeInfo.cookie
+                Cookie:@data.authorizeInfo.cookie
             }
             ,timeout:1000 * 10
         },(err,res,content)=>
@@ -89,8 +96,8 @@ class Initializer extends Source::Initializer
             if not result
                 @error Source.Errors.ParseError("fail to parse initial result",{raw:result})
                 return
-            @source.guid = "weibo_#{result.id}"
-            @source.name = "#{result.name}'s Weibo Timeline"
+            @data.guid = "weibo_#{result.id}"
+            @data.name = "#{result.name}'s Weibo Timeline"
             @setState "initialized"
     parseInitContent:(content)->
         match = content.match /userInfo = (\{[^}]+\})/i
@@ -117,17 +124,18 @@ urlModule = require "url"
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
 
-class Authorizer extends Source::Authorizer
+class WeiboAuthorizer extends Source::Authorizer
     constructor:(@source)->
         super(@source)
         @jar = new CookieJar()
         @userAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
         @timeout = 1000 * 10
-        @on "state",(state)->
-            console.debug "WEIBO:::change state",state
-    prelogin:()->
-        @requirePinCode = false
-        url = "https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4&"
+    atPrelogin:(sole)->
+        @data.requireCaptcha = false
+        su = new Buffer(encodeURIComponent(@data.username)).toString("base64")
+        callbackId = Date.now()
+        url = 'https://login.sina.com.cn/sso/prelogin.php?checkpin=1&entry=mweibo&su=#{su}&callback=jsonpcallback#{callbackId}'
+        #"https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4&"
         option = {}
         option.method = "GET"
         option.headers = {
@@ -139,57 +147,78 @@ class Authorizer extends Source::Authorizer
         option.timeout = @timeout
         option.jar = @jar
         httpUtil.httpGet option,(err,res,content)=>
+            if not @checkSole sole
+                return
             # maybe get pin code here
             if err
                 @error new Source.Errors.NetworkError()
                 return
             @setState "prelogined"
-    loginAttempt:()->
+    atLogining:(sole)->
+#        postData = {
+#            uname:@data.username
+#            ,pwd:@data.secret
+#            ,check:1
+#            ,backUrl:"http://m.weibo.cn"
+#        }
+#        loginUrl = "https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4"
+
+        loginUrl = "https://passport.sina.cn/sso/login"
+        referer = "https://passport.sina.cn/signin/login?entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F"
         postData = {
-            uname:@username
-            ,pwd:@secret
-            ,check:1
-            ,backUrl:"http://m.weibo.cn"
+            username:@data.username
+            password:@data.secret
+            savestate:1
+            ec:0
+            entry:"mweibo"
         }
-        loginUrl = "https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4"
         option = {}
         option.url = loginUrl
         option.data = postData
         option.method = "POST"
         option.jar = @jar
         option.headers = {
-            "Referer":loginUrl
+            "Referer":referer
             ,"User-Agent":@userAgent
         }
+        
         option.timeout = @timeout
         httpUtil.httpPost option,(err,res,content)=>
-            
+            successRetcode = 20000000
+            if not @checkSole sole
+                return
             if err
                 @error new Source.Errors.NetworkError("fail to login due to netweork error",{via:err})
                 return
-            @mobileRedirectLoginLocation = res.headers["location"]
-            console.log err,res.headers,content.toString()
-            @checkLogin()
-    checkLogin:()->
-        try
-            info = urlModule.parse @mobileRedirectLoginLocation,true
-        catch e
-            info = {query:{}}
-        gsid = info.query.g
-        if gsid
-            @authorized = true
-            @loginError = null
-            @cookie = "gsid_CTandWM=#{gsid}; expires=Sat, 27-Apr-2024 01:38:02 GMT; path=/; domain=.weibo.cn; httponly"
-            @authorizeInfo = {@cookie}
+            try
+                result = JSON.parse content.toString()
+            catch e
+                @error new Source.Errors.ParseError "fail to parse response at login",{raw:content.toString(),via:e}
+                return
+            if result.retcode isnt successRetcode
+                @error new Source.Errors.AuthorizationFailed "authorization failed with retcode #{result.retcode}",{result:result}
+                return
+            result.data ?= {}
+            domain = result.data.crossdomainlist or {}
+            ticketUrl = domain["weibo.cn"]
+            httpUtil.httpGet {
+                url:"http:"+ticketUrl
+                jar:@jar
+                headers:{Referer:referer}
+            },(err,res,content)=>
+                if err
+                    @error new Source.Errors.NetworkError("fail to get crossdomain cookie",via:err)
+                    return
+                if res.statusCode isnt 200
+                    @error new Source.Errors.AuthorizationFailed "crossdomain ticket fail with status #{res.statusCode}",{result:result}
+                    return
+                @data.authorized = true
+                @data.authorizeInfo = {cookie:@jar.getCookieStringSync "http://m.weibo.cn"}
+                @setState "authorized"
 
-            #configString = "TTT_USER_CONFIG_H5=%7B%22ShowMblogPic%22%3A1%2C%22ShowUserInfo%22%3A1%2C%22MBlogPageSize%22%3A%2250%22%2C%22ShowPortrait%22%3A1%2C%22CssType%22%3A0%2C%22Lang%22%3A1%7D; expires=Sat, 27-Apr-2024 01:38:02 GMT; path=/; domain=.weibo.cn; httponly"
-            #@jar.setCookieSync cookieString,"http://weibo.cn/"
-            #@jar.setCookieSync configString,"http://weibo.cn/"
-            @setState "authorized"
-        else
-            @error new Source.Errors.AuthorizationFailed("fail to authorize")
-Weibo::Updater = Updater
-Weibo::Initializer = Initializer
-Weibo::Authorizer = Authorizer
+
+Weibo::Updater = WeiboUpdater
+Weibo::Initializer = WeiboInitializer
+Weibo::Authorizer = WeiboAuthorizer
 
 module.exports = Weibo

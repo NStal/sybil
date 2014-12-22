@@ -2169,6 +2169,7 @@ html * {
   height: 100%;
   overflow: auto;
   position: relative;
+  margin-top: 45px;
 }
 .archive-list .container-wrapper .container {
   width: 100%;
@@ -2333,18 +2334,27 @@ html * {
 }
 .archive-list .archive-list-controller {
   position: fixed;
-  right: 8px;
-  bottom: 120px;
+  right: 20px;
+  bottom: 15%;
   border-radius: 4px;
   background-color: #404040;
   color: white;
   font-size: 24px;
   z-index: 100;
   overflow: hidden;
+  opacity: 0.5;
+  transition: all 400ms ease;
+  -moz-transition: all 400ms ease;
+  -webkit-transition: all 400ms ease;
+  -o-transition: all 400ms ease;
+}
+.archive-list .archive-list-controller.left-mode {
+  right: auto;
+  left: 20px;
 }
 .archive-list .archive-list-controller .tab-button {
   display: block;
-  padding: 6px 10px;
+  padding: 14px 20px;
   cursor: pointer;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -2559,21 +2569,28 @@ html * {
   min-width: 600px;
   max-width: 1920px;
   width: 100%;
+  position: relative;
 }
 .source-view .archive-list > .title {
-  max-height: 45px;
-  min-height: 45px;
-  overflow: visible;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
   z-index: 100;
   display: none;
 }
 .source-view .archive-list > .title .source-name {
   display: block;
   width: 100%;
+  height: 45px;
   font-size: 24px;
-  padding: 10px 0;
+  padding: 10px 8px;
   font-weight: 400;
   z-index: 100;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .source-view .archive-list > .title .action-button {
   cursor: pointer;
@@ -2583,7 +2600,7 @@ html * {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  padding: 0 20px;
+  padding: 5px 20px 12px;
 }
 .source-view .archive-list > .title .action-button:hover {
   color: #33bbee;
@@ -2592,25 +2609,75 @@ html * {
   padding-right: 6px;
 }
 .source-view .archive-list > .title .source-option {
-  padding-top: 5px;
-  height: 20px;
+  overflow: hidden;
+  max-height: 0;
   width: 100%;
+  transition: max-height 500ms ease;
+  -moz-transition: max-height 500ms ease;
+  -webkit-transition: max-height 500ms ease;
+  -o-transition: max-height 500ms ease;
+}
+.source-view .archive-list > .title .refresh-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 500ms ease;
+  -moz-transition: max-height 500ms ease;
+  -webkit-transition: max-height 500ms ease;
+  -o-transition: max-height 500ms ease;
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexflex;
+  -webkit-flex-flow: column;
+  -moz-flex-flow: column;
+  flex-flow: column;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  background-color: white;
+  opacity: 0.9;
+}
+.source-view .archive-list > .title .refresh-hint .text span,
+.source-view .archive-list > .title .refresh-hint .text i {
+  text-align: center;
+  height: 45px;
+  line-height: 45px;
+}
+.source-view .archive-list > .title .refresh-hint i {
+  line-height: 45px;
+  padding-left: 15px;
+  padding: 10px;
+}
+.source-view .archive-list > .title .refresh-hint.show {
+  max-height: 100px;
+}
+.source-view .archive-list > .title .wrapper:hover .source-option {
+  max-height: 100px;
 }
 .source-view .archive-list > .title .wrapper {
-  height: 45px;
+  z-index: 1;
   text-align: center;
   width: 100%;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
   overflow: hidden;
   background-color: #404040;
   color: #d9d9d9;
-  transition: all 200ms ease;
-  -moz-transition: all 200ms ease;
-  -webkit-transition: all 200ms ease;
-  -o-transition: all 200ms ease;
-}
-.source-view .archive-list > .title .wrapper:hover {
-  height: 80px;
+  transition: all 100ms ease;
+  -moz-transition: all 100ms ease;
+  -webkit-transition: all 100ms ease;
+  -o-transition: all 100ms ease;
 }
 .search-view {
   height: 100%;
@@ -2945,11 +3012,6 @@ html * {
   width: 50%;
   margin: 20px auto;
 }
-.list-view .list-view-archive-list .loading-hint .box .face {
-  box-shadow: inset 0 0 0.3px 1px rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  border: 0.5px solid #eee;
-}
 .list-view .list-view-archive-list .list-view-archive-list-item {
   position: relative;
   width: 100%;
@@ -2971,8 +3033,7 @@ html * {
 .list-view .list-view-archive-list .list-view-archive-list-item.clear .title {
   text-decoration: line-through;
 }
-.list-view .list-view-archive-list .list-view-archive-list-item.clear .title,
-.list-view .list-view-archive-list .list-view-archive-list-item.clear .content {
+.list-view .list-view-archive-list .list-view-archive-list-item.clear .title {
   color: #aaaaaa;
 }
 .list-view .list-view-archive-list .list-view-archive-list-item .title {
@@ -2990,6 +3051,7 @@ html * {
   font-size: 16px;
   max-height: 80%;
   overflow: hidden;
+  color: #999;
 }
 .list-view .list-view-archive-list .list-view-archive-list-item .shadow {
   position: absolute;
@@ -3329,6 +3391,8 @@ html * {
   -moz-flex-flow: column;
   flex-flow: column;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .add-source-popup button {
   background-color: white;
@@ -3368,13 +3432,16 @@ html * {
   height: 100%;
 }
 .add-source-popup .input-area {
-  max-height: 140px;
+  max-height: 90%;
   min-height: 140px;
+  height: 250px;
+  width: 800px;
+  max-width: 90%;
 }
 .add-source-popup .input-area textarea {
   border: none;
   width: 100%;
-  height: 100px;
+  height: 80%;
   padding: 20px;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -3382,6 +3449,10 @@ html * {
   box-shadow: inset 0 0 4px 0 rgba(0, 0, 0, 0.5);
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
+}
+.add-source-popup .input-area button {
+  margin-top: 15px;
+  margin-right: 10px;
 }
 .popup {
   border-radius: 4px;
@@ -3679,6 +3750,14 @@ cube-loading-hint .box .face {
   height: 20px;
   position: absolute;
 }
+cube-loading-hint.white .box .face {
+  box-shadow: inset 0 0 2px 0.66666667px rgba(255, 255, 255, 0.35);
+  border: 0.5px solid #eee;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+cube-loading-hint.white .text {
+  color: #ddd;
+}
 cube-loading-hint .box .face-left {
   transform: rotateY(90deg) translateZ(-10px);
   -webkit-transform: rotateY(90deg) translateZ(-10px);
@@ -3811,14 +3890,15 @@ cube-loading-hint .box .face-back {
   mix-blend-mode: darken;
   opacity: 0;
 }
-.offline-hinter .text {
+.offline-hinter .loading-hint {
   color: #444;
   position: absolute;
-  width: 100%;
   text-align: center;
   display: block;
+  left: 50%;
   bottom: 50px;
-  margin: 10px auto;
+  width: 200px;
+  margin: 10px -100px;
 }
 .offline-hinter.show {
   background-color: rgba(0, 0, 0, 0.5);
@@ -4097,6 +4177,61 @@ cube-loading-hint .box .face-back {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   margin-top: 5px;
+  position: relative;
+}
+.stack-terminal {
+  width: 100%;
+  color: #d9d9d9;
+  background-color: #404040;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  margin-top: 5px;
+  position: relative;
+}
+.stack-terminal .title {
+  text-align: center;
+  padding: 10px;
+}
+.stack-terminal .choice {
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexflex;
+  -webkit-flex-flow: row;
+  -moz-flex-flow: row;
+  flex-flow: row;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+.stack-terminal .choice button {
+  width: 100px;
+  border: none;
+  background: white;
+  margin: 15px;
+  padding: 5px 5px;
+}
+.stack-terminal .detail {
+  background-color: #303030;
+  padding: 10px;
+  box-shadow: inset 0 0 8px 0 #222;
+}
+.stack-terminal input,
+.stack-terminal button {
+  display: block;
+}
+.stack-terminal p {
+  margin: 5% auto;
+  width: 90%;
+  display: block;
+  line-height: 20px;
+}
+.stack-terminal input {
+  width: 90%;
+  margin: 16px auto;
+  padding: 8px 8px;
+  border: none;
 }
 .source-authorize-terminal {
   width: 100%;
@@ -4106,19 +4241,11 @@ cube-loading-hint .box .face-back {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   margin-top: 5px;
+  position: relative;
 }
 .source-authorize-terminal .title {
   text-align: center;
   padding: 10px;
-}
-.source-authorize-terminal .detail {
-  background-color: #303030;
-  padding: 10px;
-  box-shadow: inset 0 0 8px 0 #222;
-}
-.source-authorize-terminal .hinter {
-  padding: 5px;
-  background-color: #333;
 }
 .source-authorize-terminal .choice {
   display: flex;
@@ -4139,6 +4266,31 @@ cube-loading-hint .box .face-back {
   margin: 15px;
   padding: 5px 5px;
 }
+.source-authorize-terminal .detail {
+  background-color: #303030;
+  padding: 10px;
+  box-shadow: inset 0 0 8px 0 #222;
+}
+.source-authorize-terminal input,
+.source-authorize-terminal button {
+  display: block;
+}
+.source-authorize-terminal p {
+  margin: 5% auto;
+  width: 90%;
+  display: block;
+  line-height: 20px;
+}
+.source-authorize-terminal input {
+  width: 90%;
+  margin: 16px auto;
+  padding: 8px 8px;
+  border: none;
+}
+.source-authorize-terminal .hinter {
+  padding: 5px;
+  background-color: #333;
+}
 .subscribe-terminal {
   width: 100%;
   color: #d9d9d9;
@@ -4147,15 +4299,11 @@ cube-loading-hint .box .face-back {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   margin-top: 5px;
+  position: relative;
 }
 .subscribe-terminal .title {
   text-align: center;
   padding: 10px;
-}
-.subscribe-terminal .detail {
-  background-color: #303030;
-  padding: 10px;
-  box-shadow: inset 0 0 8px 0 #222;
 }
 .subscribe-terminal .choice {
   display: flex;
@@ -4176,33 +4324,43 @@ cube-loading-hint .box .face-back {
   margin: 15px;
   padding: 5px 5px;
 }
-.subscribe-terminal > div {
-  display: none;
+.subscribe-terminal .detail {
+  background-color: #303030;
+  padding: 10px;
+  box-shadow: inset 0 0 8px 0 #222;
 }
-.subscribe-terminal.accepter .accepter,
-.subscribe-terminal.authenticator .authenticator,
-.subscribe-terminal.hinter .hinter {
+.subscribe-terminal input,
+.subscribe-terminal button {
   display: block;
 }
-.subscribe-terminal .authenticator input,
-.subscribe-terminal accepter input,
-.subscribe-terminal .authenticator button,
-.subscribe-terminal accepter button {
-  display: block;
-}
-.subscribe-terminal .authenticator p,
-.subscribe-terminal accepter p {
+.subscribe-terminal p {
   margin: 5% auto;
   width: 90%;
   display: block;
   line-height: 20px;
 }
-.subscribe-terminal .authenticator input,
-.subscribe-terminal accepter input {
+.subscribe-terminal input {
   width: 90%;
   margin: 16px auto;
   padding: 8px 8px;
   border: none;
+}
+.subscribe-terminal > div {
+  display: none;
+}
+.subscribe-terminal.accepter .accepter,
+.subscribe-terminal.authenticator .authenticator,
+.subscribe-terminal.hinter .hinter,
+.subscribe-terminal.waiter .waiter,
+.subscribe-terminal.failure .failure {
+  display: block;
+}
+.subscribe-terminal .waiter .loading-hint,
+.subscribe-terminal .hinter p {
+  width: 80%;
+  display: block;
+  padding: 5px;
+  margin: 2px auto;
 }
 .subscribe-assistant {
   width: 100%;
@@ -4212,5 +4370,6 @@ cube-loading-hint .box .face-back {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   margin-top: 5px;
+  position: relative;
   padding: 10px;
 }

@@ -1,6 +1,8 @@
 App = require("app")
+CubeLoadingHint = require "/widget/cubeLoadingHint"
 class OfflineHinter extends Leaf.Widget
     constructor:()->
+        @include CubeLoadingHint
         super $(".offline-hinter")[0]
         @hide()
         App.connectionManager.on "connect",()=>

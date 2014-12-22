@@ -15,15 +15,14 @@ class TwitterSource
         return null
     @detectStream = (uri)->
         stream = new EventEmitter()
-        process.nextTick ()->
-            for TwitterSource in Sources
-                if TwitterSource.test uri
-                    console.log "tests",TwitterSource.name
-                    stream.emit "data", new TwitterSource({uri:uri})
-                    stream.emit "end"
-                    return
-            stream.emit "end"
-        return stream
+        sources = []
+        for TwitterSource in Sources
+            if TwitterSource.test uri
+                console.log "tests",TwitterSource.name
+                sources.push new TwitterSource({uri:uri})
+        if sources.length is 0
+            return null
+        return Source.delayStream sources
     constructor:(info)->
         for Source in Sources
             if Source.test info.uri

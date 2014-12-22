@@ -5,17 +5,17 @@ Model = require "model"
 class ArchiveDisplayer extends Leaf.Widget
     constructor:(template)->
         super template
+        @useDisplayContent = true
     setArchive:(archive)->
         if @archive
             @archive.stopListenBy this
-            
-        @archive = archive 
+
+        @archive = archive
         @archive.listenBy this,"change",@render
         @render()
-        @useDisplayContent = true
 
     _renderShareInfo:(profile,howmany)->
-        if howmany is 0 
+        if howmany is 0
             @UI.shareInfo$.text ""
             return true
         if not profile
@@ -28,7 +28,7 @@ class ArchiveDisplayer extends Leaf.Widget
             else
                 words = profile.nickname+" "+i18n.sharesIt()
             @UI.shareInfo$.html(html+words)
-            
+
     render:()->
         @UI.title$.text(@archive.title)
         if @archive.originalLink
@@ -42,7 +42,7 @@ class ArchiveDisplayer extends Leaf.Widget
         if @archive.listName is maybeList
             @UI.readLater$.addClass("active")
         else
-            @UI.readLater$.removeClass("active") 
+            @UI.readLater$.removeClass("active")
         if @archive.listName
             @renderData.listText = "list (#{@archive.listName})"
         else
@@ -59,8 +59,10 @@ class ArchiveDisplayer extends Leaf.Widget
             @_renderShareInfo(profile,shareRecords.length)
         @UI.sourceName$.text @archive.sourceName
         originalLink = @archive.originalLink or ""
+
         if @useDisplayContent
             toDisplay = @archive.displayContent or @archive.content
+
         else
             toDisplay = @archive.content
         if @currentContent isnt toDisplay
@@ -68,7 +70,7 @@ class ArchiveDisplayer extends Leaf.Widget
             if !@currentContent
                 @UI.content$.text("")
                 return
-            
+            # try have resource proxy set.
             if App.userConfig.get("enableResourceProxy")
                 if not App.userConfig.get("useResourceProxyByDefault")
                     # replace on error
@@ -96,7 +98,7 @@ class ArchiveDisplayer extends Leaf.Widget
                 @UI.content$.html(sanitizer.sanitize(toDisplay))
             @UI.content$.find("a").each ()->
                 this.setAttribute "target","_blank"
-                
+
     onClickShare:()->
         if not @archive.share
             console.log @archive

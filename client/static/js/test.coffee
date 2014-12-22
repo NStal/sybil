@@ -35,14 +35,20 @@ if window.location.toString().indexOf("debug") > 0
 #                    item.showSourceDetail()
 #                    break
     true
-#    App.on "connect",()->
+    App.on "connect",()->
+#        console.debug "show?"
+#        App.offlineHinter.show()
 #        App.sourceView.archiveList.UI.loadingHint.show()
 #        setTimeout (()->
 #            App.addSourcePopup.show()
-#            App.addSourcePopup.UI.input.value = "http://bitinn.net/"
+#            App.addSourcePopup.UI.input.value = "https://twitter.com/nstalorz/lists/vips"
+#            
+##            App.addSourcePopup.UI.input.value = "http://weibo.com"
+##            App.addSourcePopup.UI.input.value = "http://youtube.com"
+#
 #            App.addSourcePopup.onClickSubmit()
 #        ),100
-    #    
+    #
     #    setTimeout (()->
     #        App.viewSwitcher.switchTo "p2p view"
     #        App.userConfig.set "enableResourceProxy",true

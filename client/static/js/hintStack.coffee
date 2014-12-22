@@ -35,4 +35,8 @@ class HintStack.HintStackItem extends Leaf.Widget
         setTimeout (()=>
             @emit "hide",this
             ),500
+    attract:()->
+        @node$.animate({bottom:10})
+        @node$.animate({bottom:0})
+        
 module.exports = HintStack

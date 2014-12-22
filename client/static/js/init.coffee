@@ -1,3 +1,4 @@
+
 context = new LeafRequire()
 context.setConfig "./require.json",(err)->
     if err
@@ -7,7 +8,7 @@ context.setConfig "./require.json",(err)->
         context.enableCache = false
     context.load ()->
         console.log "sybil loaded at version #{context.version}"
-
+window.SybilMainContext = context
                 
 #context.debug = true
 #context.enableCache = false
