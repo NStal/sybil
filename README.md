@@ -5,6 +5,7 @@ sybil
 
 ## 
 Features:
+
 1. Support RSS.
 2. Support custom crawler, like `Twitter`, `Twitter lists`, `Weibo`, or what ever you like to [write in hours](./doc/dev/custom-source.md).
 3. Have a [plugin system](./doc/user/install-plugin.md) , [easy to extend](./doc/dev/write-a-local-plugin.md), friendly to [third party tools](./doc/dev/write-a-remote-plugin.md).
@@ -15,6 +16,7 @@ Features:
 8. Support proxy.
 
 Limits:
+
 1. For this very moment, sybil is available on linux. OSX and Windows will be supported in near future.
 2. APIs are still not stable and may be changed reasonably.
 
