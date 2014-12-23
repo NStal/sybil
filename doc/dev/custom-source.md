@@ -348,6 +348,6 @@ tester.test()
 ```
 
 
-### Instal it.
+### Installation
 
 Make a symlink or copy from /example/pixiv to /customSources/pixiv , and restart the sybil.

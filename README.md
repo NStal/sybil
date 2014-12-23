@@ -6,7 +6,7 @@ sybil
 ## 
 Features:
 1. Support RSS.
-2. Support custom crawler, like `Twitter`, `Twitter lists`, `Weibo`, or what ever you like to [write in minutes](./doc/dev/custom-source.md).
+2. Support custom crawler, like `Twitter`, `Twitter lists`, `Weibo`, or what ever you like to [write in hours](./doc/dev/custom-source.md).
 3. Have a [plugin system](./doc/user/install-plugin.md) , [easy to extend](./doc/dev/write-a-local-plugin.md), friendly to [third party tools](./doc/dev/write-a-remote-plugin.md).
 4. [Support data export](./doc/user/backup.md).
 5. Run on server or desktop.
@@ -26,7 +26,12 @@ Limits:
 5. Run `sybil` with console or double click it file.
 6. Follow the instructions what ever it comes up with, it should take seconds to finish if you don't care.
 
-## Development.
+## Development Install.
+
+1. Clone the repo.
+2. Follow [this guide](./doc/dev/setup-dev-environment.md) to setup the environment.
+3. [Read the source code](./doc/dev/read-the-source-code.md)
+4. Code.
 
 ## Road map or todos.
 1. support OSX.

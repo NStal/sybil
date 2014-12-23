@@ -18,7 +18,9 @@ catch e
 
 if process.argv[2] is "debug"
     settings.debug = true
-    
+if process.argv[2] is "settings"
+    console.log settings[process.argv[3]] or ""
+    process.exit(0)
 logger.useColor = settings.logWithColor
 logger.root = settings.root
 # setup log redirections if log path is defined
@@ -41,7 +43,7 @@ if not settings.debug and process.stdin and process.stdin.isTTY
         fs.unlinkSync pidPath
     pm.background()
 
-if settings.logPath and not settings.debug 
+if settings.logPath and not settings.debug
     logStream = fs.createWriteStream(settings.logPath,{flags:"a"});
     process.__defineGetter__ "stdout",()->logStream
     process.__defineGetter__ "stderr",()->logStream
