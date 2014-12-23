@@ -69,7 +69,7 @@ Note that we try to accessing `@data.authorizeInfo` to access authorize info, an
 
 Now, we know the `PixivInitializer` can't get things done without `authorizeInfo`, so we come to complete the authorizer first.
 
-### Authorizer
+### `Authorizer`
 
 ```coffee-script
 
@@ -190,7 +190,7 @@ The code and comments above are quite self explained. Just make sure you have re
 
 Now we are going to implement an `Updater`.
 
-### Updater
+### `Updater`
 An `Updater` is reponsible for updating the source periodically. When it fails due to various reasons, we should either retry after certain amount of time or inform the user about the situation. 
 
 `Updater` should implement 2 interfaces, `@atFetching` and `@parseRawArchive`. you should generally fetch the archives during `@atFetching` and save them to `@data.rawFetchedArchives` as a array. `@parseRawArchive` should parse them one by one into a [sybil archive](./archive.md). you can also read the source code in [collector/sources/] to see the live example.

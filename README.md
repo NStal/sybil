@@ -41,6 +41,7 @@ Limits:
 
 ## User guide
 You can post questions here https://groups.google.com/forum/#!forum/sybil-reader
+
 1. [Basic usage](./doc/user/basic-usage.md)
 2. [Better p2p network](./doc/user/better-p2p-network.md)
 3. [Advanced usage](./doc/user/advanced-usage.md)
