@@ -11,6 +11,7 @@ log
 pid
 backup/*
 todo.org
+*.org
 \#*
 *pem
 releaseUtil
@@ -18,3 +19,4 @@ releaseUtil
 db/*
 ./test/subscribe/*
 
+*.key
