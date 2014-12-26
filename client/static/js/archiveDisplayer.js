@@ -61,7 +61,7 @@
       } else {
         this.UI.like$.removeClass("active");
       }
-      maybeList = App.userConfig.get("" + this.archive.sourceGuid + "/maybeList") || "read later";
+      maybeList = this.archive.listName || App.userConfig.get("" + this.archive.sourceGuid + "/maybeList") || "read later";
       this.UI.readLater$.text(maybeList);
       if (this.archive.listName === maybeList) {
         this.UI.readLater$.addClass("active");

@@ -115,7 +115,7 @@ class ListItem extends Leaf.Widget
         @node$.addClass("select");
     onClickNode:()=>
         @select()
-        
+
 class ArchiveList extends Leaf.Widget
     constructor:()->
         @include CubeLoadingHint
@@ -133,7 +133,7 @@ class ArchiveList extends Leaf.Widget
         @scrollChecker.on "scrollBottom",()=>
             @more()
 
-                
+
     load:(list)->
         if @currentList
             @currentList.stopListenBy this
@@ -144,7 +144,7 @@ class ArchiveList extends Leaf.Widget
         @noMore = false
         @UI.loadingHint.hide()
         @more()
-            
+
     more:()->
         if @noMore
             return
@@ -183,7 +183,7 @@ class ArchiveListItem extends Leaf.Widget
         super App.templates["list-view-archive-list-item"]
         @render()
         @isDone = false
-        
+
     onClickNode:()->
         @select()
     select:()->
@@ -230,7 +230,7 @@ class ArchiveListItem extends Leaf.Widget
         else if result.length is 0
             result = "( empty )"
         return result
-    
+
 class ListArchiveDisplayer extends ArchiveDisplayer
     constructor:()->
         # share template with search view
@@ -241,5 +241,5 @@ class ListArchiveDisplayer extends ArchiveDisplayer
         @setArchive(archive)
         @node.scrollTop = 0
         @render()
-        
+
 module.exports = ListView

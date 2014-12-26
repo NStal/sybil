@@ -37,7 +37,7 @@ class ArchiveDisplayer extends Leaf.Widget
             @UI.like$.addClass("active")
         else
             @UI.like$.removeClass("active")
-        maybeList = App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
+        maybeList = @archive.listName or App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
         @UI.readLater$.text maybeList
         if @archive.listName is maybeList
             @UI.readLater$.addClass("active")
