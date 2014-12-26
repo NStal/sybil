@@ -66,3 +66,19 @@ When stored as JSON object, `Archive` has following properties
     // property reserved for extension or plugin use
     ,meta:{}
 }```
+
+
+# Magics
+
+## Resource with referer check.
+
+For image resource with referer check, you may set src to `/remoteResource?url={{imageSrc}}&referer={{archiveUrl}}`. The sybil local plugin `resourceProxy` will try to fetch the resource using the available proxies and set referer for you.
+Resource
+
+## Big image and thumbnails.
+
+For sources that can extract both a thumbnail and a raw image for an `img` element, you may set the thumbnail url or a reasonable size image url to `src` and set raw url to `data-raw-src` url, this will trigger the sybil auto reload facilities. Plugin may also set thumbnail src to  `data-thumbnail-src`. `data-thumbnail-src` will be used as `src` when user are view under mobile device.
+
+## Modify archive content to improve the richness of the archive.
+
+Some plugins that may modify `content` field of the archive, such as extends the shortened url, or inline the image to base64. It's not recommanded unless no data will be lost. The recommanded way is to set the `displayContent` field, and leave the `content` field unchanged. If `displayContent` already exists, plugin should using the `displayContent` instead of `content` to provide better plugin compatabilities.

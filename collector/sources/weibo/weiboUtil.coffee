@@ -22,7 +22,7 @@ Errors = exports.Errors = Source.Errors
 exports.fetch = (info = {},callback)->
     cookie = info.cookie
     timeout = info.timeout or 30 * 1000
-    url = "http://m.weibo.cn/searchs/searchFeed?&feature=0&uicode=20000060&rl=1&ext=plt%3A490&page=1" 
+    url = "http://m.weibo.cn/searchs/searchFeed?&feature=0&uicode=20000060&rl=1&ext=plt%3A490&page=1"
     option = urlModule.parse url
     option.method = "GET"
     option.headers = {
@@ -61,9 +61,9 @@ exports.renderDisplayContent = (raw)=>
         $text(this).attr("href",urlModule.resolve("http://weibo.com/",href))
     pics = raw.pic_ids or []
     pics.forEach (id)->
-        $text(".tweet").append "<img src='http://ww1.sinaimg.cn/mw1024/#{id}'/>"
+        $text(".tweet").append "<img src='http://ww1.sinaimg.cn/mw1024/#{id}' data-raw-src='http://ww1.sinaimg.cn/large/#{id}' data-thumbnail-src='http://ww2.sinaimg.cn/thumbnail/#{id}'/>"
     if raw.retweeted_status
-        retweet = exports.renderDisplayContent raw.retweeted_status 
+        retweet = exports.renderDisplayContent raw.retweeted_status
         $text(".tweet").append retweet
     return $text.html()
 exports.gb2utf8 = (buffer)->
