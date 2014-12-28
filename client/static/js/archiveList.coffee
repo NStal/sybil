@@ -107,6 +107,8 @@ class ArchiveList extends Leaf.Widget
         else
             @UI.toggleViewAll$.text("view all")
     clear:()->
+        if @archiveLoader
+            @archiveLoader.stopListenBy this
         @archiveLoader = null
         @UI.containerWrapper.scrollTop = 0
         @UI.emptyHint$.show()
