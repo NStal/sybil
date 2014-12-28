@@ -48,6 +48,11 @@
       this.UI.archives$.text("" + this.source.unreadCount + "/" + (this.source.totalArchive || '?'));
       this.UI.descriptionContent$.text(this.source.description || "none");
       this.onClickCancelDescriptionButton();
+      if (App.userConfig.get("enableResourceProxy/" + this.source.guid)) {
+        this.UI.enableResourceProxy.checked = true;
+      } else {
+        this.UI.enableResourceProxy.checked = false;
+      }
       if (this.source.statistic) {
         this.sourceStatistic.load(this.source.statistic);
         result = 0;
@@ -63,6 +68,16 @@
           perweek = parseInt(Math.ceil(perweek));
         }
         return this.UI.frequency$.text("" + perweek + " post per week");
+      }
+    };
+
+    SourceDetail.prototype.onClickEnableResourceProxy = function() {
+      if (App.userConfig.get("enableResourceProxy/" + this.source.guid)) {
+        this.UI.enableResourceProxy.checked = false;
+        return App.userConfig.set("enableResourceProxy/" + this.source.guid, false);
+      } else {
+        this.UI.enableResourceProxy.checked = true;
+        return App.userConfig.set("enableResourceProxy/" + this.source.guid, true);
       }
     };
 

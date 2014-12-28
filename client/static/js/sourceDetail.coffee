@@ -29,6 +29,10 @@ class SourceDetail extends Popup
         @UI.archives$.text "#{@source.unreadCount}/#{@source.totalArchive or '?'}"
         @UI.descriptionContent$.text @source.description or "none"
         @onClickCancelDescriptionButton()
+        if App.userConfig.get "enableResourceProxy/#{@source.guid}"
+            @UI.enableResourceProxy.checked = true
+        else
+            @UI.enableResourceProxy.checked = false
         if @source.statistic
             @sourceStatistic.load @source.statistic
             result = 0
@@ -40,6 +44,13 @@ class SourceDetail extends Popup
             else
                 perweek = parseInt(Math.ceil perweek)
             @UI.frequency$.text "#{perweek} post per week"
+    onClickEnableResourceProxy:()->
+        if App.userConfig.get "enableResourceProxy/#{@source.guid}"
+            @UI.enableResourceProxy.checked = false
+            App.userConfig.set "enableResourceProxy/#{@source.guid}",false
+        else
+            @UI.enableResourceProxy.checked = true
+            App.userConfig.set "enableResourceProxy/#{@source.guid}",true
     show:()->
         if SourceDetail.currentDetail
             SourceDetail.currentDetail.hide()
@@ -62,7 +73,7 @@ class SourceDetail extends Popup
         @renderData.refreshStyle = "fa-spin"
         source.forceUpdate (err)=>
             console.debug "source update done hehe?",err,"??"
-            
+
             @renderData.refreshStyle = ""
             if source isnt @source
                 # current source has changed, ignore the result
@@ -91,9 +102,9 @@ class SourceDetail extends Popup
     onClickCancelDescriptionButton:()->
         @UI.descriptionEditor$.hide()
         @UI.description$.show()
-        
+
 #class SourceRuningState extends Leaf.Widget
-    
+
 class SourceStatistic extends Leaf.Widget
     constructor:()->
         super "<canvas></canvas>"
@@ -117,13 +128,13 @@ class SourceStatistic extends Leaf.Widget
         step = @width / (@info.length + 1)
         offset = parseInt(step/2)
         @context.fillStyle = "#d9d9d9"
-        for count in @info 
+        for count in @info
             #@context.rect offset,0,offset+step/2,count*maxHeight/max
             @context.beginPath()
             @context.rect parseInt(offset),@height-parseInt(count*maxHeight/max),parseInt(step/2),parseInt(count*maxHeight/max)
             @context.fill()
             @context.closePath()
             offset += step
-        
+
 #window.SourceDetail = SourceDetail
 module.exports = SourceDetail

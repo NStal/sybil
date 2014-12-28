@@ -51,7 +51,7 @@
     };
 
     ArchiveDisplayer.prototype.render = function() {
-      var content, maybeList, originalLink, profile, shareRecords, toDisplay;
+      var content, forceProxy, maybeList, originalLink, profile, shareRecords, toDisplay;
       this.UI.title$.text(this.archive.title);
       if (this.archive.originalLink) {
         this.UI.title$.attr("href", this.archive.originalLink);
@@ -99,8 +99,9 @@
           this.UI.content$.text("");
           return;
         }
-        if (App.userConfig.get("enableResourceProxy")) {
-          if (!App.userConfig.get("useResourceProxyByDefault")) {
+        forceProxy = App.userConfig.get("enableResourceProxy/" + this.archive.sourceGuid);
+        if (App.userConfig.get("enableResourceProxy") || forceProxy) {
+          if (!App.userConfig.get("useResourceProxyByDefault") && !forceProxy) {
             this.UI.content$.html(sanitizer.sanitize(toDisplay));
             this.UI.content$.find("img").each(function() {
               this.useProxy = false;

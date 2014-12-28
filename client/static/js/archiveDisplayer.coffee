@@ -71,8 +71,9 @@ class ArchiveDisplayer extends Leaf.Widget
                 @UI.content$.text("")
                 return
             # try have resource proxy set.
-            if App.userConfig.get("enableResourceProxy")
-                if not App.userConfig.get("useResourceProxyByDefault")
+            forceProxy = App.userConfig.get "enableResourceProxy/#{@archive.sourceGuid}"
+            if App.userConfig.get("enableResourceProxy") or forceProxy
+                if not App.userConfig.get("useResourceProxyByDefault") and not forceProxy
                     # replace on error
                     @UI.content$.html (sanitizer.sanitize(toDisplay))
                     @UI.content$.find("img").each ()->
