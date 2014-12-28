@@ -13,9 +13,7 @@ class SearchView extends View
         @archiveDisplayer = new ArchiveDisplayer(App.templates.baseView.archiveDisplayer)
         @archiveDisplayer.node$.hide()
         @searchList.on "select",(archive)=>
-            console.log "select",archive
             @archiveDisplayer.setArchive(archive)
-            console.debug "~~~",@archiveDisplayer.node.scrollTop
             @archiveDisplayer.node.scrollTop = 0
             @archiveDisplayer.node$.show();
             @node$.addClass("show-displayer");
@@ -45,7 +43,6 @@ class SearchList extends Leaf.Widget
         @appendQueue = async.queue ((archive,done)=>
             listItem = new SearchListItem(archive)
             listItem.onClickNode = ()=>
-                console.debug "select",listItem.archive
                 @emit "select",listItem.archive
             listItem.onMouseoverNode = ()=>
                 @emit "select",listItem.archive
@@ -58,7 +55,6 @@ class SearchList extends Leaf.Widget
         @viewRead = true
         @loadCount = 20
     onScroll:()->
-        console.log @scrollTarget.scrollHeight - @scrollTarget.scrollTop - @scrollTarget.clientHeight,@scrollTarget.clientHeight/2
         if @scrollTarget.scrollHeight - @scrollTarget.scrollTop - @scrollTarget.clientHeight < @scrollTarget.clientHeight/2
             @more()
     applySearch:(query)->
@@ -88,7 +84,6 @@ class SearchList extends Leaf.Widget
                 App.showError err
                 return
     appendArchive:(archive)->
-        console.debug archive,"to append"
         @UI.noMoreHint$.hide()
         @appendQueue.push archive
     onNoMore:()->
@@ -109,7 +104,6 @@ class SearchListItem extends Leaf.Widget
         if not @archive.createDate
             time = (new Date(0)).getTime()
         else
-            console.log @archive.createDate
             time = @archive.createDate.getTime()
         now = Date.now()
         tilNow = now - time

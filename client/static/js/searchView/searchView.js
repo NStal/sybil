@@ -32,9 +32,7 @@
       this.archiveDisplayer.node$.hide();
       this.searchList.on("select", (function(_this) {
         return function(archive) {
-          console.log("select", archive);
           _this.archiveDisplayer.setArchive(archive);
-          console.debug("~~~", _this.archiveDisplayer.node.scrollTop);
           _this.archiveDisplayer.node.scrollTop = 0;
           _this.archiveDisplayer.node$.show();
           return _this.node$.addClass("show-displayer");
@@ -87,7 +85,6 @@
           var listItem;
           listItem = new SearchListItem(archive);
           listItem.onClickNode = function() {
-            console.debug("select", listItem.archive);
             return _this.emit("select", listItem.archive);
           };
           listItem.onMouseoverNode = function() {
@@ -108,7 +105,6 @@
     }
 
     SearchList.prototype.onScroll = function() {
-      console.log(this.scrollTarget.scrollHeight - this.scrollTarget.scrollTop - this.scrollTarget.clientHeight, this.scrollTarget.clientHeight / 2);
       if (this.scrollTarget.scrollHeight - this.scrollTarget.scrollTop - this.scrollTarget.clientHeight < this.scrollTarget.clientHeight / 2) {
         return this.more();
       }
@@ -157,7 +153,6 @@
     };
 
     SearchList.prototype.appendArchive = function(archive) {
-      console.debug(archive, "to append");
       this.UI.noMoreHint$.hide();
       return this.appendQueue.push(archive);
     };
@@ -195,7 +190,6 @@
       if (!this.archive.createDate) {
         time = (new Date(0)).getTime();
       } else {
-        console.log(this.archive.createDate);
         time = this.archive.createDate.getTime();
       }
       now = Date.now();
