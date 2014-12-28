@@ -1,4 +1,4 @@
-class ConnectionManager extends Leaf.EventEmitter 
+class ConnectionManager extends Leaf.EventEmitter
     constructor:(address)->
         super()
         @connectInterval = 1000

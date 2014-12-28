@@ -5,40 +5,12 @@
         "root": "./js/",
         "files": [
             {
-                "path": "addSourcePopup.js",
-                "hash": "5377bc"
-            },
-            {
                 "path": "app.js",
                 "hash": "02e45f"
             },
             {
-                "path": "archiveDisplayer.js",
-                "hash": "2cb4cf"
-            },
-            {
-                "path": "archiveList.js",
-                "hash": "98ffb1"
-            },
-            {
                 "path": "connectionManager.js",
                 "hash": "ab2bdb"
-            },
-            {
-                "path": "contextMenu.js",
-                "hash": "51a854"
-            },
-            {
-                "path": "customArchiveList.js",
-                "hash": "04a548"
-            },
-            {
-                "path": "customSourceList.js",
-                "hash": "e4b046"
-            },
-            {
-                "path": "customView.js",
-                "hash": "c14280"
             },
             {
                 "path": "enhancement.js",
@@ -46,7 +18,7 @@
             },
             {
                 "path": "hintStack.js",
-                "hash": "c43e6b"
+                "hash": "a36cb2"
             },
             {
                 "path": "i18n.js",
@@ -54,27 +26,11 @@
             },
             {
                 "path": "init.js",
-                "hash": "407e66"
-            },
-            {
-                "path": "listView.js",
-                "hash": "5b03c3"
-            },
-            {
-                "path": "load.js",
-                "hash": "83b90a"
+                "hash": "b81c89"
             },
             {
                 "path": "main.js",
-                "hash": "6fb827"
-            },
-            {
-                "path": "manageView.js",
-                "hash": "019e45"
-            },
-            {
-                "path": "messageCenter.js",
-                "hash": "975564"
+                "hash": "9f7dc1"
             },
             {
                 "path": "mobile.js",
@@ -82,11 +38,7 @@
             },
             {
                 "path": "model.js",
-                "hash": "b2a7ca"
-            },
-            {
-                "path": "model.old.js",
-                "hash": "544564"
+                "hash": "388f74"
             },
             {
                 "path": "modelSyncManager.js",
@@ -98,7 +50,7 @@
             },
             {
                 "path": "offlineHinter.js",
-                "hash": "bd8fcb"
+                "hash": "0cd720"
             },
             {
                 "path": "p2pView.js",
@@ -113,18 +65,6 @@
                 "hash": "3718fc"
             },
             {
-                "path": "readLaterList.js",
-                "hash": "e88422"
-            },
-            {
-                "path": "searchView.js",
-                "hash": "1a4c80"
-            },
-            {
-                "path": "selectors.js",
-                "hash": "7d4ea9"
-            },
-            {
                 "path": "serverConnection.js",
                 "hash": "211027"
             },
@@ -133,40 +73,12 @@
                 "hash": "5e1cc1"
             },
             {
-                "path": "sourceDetail.js",
-                "hash": "cb8d80"
-            },
-            {
-                "path": "sourceList.js",
-                "hash": "3e3fa7"
-            },
-            {
-                "path": "sourceView.js",
-                "hash": "ec8d6a"
-            },
-            {
-                "path": "swipeCheker.js",
-                "hash": "19f416"
-            },
-            {
-                "path": "tagArchiveList.js",
-                "hash": "4d1963"
-            },
-            {
-                "path": "tagList.js",
-                "hash": "0d1273"
-            },
-            {
-                "path": "tagView.js",
-                "hash": "c5b85f"
-            },
-            {
                 "path": "templateManager.js",
-                "hash": "e1b933"
+                "hash": "58d609"
             },
             {
                 "path": "test.js",
-                "hash": "7abe2c"
+                "hash": "fd13ca"
             },
             {
                 "path": "userConfig.js",
@@ -174,11 +86,15 @@
             },
             {
                 "path": "view.js",
-                "hash": "c72e62"
+                "hash": "8f84f2"
             },
             {
                 "path": "viewSwitcher.js",
                 "hash": "83b90a"
+            },
+            {
+                "path": "baseView/archiveDisplayer.js",
+                "hash": "22e3cb"
             },
             {
                 "path": "lib/async.js",
@@ -194,11 +110,11 @@
             },
             {
                 "path": "lib/leaf-require.js",
-                "hash": "944c84"
+                "hash": "a25a25"
             },
             {
                 "path": "lib/leaf.js",
-                "hash": "197c68"
+                "hash": "5f8961"
             },
             {
                 "path": "lib/lodash.js",
@@ -221,6 +137,10 @@
                 "hash": "ea5381"
             },
             {
+                "path": "listView/listView.js",
+                "hash": "75453b"
+            },
+            {
                 "path": "procedure/endlessArchiveLoader.js",
                 "hash": "e557e1"
             },
@@ -229,16 +149,40 @@
                 "hash": "00d3d3"
             },
             {
+                "path": "searchView/searchView.js",
+                "hash": "6122a8"
+            },
+            {
                 "path": "sourceUtil/adapterTerminal.js",
-                "hash": "ef37a6"
+                "hash": "ac1d3c"
+            },
+            {
+                "path": "sourceUtil/addSourcePopup.js",
+                "hash": "025bb1"
             },
             {
                 "path": "sourceUtil/sourceAuthorizeTerminal.js",
-                "hash": "ca5c39"
+                "hash": "baad4f"
             },
             {
                 "path": "sourceUtil/subscribeAssistant.js",
-                "hash": "14827f"
+                "hash": "530754"
+            },
+            {
+                "path": "sourceView/archiveList.js",
+                "hash": "b2b695"
+            },
+            {
+                "path": "sourceView/sourceDetail.js",
+                "hash": "cd10b7"
+            },
+            {
+                "path": "sourceView/sourceList.js",
+                "hash": "6a53e0"
+            },
+            {
+                "path": "sourceView/sourceView.js",
+                "hash": "ba5c3b"
             },
             {
                 "path": "util/delayWorker.js",
@@ -262,7 +206,7 @@
             },
             {
                 "path": "util/swipeChecker.js",
-                "hash": "c80599"
+                "hash": "8e1145"
             },
             {
                 "path": "util/task.js",
@@ -274,11 +218,11 @@
             },
             {
                 "path": "widget/contextMenu.js",
-                "hash": "1361a7"
+                "hash": "55504f"
             },
             {
                 "path": "widget/cubeLoadingHint.js",
-                "hash": "2299b0"
+                "hash": "160bb4"
             },
             {
                 "path": "widget/popup.js",
@@ -288,5 +232,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.1.10"
+    "version": "0.1.22"
 }

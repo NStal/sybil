@@ -6,13 +6,13 @@
 
   ViewSwitcher = View.ViewSwitcher;
 
-  AddSourcePopup = require("addSourcePopup");
+  AddSourcePopup = require("sourceUtil/addSourcePopup");
 
-  SourceView = require("sourceView");
+  SourceView = require("sourceView/sourceView");
 
-  ListView = require("listView");
+  ListView = require("listView/listView");
 
-  SearchView = require("searchView");
+  SearchView = require("searchView/searchView");
 
   OfflineHinter = require("offlineHinter");
 

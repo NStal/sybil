@@ -1,7 +1,9 @@
-App = require("../app")
+tm = require "/templateManager"
+tm.use "widget/contextMenu"
+App = require("/app")
 class ContextMenu extends Leaf.Widget
     constructor:(selections)->
-        super(App.templates["context-menu"])
+        super(App.templates.widget.contextMenu)
         @selections = selections
         @children = Leaf.Widget.makeList @UI.container
         @node.oncontextmenu = ()->
@@ -10,9 +12,9 @@ class ContextMenu extends Leaf.Widget
             @addSelection(item)
     addSelection:(selection)->
         child = new ContextMenuItem(selection.name)
-        child.onClickNode = ()=> 
+        child.onClickNode = ()=>
             @hide()
-            setTimeout selection.callback,0 
+            setTimeout selection.callback,0
         @children.push child
     show:(e)->
         e.stopImmediatePropagation()
@@ -63,9 +65,10 @@ class Mask extends Leaf.Widget
     hide:()->
         @remove()
 ContextMenu.mask = new Mask()
+tm.use "widget/contextMenuItem"
 class ContextMenuItem extends Leaf.Widget
     constructor:(word)->
-        super App.templates["context-menu-item"]
+        super App.templates.widget.contextMenuItem
         @node$.text word
     onClickNode:()->
         @emit "fire",this

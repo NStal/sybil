@@ -10,12 +10,14 @@
 
   tm = require("/templateManager");
 
+  tm.use("sourceUtil/sourceAuthorizeTerminal");
+
   SourceAuthorizeTerminal = (function(_super) {
     __extends(SourceAuthorizeTerminal, _super);
 
     function SourceAuthorizeTerminal(source) {
       this.source = source;
-      SourceAuthorizeTerminal.__super__.constructor.call(this, App.templates["source-authorize-terminal"]);
+      SourceAuthorizeTerminal.__super__.constructor.call(this, App.templates.sourceUtil.sourceAuthorizeTerminal);
       if (!this.source.requireLocalAuth) {
         setTimeout(((function(_this) {
           return function() {

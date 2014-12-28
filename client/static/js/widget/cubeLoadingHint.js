@@ -8,7 +8,7 @@
 
   tm = require("/templateManager");
 
-  tm.use("cube-loading-hint");
+  tm.use("widget/cubeLoadingHint");
 
   console.debug("use cube");
 
@@ -19,7 +19,7 @@
       if (params == null) {
         params = {};
       }
-      CubeLoadingHint.__super__.constructor.call(this, App.templates["cube-loading-hint"]);
+      CubeLoadingHint.__super__.constructor.call(this, App.templates.widget.cubeLoadingHint);
       this.UI.hint$.text(params.hint || "");
       this.expose("show");
       this.expose("hide");

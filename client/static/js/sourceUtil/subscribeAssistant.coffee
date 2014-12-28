@@ -5,10 +5,12 @@ App = require "/app"
 AdapterTerminal = require "./adapterTerminal"
 HintStack = require "/hintStack"
 CubeLoadingHint = require "/widget/cubeLoadingHint"
+tm = require "/templateManager"
+tm.use "sourceUtil/subscribeAssistant"
 class SubscribeAssistant extends HintStack.HintStackItem
     constructor:(@uri)->
         @include CubeLoadingHint
-        super App.templates["subscribe-assistant"]
+        super App.templates.sourceUtil.subscribeAssistant
         @show()
         @terminals = []
         @setHint "Try detect any possible source from the given url #{@uri}"
@@ -18,12 +20,12 @@ class SubscribeAssistant extends HintStack.HintStackItem
                 @emit "error",err
                 return
             stream.on "data",(candidate)=>
-                console.debug "get candidate",candidate 
+                console.debug "get candidate",candidate
                 @spawnAdapterTerminal candidate
             stream.on "end",()=>
                 console.debug "end stream"
                 console.debug @terminals.length,@terminals.map (item)->item.candidate
-                
+
                 if @terminals.length is 0
                     @setHint "No source available detected from the url #{@uri}"
                     @emit "none"

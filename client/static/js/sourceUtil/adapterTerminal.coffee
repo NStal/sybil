@@ -1,10 +1,13 @@
 App = require "/app"
 HintStack = require "/hintStack"
 CubeLoadingHint = require "/widget/cubeLoadingHint"
+tm = require "/templateManager"
+tm.use "sourceUtil/subscribeAdapterTerminal"
+
 class SubscribeAdapterTerminal extends HintStack.HintStackItem
     constructor:(candidate)->
         @include CubeLoadingHint
-        super App.templates["subscribe-adapter-terminal"]
+        super App.templates.sourceUtil.subscribeAdapterTerminal
         console.debug candidate,"from termional"
         @candidate = candidate
         @Data.mode = "accepter"
@@ -76,7 +79,7 @@ class SubscribeAdapterTerminal extends HintStack.HintStackItem
     onClickRefuse:()->
         @decline ()=>
             @hide()
-    
+
     hint:(word)->
         @Data.mode = "hinter"
         @Data.hint = word

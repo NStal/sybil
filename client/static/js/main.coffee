@@ -4,13 +4,13 @@
 # 3. Connect to the sybil websocket API
 # 3.5 (app ready)
 # 4. Sync the required data like source/list/nodes
-# 
+#
 View = require "view"
 ViewSwitcher = View.ViewSwitcher
-AddSourcePopup = require "addSourcePopup"
-SourceView = require "sourceView"
-ListView = require "listView"
-SearchView = require "searchView"
+AddSourcePopup = require "sourceUtil/addSourcePopup"
+SourceView = require "sourceView/sourceView"
+ListView = require "listView/listView"
+SearchView = require "searchView/searchView"
 OfflineHinter = require "offlineHinter"
 SettingPanel = require "settingPanel"
 HintStack = require "hintStack"
@@ -45,15 +45,15 @@ App.afterInitialLoad = (callback)->
 App.init = ()->
     # public components
 
-    
+
     App.viewSwitcher = new ViewSwitcher()
-    
-    # views 
+
+    # views
     App.addSourcePopup = new AddSourcePopup()
     App.addSourcePopup.appendTo document.body
     App.offlineHinter = new OfflineHinter()
 #    App.settingPanel = new SettingPanel()
-            
+
     App.sourceView = new SourceView()
     App.listView = new ListView()
     App.searchView = new SearchView()
@@ -65,7 +65,7 @@ App.init = ()->
     #App.sourceSelector = new SourceSelector()
     #App.tagSelector.appendTo document.body
     #App.sourceSelector.appendTo document.body
-    
+
     # Should hide all view by default
     # The reason I don't do this in style sheet
     # is that some views need to be display:flex;
@@ -73,7 +73,7 @@ App.init = ()->
     # I won't be able to know who need to be display:flex;
     for view in View.views
         view.hide()
-    
+
     App.viewSwitcher.switchTo "source view"
     App.emit "structureReady"
     App.connect()
@@ -99,12 +99,12 @@ App.persistentDataStoreManager = new (require "persistentDataStore").Manager()
 App.userConfig = new (require "userConfig")
 App.modelSyncManager = new (require "modelSyncManager")
 
-    
+
 $ ()->
     App.templateManager.start()
     console.debug "start tm"
     App.templateManager.on "ready",(templates)->
         App.templates = templates
         App.init()
-    
+
     require "test"

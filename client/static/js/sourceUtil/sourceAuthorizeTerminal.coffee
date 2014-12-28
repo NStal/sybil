@@ -1,9 +1,10 @@
 Model = require "/model"
 App = require "/app"
 tm = require "/templateManager"
+tm.use "sourceUtil/sourceAuthorizeTerminal"
 class SourceAuthorizeTerminal extends Leaf.Widget
     constructor:(@source)->
-        super App.templates["source-authorize-terminal"]
+        super App.templates.sourceUtil.sourceAuthorizeTerminal
         if not @source.requireLocalAuth
             setTimeout (()=>
                 @emit "authorized"
@@ -16,7 +17,7 @@ class SourceAuthorizeTerminal extends Leaf.Widget
             if source is @source
                 @emit "authorized"
                 @clear()
-            
+
         @Data.mode = "authenticator"
         App.modelSyncManager.listenBy this,"source/requireLocalAuth",(source)=>
             if source is @source
@@ -56,5 +57,5 @@ class SourceAuthorizeTerminal extends Leaf.Widget
     onClickRefuse:()->
         @hide()
 
-        
+
 module.exports = SourceAuthorizeTerminal
