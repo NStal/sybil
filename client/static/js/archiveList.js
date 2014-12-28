@@ -167,6 +167,9 @@
     };
 
     ArchiveList.prototype.clear = function() {
+      if (this.archiveLoader) {
+        this.archiveLoader.stopListenBy(this);
+      }
       this.archiveLoader = null;
       this.UI.containerWrapper.scrollTop = 0;
       this.UI.emptyHint$.show();
