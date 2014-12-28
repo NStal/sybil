@@ -8,8 +8,10 @@ console = env.logger.create __filename
 class Weibo extends Source
     @detectStream = (uri)->
         match = (new RegExp("weibo.com","i")).test uri
-        if not match
+        if not match and uri isnt "weibo"
             return null
+        if uri is "weibo"
+            uri = "http://weibo.com"
         stream = new EventEmitter()
         process.nextTick ()->
             stream.emit "data", new Weibo({uri:uri})
@@ -20,7 +22,7 @@ class Weibo extends Source
     constructor:(info = {})->
         super(info)
         @type = "weibo"
-    
+
 class WeiboUpdater extends Source::Updater
     constructor:(@source)->
         super(@source)
@@ -73,7 +75,7 @@ class WeiboUpdater extends Source::Updater
                 raw:raw
             }
         }
-            
+
 class WeiboInitializer extends Source::Initializer
     constructor:(@source)->
         super(@source)
@@ -103,7 +105,7 @@ class WeiboInitializer extends Source::Initializer
         match = content.match /userInfo = (\{[^}]+\})/i
         if not match
             return null
-        try 
+        try
             data = JSON.parse match[1]
         catch e
             return null
@@ -112,7 +114,7 @@ class WeiboInitializer extends Source::Initializer
             ,id:data.id
             ,avatar:data.profile_image_url
         }
-                
+
 # Authorizer should provide @cookie
 # should stored to @source.properties.cookie
 querystring = require "querystring"
@@ -134,7 +136,7 @@ class WeiboAuthorizer extends Source::Authorizer
         @data.requireCaptcha = false
         su = new Buffer(encodeURIComponent(@data.username)).toString("base64")
         callbackId = Date.now()
-        url = 'https://login.sina.com.cn/sso/prelogin.php?checkpin=1&entry=mweibo&su=#{su}&callback=jsonpcallback#{callbackId}'
+        url = "https://login.sina.com.cn/sso/prelogin.php?checkpin=1&entry=mweibo&su=#{su}&callback=jsonpcallback#{callbackId}"
         #"https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4&"
         option = {}
         option.method = "GET"
@@ -181,7 +183,7 @@ class WeiboAuthorizer extends Source::Authorizer
             "Referer":referer
             ,"User-Agent":@userAgent
         }
-        
+
         option.timeout = @timeout
         httpUtil.httpPost option,(err,res,content)=>
             successRetcode = 20000000
