@@ -7,7 +7,12 @@ exports.restart = ()->
         root = root.parent
     scriptPath = root.filename
     args.unshift scriptPath
-    intepreter = process.argv[0]
+    if process.env.SYBIL_COFFEE
+        pathModule = require "path"
+        intepreter = pathModule.resolve process.env.SYBIL_COFFEE
+    else
+        intepreter = process.argv[0]
+
     child_process.spawn intepreter,args,{env:process.env,detached:true,cwd:process.cwd(),stdio:["ignore",1,2]}
 #    setTimeout (()->
 #        process.exit(0)),0
