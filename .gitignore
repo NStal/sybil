@@ -20,3 +20,4 @@ db/*
 ./test/subscribe/*
 
 *.key
+./playground/*

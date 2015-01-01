@@ -15,7 +15,7 @@ class SwipeChecker extends Leaf.EventEmitter
     onend:(e)->
         if not @endPoint
             return
-        swipeFloor = 95
+        swipeFloor = @swipeFloor or 60
         if e.touches.length is 0
             endDate = Date.now()
 
