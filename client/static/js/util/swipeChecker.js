@@ -37,7 +37,7 @@
       if (!this.endPoint) {
         return;
       }
-      swipeFloor = 95;
+      swipeFloor = this.swipeFloor || 60;
       if (e.touches.length === 0) {
         endDate = Date.now();
         if (endDate - this.startDate < 1000) {

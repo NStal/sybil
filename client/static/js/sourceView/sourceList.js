@@ -366,7 +366,7 @@
     };
 
     SourceListItem.prototype.render = function() {
-      var self, style, url;
+      var bigErrorTime, lastErrorDate, self, smallErrorTime, style, url;
       this.renderData.name = this.source.name;
       this.renderData.guid = this.source.guid;
       this.renderData.unreadCount = (parseInt(this.source.unreadCount) >= 0) && parseInt(this.source.unreadCount).toString() || "?";
@@ -379,8 +379,24 @@
       }
       this.renderData.statusStyle = style;
       this.renderData.state = "ok";
+      smallErrorTime = 1000 * 60 * 60;
+      bigErrorTime = 1000 * 60 * 60 * 24 * 2;
       if (this.source.lastError) {
-        this.renderData.state = "warn";
+        if (this.source.lastErrorDate) {
+          lastErrorDate = (Date.now() - new Date(this.source.lastErrorDate).getTime()) || 0;
+        } else {
+          lastErrorDate = -1;
+        }
+        console.debug(lastErrorDate);
+        if (lastErrorDate < 0) {
+          this.renderData.state = "warn";
+        } else if (lastErrorDate < smallErrorTime) {
+          this.renderData.state = "unhealthy";
+        } else if (lastErrorDate < bigErrorTime) {
+          this.renderData.state = "warn";
+        } else {
+          this.renderData.state = "error";
+        }
       }
       if (this.source.requireLocalAuth) {
         this.renderData.state = "error";

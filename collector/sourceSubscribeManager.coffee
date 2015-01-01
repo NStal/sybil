@@ -269,7 +269,7 @@ class SubscribeAdapter extends States
         # A subscribed source should be waiting for startUpdateSignal.
         # If not we wait until it's at this state. So who every recieve
         # the source, is garanteed that it will be waiting for a `startUpdateSignal`
-        #
+        @source.clearError()
         if @source.isWaitingFor "startUpdateSignal"
             @emit "subscribe",@source
         else

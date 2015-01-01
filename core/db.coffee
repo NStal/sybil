@@ -267,7 +267,7 @@ exports.moveArchiveToList = (guid,listName,callback)->
     if not guid
         callback new Errors.InvalidParameter "move archive to list need a guid"
         return
-    Collections.archive.findAndModify {guid:guid},{},{$set:{listName:listName}},{safe:true},(err,archive)=>
+    Collections.archive.findAndModify {guid:guid},{},{$set:{listName:listName,listModifyDate:new Date()}},{safe:true},(err,archive)=>
         if err
             callback err
             return
@@ -358,7 +358,7 @@ exports.removeList = (listName,callback)->
             return
 
 exports.readLaterArchive = (guid,callback)->
-    Collections.archive.findAndModify {guid:guid,$or:[{readLater:false},{readLater:{$exists:false}}]},{},{$set:{readLater:true}},(err,item)->
+    Collections.archive.findAndModify {guid:guid,$or:[{readLater:false},{readLater:{$exists:false}}]},{},{$set:{readLater:true,listModifyDate:new Date()}},(err,item)->
         if err
             callback err
             return
@@ -419,11 +419,15 @@ exports.getShareArchiveByNodeHashes = (hashes,option = {},callback)->
             callback err,arr
             return
 exports.getCustomArchives = (query,callback)->
+    # NEEEEED refactor...
     console.log "initl",query
     finalQuery = {$or:[]}
     tagQuery = null
     if query.sourceGuids instanceof Array and query.sourceGuids.length > 0
-        finalQuery.$or.push {sourceGuid:{$in:query.sourceGuids}}
+        if query.sourceGuids.length is 1
+            finalQuery.$or.push {sourceGuid:query.sourceGuids[0]}
+        else
+            finalQuery.$or.push {sourceGuid:{$in:query.sourceGuids}}
     if query.keywords instanceof Array and query.keywords.length > 0
         # Note:check keywords here
         keywords = []
@@ -438,7 +442,7 @@ exports.getCustomArchives = (query,callback)->
     # now use this to escape
     # http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
     escapeRegExp = (str)->
-      return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
     if query.inurl
         finalQuery.sourceUrl = new RegExp(query.inurl.replace(/\./,"\\."),"i")
     if query.title
@@ -449,13 +453,20 @@ exports.getCustomArchives = (query,callback)->
     # But it's really convinient. Perform some check if it is a problem in future
     if finalQuery.$or.length is 0
         delete finalQuery.$or
+    else if finalQuery.$or.length is 1
+        for prop of finalQuery.$or[0]
+            finalQuery[prop] = finalQuery.$or[0][prop]
+        delete finalQuery.$or
     if query.properties
         for prop of query.properties
             finalQuery[prop] = query.properties[prop]
     console.log finalQuery,"~~~",{limit:query.limit or 1000,skip:query.offset or 0}
     cursor = Collections.archive.find finalQuery,{limit:query.limit or 1000,skip:query.offset or 0}
-    if not cursor.noSort
+    if not query.sort
         cursor.sort({createDate:-1})
+    else
+        console.log "SORT",query.sort
+        cursor.sort query.sort
     # here maybe some performance issue one day
     # but we are designed for single user
     # so it may not be a problem here

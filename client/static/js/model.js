@@ -68,7 +68,7 @@
 
     Source.sources = new AllSourceCollection();
 
-    Source.prototype.fields = ["name", "guid", "unreadCount", "tags", "uri", "collectorName", "description", "totalArchive", "statistic", "type", "lastError", "lastErrorDescription", "requireLocalAuth", "requireCaptcha", "captcha", "lastUpdate", "lastFetch", "panic", "nextFetchInterval"];
+    Source.prototype.fields = ["name", "guid", "unreadCount", "tags", "uri", "collectorName", "description", "totalArchive", "statistic", "type", "lastError", "lastErrorDate", "lastErrorDescription", "requireLocalAuth", "requireCaptcha", "captcha", "lastUpdate", "lastFetch", "panic", "nextFetchInterval"];
 
     function Source(data) {
       Source.__super__.constructor.call(this);

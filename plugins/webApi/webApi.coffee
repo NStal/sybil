@@ -33,7 +33,7 @@ class WebApiServer extends EventEmitter
         @sybil.on "friend/remove",@pushFriendRemove.bind this
         cc = @sybil.collectorController
         cc.on "candidate/subscribe",@genPush "candidate/subscribe"
-        cc.on "candidate/requireAuth",@genPush "candidate/requireAuth" 
+        cc.on "candidate/requireAuth",@genPush "candidate/requireAuth"
         cc.on "candidate/requireCaptcha",@genPush "candidate/requireCaptcha"
         cc.on "candidate/fail",@genPush "candidate/fail"
         cc.on "candidate/cancel",@genPush "candidate/cancel"
@@ -64,12 +64,12 @@ class WebApiServer extends EventEmitter
             connection.on "close",()=>
                 console.debug "connection close from client"
                 @destroyMessageCenter(mc)
-    setupHttpServer:()-> 
+    setupHttpServer:()->
         @app = express()
         @app.use express.static(require("path").join(__dirname,"../../client/static"))
         console.debug "API server static file serve at",require("path").join(__dirname,"../client/static")
         @httpServer = http.createServer(@app)
-        
+
         console.log @httpPort,@host,"listen"
         @httpServer.listen(@httpPort,@host)
     setupMessageCenter:(messageCenter)->
@@ -165,7 +165,7 @@ class WebApiServer extends EventEmitter
                     offsetIndex = 0
                 callback err,archives.slice(offsetIndex,offsetIndex+count)
         messageCenter.registerApi "getSourceArchives",(query,callback)=>
-            @sybil.getSourceArchives query.guid,(err,archives)-> 
+            @sybil.getSourceArchives query.guid,(err,archives)->
                 if err
                     console.error err
                     err = "db error"
@@ -204,7 +204,7 @@ class WebApiServer extends EventEmitter
                 return
             @sybil.removeTagFromSource data.guid,data.name,(err,item)=>
                 callback err,item
-        
+
         messageCenter.registerApi "likeArchive",(guid,callback)=>
             @sybil.likeArchive guid,(err)=>
                 callback err
@@ -286,7 +286,7 @@ class WebApiServer extends EventEmitter
         messageCenter.registerApi "unshare",(guid,callback)=>
             @sybil.unshareArchive guid,(err)->
                 callback err
-        
+
         messageCenter.registerApi "getFriends",(_,callback)=>
             @sybil.getFriends (err,friends)=>
                 callback err,friends
@@ -327,9 +327,9 @@ class WebApiServer extends EventEmitter
                 found = lists.some (list)->list.name is name
                 if err or not lists or not found
                     callback "not found"
-                    return 
-                @sybil.getCustomArchives {properties:{listName:name},viewRead:true},(err,archives)->
-                    sortArchive archives
+                    return
+                @sybil.getCustomArchives {properties:{listName:name},viewRead:true,sort:{"listModifyDate":-1}},(err,archives)->
+                    #sortArchive archives
                     archives = archives.slice(offset,offset+count)
                     callback null,{name:"read later",archives:archives}
         messageCenter.registerApi "getSourceStatistic",(guid,callback)=>

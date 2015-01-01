@@ -100,7 +100,7 @@
 
     ArchiveList.prototype.showUpdateHint = function() {
       if (this.refreshHintShowInterval == null) {
-        this.refreshHintShowInterval = 1000 * 7;
+        this.refreshHintShowInterval = 1000 * 15;
       }
       this.UI.refreshHint$.addClass("show");
       if (this._updateHintTimer) {

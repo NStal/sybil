@@ -36,6 +36,7 @@ class Source extends Model
         ,"statistic"
         ,"type"
         ,"lastError"
+        ,"lastErrorDate"
         ,"lastErrorDescription"
         ,"requireLocalAuth"
         ,"requireCaptcha"
@@ -46,7 +47,7 @@ class Source extends Model
         ,"nextFetchInterval"]
     constructor:(data)->
         super()
-        @declare 
+        @declare
         @data = data or {}
         @data.type = "source"
         return Source.sources.add this
@@ -86,7 +87,7 @@ class Source extends Model
             else
                 @confirm()
             callback err
-    forceUpdate:(callback)-> 
+    forceUpdate:(callback)->
         App.messageCenter.invoke "forceUpdateSource",@guid,(err)=>
             if err
                 callback err
@@ -121,7 +122,7 @@ class SourceFolder extends Model
             ,type:"folder"
             ,children:children
         }
-            
+
 class Archive extends Model
     @getByCustom = (option,callback)->
         App.messageCenter.invoke "getCustomArchives",option,(err,archives)->
@@ -262,8 +263,8 @@ class ArchiveList extends Model
     remove:(archive)->
         this.count--;
         @emit "remove",archive
-        
-        
+
+
 
 Model.Source = Source
 Model.SourceFolder = SourceFolder

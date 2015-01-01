@@ -73,13 +73,16 @@ class Source extends States
             # Thus may only be used as displaying material or
             # a general infer for debug.
             ,lastError:@data.lastError or null
+            ,lastErrorDate:@data.lastErrorDate or null
             ,panic:@data.panicError or null
         }
     logError:(err)->
         @data.lastError = err
+        @data.lastErrorDate = new Date()
         @emit "modify"
     clearError:()->
         @data.lastError = null
+        @data.lastErrorDate = null
         @emit "modify"
     constructor:(@info = {})->
         # @info are the data stored of the current source

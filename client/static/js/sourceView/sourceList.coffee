@@ -234,8 +234,28 @@ class SourceListItem extends SourceListItemBase
         # it just works for now, but may broken in future
         # don't change the src if it's loaded
         @renderData.state = "ok"
+
+        # error for 2 day
+        # day
+        smallErrorTime = 1000 * 60 * 60
+        bigErrorTime = 1000 * 60 * 60 * 24 * 2
+#        if not @source.lastError
+#            @source.lastErrorDate = Date.now() - 100
+#            @source.lastError = new Error("hehe")
         if @source.lastError
-            @renderData.state = "warn"
+            if @source.lastErrorDate
+                lastErrorDate = (Date.now() - new Date(@source.lastErrorDate).getTime()) or 0
+            else
+                lastErrorDate = -1
+            console.debug lastErrorDate
+            if lastErrorDate < 0
+                @renderData.state = "warn"
+            else if lastErrorDate < smallErrorTime
+                @renderData.state = "unhealthy"
+            else if lastErrorDate < bigErrorTime
+                @renderData.state = "warn"
+            else
+                @renderData.state = "error"
         if @source.requireLocalAuth
             @renderData.state = "error"
         if not @iconLoaded

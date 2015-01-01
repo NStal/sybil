@@ -2503,6 +2503,10 @@ html * {
   display: block;
   background-color: orange;
 }
+.source-view .source-list .item .error-hint.unhealthy {
+  display: block;
+  background-color: rgba(0, 0, 0, 0.1);
+}
 .source-view .source-list .item .title {
   overflow: hidden;
   cursor: pointer;
