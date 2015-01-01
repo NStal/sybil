@@ -70,7 +70,7 @@ class ArchiveList extends Leaf.Widget
         @hideUpdateHint()
         @more()
     showUpdateHint:()->
-        @refreshHintShowInterval ?= 1000 * 7
+        @refreshHintShowInterval ?= 1000 * 15
         @UI.refreshHint$.addClass("show")
         if @_updateHintTimer
             @_updateHintTimer = null

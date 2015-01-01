@@ -26,7 +26,7 @@ module.exports.Collections = Collections
 dbServer = new mongodb.Server config.dbHost,config.dbPort,config.dbOption
 dbConnector = new mongodb.Db(config.dbName,dbServer,{safe:false})
 
-    
+
 exports.init = (callback)->
     dbConnector.open (err,db)->
         if err or not db
@@ -35,7 +35,7 @@ exports.init = (callback)->
             process.exit(1)
         dbConnector.db = db
         exports.loadCollections collectionNames,(err,collections)->
-            if err 
+            if err
                 if callback
                     callback err
                 return
@@ -85,7 +85,7 @@ exports.saveArchive = (archive,callback)->
                 callback err
             return
         if not item.hasRead
-            Collections.source.findAndModify {guid:archive.sourceGuid},{},{$inc:{unreadCount:1}},{safe:true},(err,source)-> 
+            Collections.source.findAndModify {guid:archive.sourceGuid},{},{$inc:{unreadCount:1}},{safe:true},(err,source)->
                 callback null,item
         else
             callback null,item
@@ -95,7 +95,7 @@ exports.updateSource = (source,callback = ()-> )->
             callback err
             return
         callback err,doc
-    
+
 exports.saveSource = (source,callback)->
     source._id = toMD5 source.guid
     Collections.source.insert source,{safe:true},(err,item)->
@@ -131,7 +131,7 @@ exports.addTagToSource = (guid,tagName,callback)->
         callback null,item
 exports.getSource = (guid,callback)->
     Collections.source.findOne {guid:guid},(err,item)->
-        if err 
+        if err
             callback new Errors.NotFound()
             return
         if not item
@@ -158,7 +158,7 @@ exports.getSourceStatistic = (guid,callback)->
     howLong = 30 #30days
     delta = 30 * 24 * 60 * 60 * 1000
     after = new Date(Date.now() - delta)
-    cursor = Collections.archive.find({sourceGuid:guid,createDate:{$gte:after}},{createDate:true},{limit:10000})
+    cursor = Collections.archive.find({sourceGuid:guid,createDate:{$gte:after}},{createDate:true},{limit:1000})
     cursor.toArray (err,arr)->
         if err
             callback err
@@ -208,15 +208,15 @@ exports.updateUnreadCount = (query = {},callback)->
             return
         (require "async").each arr,((source,done)->
             Collections.archive.find({sourceGuid:source.guid,hasRead:false}).count (err,count)->
-                
+
                 Collections.source.update {_id:source._id},{$set:{unreadCount:count}},{safe:true},(err)->
-                    done() 
+                    done()
             ),(err)->
                 callback err
 exports.setArchiveDisplayContent = (guid,content,callback)->
     Collections.archive.findAndModify {guid:guid},{},{$set:{displayContent:content or null}},{safe:true},(err,archive)->
         callback err,archive
-    
+
 
 exports.getArchiveStream = (callback)->
     stream = new EventEmitter()
@@ -228,7 +228,7 @@ exports.getArchiveStream = (callback)->
     stream.close = ()->
         dbStream.close()
     callback null,stream
-    
+
 exports.likeArchive = (guid,callback)->
     Collections.archive.findAndModify {guid:guid},{},{$set:{like:true}},{safe:true},(err,archive)->
         console.log "like archive",archive
@@ -313,7 +313,7 @@ exports.getLists = (callback)->
             lists = [{name:"read later",count:0}]
         @archiveList = lists
         callback null,lists
-        
+
 exports._saveLists = ()->
     if not @archiveList instanceof Array
         return
@@ -352,7 +352,7 @@ exports.removeList = (listName,callback)->
                 exports._saveLists()
                 callback(null)
                 return true
-            return false 
+            return false
         if not find
             callback new Errors.NotFound()
             return
@@ -452,8 +452,8 @@ exports.getCustomArchives = (query,callback)->
     if query.properties
         for prop of query.properties
             finalQuery[prop] = query.properties[prop]
-    console.log finalQuery,"~~~",{limit:query.limit or 10000,skip:query.offset or 0}
-    cursor = Collections.archive.find finalQuery,{limit:query.limit or 10000,skip:query.offset or 0}
+    console.log finalQuery,"~~~",{limit:query.limit or 1000,skip:query.offset or 0}
+    cursor = Collections.archive.find finalQuery,{limit:query.limit or 1000,skip:query.offset or 0}
     if not cursor.noSort
         cursor.sort({createDate:-1})
     # here maybe some performance issue one day
@@ -505,7 +505,7 @@ exports.getShareRecordsByLinks = (links,callback)->
     cursor = Collections.shareRecord.find {originalLink:{$in:links}}
     cursor.toArray (err,array)->
         callback err,array
-        
+
 exports.addFriend = (friend,callback)->
     friend = new Friend(friend)
     if not friend.check()
@@ -621,6 +621,6 @@ class Friend
             ,email:@email
             ,publicKey:@publicKey.toString()
             ,_id:@keyHash
-        }            
+        }
 exports.Archive = Archive
 exports.Source = Source
