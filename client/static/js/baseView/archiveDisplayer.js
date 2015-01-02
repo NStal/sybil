@@ -25,10 +25,20 @@
     ArchiveDisplayer.prototype.setArchive = function(archive) {
       if (this.archive) {
         this.archive.stopListenBy(this);
+        this.stopBubble(this.archive);
       }
       this.archive = archive;
+      this.bubble(this.archive, "change");
       this.archive.listenBy(this, "change", this.render);
       return this.render();
+    };
+
+    ArchiveDisplayer.prototype.focus = function() {
+      return this.node$.addClass("focus");
+    };
+
+    ArchiveDisplayer.prototype.blur = function() {
+      return this.node$.removeClass("focus");
     };
 
     ArchiveDisplayer.prototype._renderShareInfo = function(profile, howmany) {
@@ -164,7 +174,7 @@
     ArchiveDisplayer.prototype.onClickReadLater = function() {
       var maybeList;
       maybeList = App.userConfig.get("" + this.archive.sourceGuid + "/maybeList") || "read later";
-      if (this.archive.listName !== maybeList) {
+      if (this.archive.listName) {
         return this.archive.changeList(maybeList, (function(_this) {
           return function(err) {
             if (err) {

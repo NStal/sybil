@@ -10,11 +10,15 @@ class ArchiveDisplayer extends Leaf.Widget
     setArchive:(archive)->
         if @archive
             @archive.stopListenBy this
-
+            @stopBubble @archive
         @archive = archive
+        @bubble @archive,"change"
         @archive.listenBy this,"change",@render
         @render()
-
+    focus:()->
+        @node$.addClass "focus"
+    blur:()->
+        @node$.removeClass "focus"
     _renderShareInfo:(profile,howmany)->
         if howmany is 0
             @UI.shareInfo$.text ""
@@ -113,7 +117,7 @@ class ArchiveDisplayer extends Leaf.Widget
         # the read later button now has a different feature
         # we may choose a default list for a source as a read later list
         maybeList = App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
-        if @archive.listName isnt maybeList
+        if @archive.listName
             @archive.changeList maybeList,(err)=>
                 if err then console.error err
                 @render()

@@ -38,6 +38,9 @@
       this._appendQueue = async.queue(((function(_this) {
         return function(item, done) {
           _this.archiveListItems.push(item);
+          if (_this.archiveListItems.length === 1) {
+            _this.emit("firstBlood");
+          }
           return setTimeout((function() {
             return done();
           }), 4);
@@ -273,6 +276,7 @@
 
     ArchiveList.prototype.onScroll = function() {
       var bottom, divider, item, top, _i, _len, _ref, _results;
+      return;
       divider = this.UI.containerWrapper.scrollTop;
       divider += $(window).height() / 3;
       if (this.disableMarkAsRead) {
@@ -352,8 +356,10 @@
     };
 
     ArchiveListItem.prototype.onClickKeepUnread = function(e) {
-      e.preventDefault();
-      e.stopPropagation();
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       return this.onClickMarkAsUnread();
     };
 
@@ -373,6 +379,7 @@
 
     ArchiveListItem.prototype.onClickMarkAsUnread = function() {
       this.lockRead = true;
+      this.emit("change");
       if (this.archive.hasRead === false) {
         this.render();
         return;
@@ -418,10 +425,19 @@
       })(this));
       this.archiveList.scrollChecker.listenBy(this, "scroll", (function(_this) {
         return function() {
-          return _this.updatePosition();
+          _this.updatePosition();
+          _this.updateFocus();
+          if (!_this.archiveList.disableMarkAsRead) {
+            return _this.markAsReadBeforeFocus();
+          }
         };
       })(this));
       this.locationStacks = [];
+      this.archiveList.on("firstBlood", (function(_this) {
+        return function() {
+          return _this.updateFocus();
+        };
+      })(this));
       this.archiveList.on("load", (function(_this) {
         return function() {
           return _this.locationStacks = [];
@@ -443,6 +459,63 @@
         return this.archiveList.more(function(err) {
           return console.debug("load more", err);
         });
+      }
+    };
+
+    ArchiveListController.prototype.getFocusItem = function() {
+      var bottom, current, height, scrollTop, top, visible;
+      current = this.getCurrentItem();
+      height = this.archiveList.UI.containerWrapper$.height();
+      top = current.node.offsetTop;
+      bottom = top + current.node.offsetHeight;
+      scrollTop = this.archiveList.UI.containerWrapper.scrollTop;
+      visible = bottom - scrollTop;
+      if (visible < height / 2 && scrollTop - top > 5) {
+        return this.getNextItem() || current;
+      } else {
+        return current;
+      }
+    };
+
+    ArchiveListController.prototype.updateFocus = function() {
+      var current;
+      current = this.getFocusItem();
+      if (!current) {
+        return;
+      }
+      if (current === this.currentFocus) {
+        return;
+      }
+      if (this.currentFocus) {
+        this.currentFocus.blur();
+        this.currentFocus.stopListenBy(this);
+      }
+      this.currentFocus = current;
+      console.debug("listen", this.currentFocus);
+      this.currentFocus.listenBy(this, "change", (function(_this) {
+        return function() {
+          return _this.render();
+        };
+      })(this));
+      this.currentFocus.focus();
+      return this.render();
+    };
+
+    ArchiveListController.prototype.markAsReadBeforeFocus = function() {
+      var index, item, max, _i, _results;
+      max = this.archiveList.archiveListItems.indexOf(this.currentFocus);
+      console.debug("mark as read before");
+      if (max > 0) {
+        _results = [];
+        for (index = _i = 0; 0 <= max ? _i <= max : _i >= max; index = 0 <= max ? ++_i : --_i) {
+          item = this.archiveList.archiveListItems[index];
+          if (item && !item.archive.hasRead) {
+            _results.push(item.markAsRead());
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
       }
     };
 
@@ -542,6 +615,77 @@
         return this.scrollToItem(item);
       }
     };
+
+    ArchiveListController.prototype.onClickExpandOption = function() {
+      if (this.isOptionShown) {
+        return this.hideOptions();
+      } else {
+        return this.showOptions();
+      }
+    };
+
+    ArchiveListController.prototype.showOptions = function() {
+      if (this.isOptionShown) {
+        return;
+      }
+      this.isOptionShown = true;
+      return this.Data.showOption = true;
+    };
+
+    ArchiveListController.prototype.hideOptions = function() {
+      if (!this.isOptionShown) {
+        return;
+      }
+      this.isOptionShown = false;
+      return this.Data.showOption = false;
+    };
+
+    ArchiveListController.prototype.render = function() {
+      var archive;
+      if (!this.currentFocus) {
+        return;
+      }
+      archive = this.currentFocus.archive;
+      this.Data.keepUnread = this.currentFocus.lockRead;
+      this.Data.liked = archive.like;
+      return this.Data.shared = archive.share;
+    };
+
+    ArchiveListController.prototype.onClickGoBottom = function() {
+      var bottom, forward, height, top;
+      if (!this.currentFocus) {
+        return;
+      }
+      this.scrollToItem(this.currentFocus);
+      bottom = this.currentFocus.node.offsetTop + this.currentFocus.node.offsetHeight;
+      top = this.archiveList.UI.containerWrapper.scrollTop;
+      height = this.archiveList.UI.containerWrapper$.height();
+      console.debug(top, height, bottom);
+      if (bottom > top + height) {
+        forward = bottom - (top + height);
+        return this.archiveList.UI.containerWrapper.scrollTop += forward;
+      }
+    };
+
+    ArchiveListController.prototype.onClickLike = function() {
+      if (this.currentFocus) {
+        return this.currentFocus.onClickLike();
+      }
+    };
+
+    ArchiveListController.prototype.onClickShare = function() {
+      if (this.currentFocus) {
+        return this.currentFocus.onClickShare();
+      }
+    };
+
+    ArchiveListController.prototype.onClickKeepUnread = function() {
+      if (this.currentFocus) {
+        return this.currentFocus.onClickKeepUnread();
+      }
+    };
+
+    ArchiveListController.prototype.reset = function() {};
 
     return ArchiveListController;
 

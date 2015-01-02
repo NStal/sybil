@@ -14,6 +14,8 @@ class ArchiveList extends Leaf.Widget
         super(template or App.templates.sourceView.archiveList)
         @_appendQueue = async.queue(((item,done)=>
             @archiveListItems.push item
+            if @archiveListItems.length is 1
+                @emit "firstBlood"
             setTimeout((()=>
                 done()
                 ),4)
@@ -171,6 +173,7 @@ class ArchiveList extends Leaf.Widget
             App.userConfig.set "previewModeFor"+@archiveInfo.name,not previewMode
             @applyPreviewMode()
     onScroll:()->
+        return
         # Maybe I should give the controll of this behavior
         # to @archiveListController.
         divider = @UI.containerWrapper.scrollTop
@@ -220,8 +223,9 @@ class ArchiveListItem extends ArchiveDisplayer
             @isMarking = false
     # UI top alias for markas unread
     onClickKeepUnread:(e)->
-        e.preventDefault()
-        e.stopPropagation()
+        if e
+            e.preventDefault()
+            e.stopPropagation()
         @onClickMarkAsUnread()
     render:()->
         super()
@@ -237,6 +241,7 @@ class ArchiveListItem extends ArchiveDisplayer
         # just lock it to prevent read don't actually update it
         # if I do so, the unread count will just inc 1
         @lockRead = true
+        @emit "change"
         if @archive.hasRead is false
             @render()
             return
@@ -265,7 +270,12 @@ class ArchiveListController extends Leaf.Widget
             @node$.removeClass "left-mode"
         @archiveList.scrollChecker.listenBy this,"scroll",()=>
             @updatePosition()
+            @updateFocus()
+            if not @archiveList.disableMarkAsRead
+                @markAsReadBeforeFocus()
         @locationStacks = []
+        @archiveList.on "firstBlood",()=>
+            @updateFocus()
         @archiveList.on "load",()=>
             @locationStacks = []
     updatePosition:()->
@@ -278,6 +288,43 @@ class ArchiveListController extends Leaf.Widget
         if last.node.offsetTop < @archiveList.UI.containerWrapper.scrollTop
             @archiveList.more (err)->
                 console.debug "load more",err
+    getFocusItem:()->
+        current = @getCurrentItem()
+        height = @archiveList.UI.containerWrapper$.height()
+        top = current.node.offsetTop
+        bottom = top + current.node.offsetHeight
+        scrollTop = @archiveList.UI.containerWrapper.scrollTop
+        visible = bottom - scrollTop
+
+        # If first item is short item.
+        # we focus at least it's header is not visible
+        if visible < height/2 and scrollTop - top > 5
+            return @getNextItem() or current
+        else
+            return current
+    updateFocus:()->
+        current = @getFocusItem()
+        if not current
+            return
+        if current is @currentFocus
+            return
+        if @currentFocus
+            @currentFocus.blur()
+            @currentFocus.stopListenBy this
+        @currentFocus = current
+        console.debug "listen",@currentFocus
+        @currentFocus.listenBy this,"change",()=>
+            @render()
+        @currentFocus.focus()
+        @render()
+    markAsReadBeforeFocus:()->
+        max = @archiveList.archiveListItems.indexOf(@currentFocus)
+        console.debug "mark as read before"
+        if max > 0
+            for index in [0..max]
+                item = @archiveList.archiveListItems[index]
+                if item and not item.archive.hasRead
+                    item.markAsRead()
     onClickPrevious:()->
         # try scroll to top of the current item
         # only scroll to previous item when beginning of the
@@ -330,6 +377,53 @@ class ArchiveListController extends Leaf.Widget
         item = @locationStacks.pop()
         if item
             @scrollToItem item
+    onClickExpandOption:()->
+        if @isOptionShown
+            @hideOptions()
+        else
+            @showOptions()
+    showOptions:()->
+        if @isOptionShown
+            return
+        @isOptionShown = true
+        @Data.showOption = true
+    hideOptions:()->
+        if not @isOptionShown
+            return
+        @isOptionShown = false
+        @Data.showOption = false
+    render:()->
+        if not @currentFocus
+            return
+        archive = @currentFocus.archive
+        @Data.keepUnread = @currentFocus.lockRead
+        @Data.liked = archive.like
+        @Data.shared = archive.share
+    onClickGoBottom:()->
+        if not @currentFocus
+            return
+        @scrollToItem @currentFocus
+        bottom = @currentFocus.node.offsetTop + @currentFocus.node.offsetHeight
+        top = @archiveList.UI.containerWrapper.scrollTop
+        height = @archiveList.UI.containerWrapper$.height()
+        console.debug top,height,bottom
+        if bottom > top + height
+            forward = bottom - (top + height)
+            @archiveList.UI.containerWrapper.scrollTop += forward
+
+
+    onClickLike:()->
+        if @currentFocus
+            @currentFocus.onClickLike()
+    onClickShare:()->
+        if @currentFocus
+            @currentFocus.onClickShare()
+    onClickKeepUnread:()->
+        if @currentFocus
+            @currentFocus.onClickKeepUnread()
+    reset:()->
+
+
 #window.ArchiveListItem = ArchiveListItem
 #window.ArchiveList = ArchiveList
 module.exports = ArchiveList

@@ -2196,8 +2196,8 @@ html * {
   -webkit-box-sizing: border-box;
   padding: 20px 80px 15px;
   border-bottom: 1px solid #aaaaaa;
-  box-shadow: inset 4px 0 0 0 #3BE;
   position: relative;
+  box-shadow: inset -4px 0 0 0 #aaaaaa, inset 4px 0 0 0 #aaaaaa;
 }
 .archive-list .archive-list-item .header {
   padding: 0px 20px;
@@ -2326,6 +2326,12 @@ html * {
 .archive-list .archive-list-item.read {
   box-shadow: none;
 }
+.archive-list .archive-list-item.focus {
+  box-shadow: inset 4px 0 0 0 #33bbee, inset -4px 0 0 0 #aaaaaa;
+}
+.archive-list .archive-list-item.focus.read {
+  box-shadow: inset 4px 0 0 0 #33bbee;
+}
 .archive-list .archive-list-item .header .mark-as-unread:hover {
   color: #444444;
 }
@@ -2335,13 +2341,13 @@ html * {
 .archive-list .archive-list-controller {
   position: fixed;
   right: 20px;
-  bottom: 15%;
+  bottom: 30px;
   border-radius: 4px;
+  text-align: center;
   background-color: #404040;
   color: white;
   font-size: 24px;
   z-index: 100;
-  overflow: hidden;
   opacity: 0.5;
   transition: all 400ms ease;
   -moz-transition: all 400ms ease;
@@ -2366,6 +2372,42 @@ html * {
 }
 .archive-list .archive-list-controller .tab-button:active {
   box-shadow: inset 0 0 4px 1px rgba(0, 0, 0, 0.5);
+}
+.archive-list .archive-list-controller.show-option .option {
+  display: block;
+  max-height: 1000px;
+}
+.archive-list .archive-list-controller .activable {
+  transition: all 100ms ease;
+  -moz-transition: all 100ms ease;
+  -webkit-transition: all 100ms ease;
+  -o-transition: all 100ms ease;
+}
+.archive-list .archive-list-controller .middle i {
+  transition: all 100ms ease;
+  -moz-transition: all 100ms ease;
+  -webkit-transition: all 100ms ease;
+  -o-transition: all 100ms ease;
+  opacity: 0.5;
+}
+.archive-list .archive-list-controller .middle.active i {
+  opacity: 1;
+}
+.archive-list .archive-list-controller .option {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  display: none;
+}
+.archive-list .archive-list-controller .option i {
+  transition: all 100ms ease;
+  -moz-transition: all 100ms ease;
+  -webkit-transition: all 100ms ease;
+  -o-transition: all 100ms ease;
+  opacity: 0.5;
+}
+.archive-list .archive-list-controller .option.active i {
+  opacity: 1;
 }
 .source-view {
   box-sizing: border-box;

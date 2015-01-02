@@ -12,6 +12,8 @@
       if (node) {
         this.attach(node);
       }
+      this.fire = this.fire.bind(this);
+      this.eventDriven = false;
     }
 
     ScrollChecker.prototype.attach = function(node) {
@@ -22,13 +24,22 @@
         this.detach(this.node);
       }
       this.node = node;
+      if (this.eventDriven) {
+        this.node.addEventListener("scroll", this.fire);
+        return;
+      }
       this.timer = setInterval(this.check.bind(this), 300);
       return this.lastValue = this.node.scrollTop;
+    };
+
+    ScrollChecker.prototype.fire = function() {
+      return this.emit("scroll");
     };
 
     ScrollChecker.prototype.detach = function(node) {
       if (this.node === node || !node) {
         clearTimeout(this.timer);
+        this.node.removeEventListener("scroll", this.fire);
         this.node = null;
       }
       return this.lastValue = null;
