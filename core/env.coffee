@@ -7,5 +7,4 @@ root = pathModule.resolve __filename,"../../"
 global.env.root = root
 
 global.sybilRequire = (path)=>
-    console.log pathModule.join root,path
     return require pathModule.join root,path

@@ -17,8 +17,9 @@ module.exports = {
         "#p2pWebApi"
         "safeGateway"
         "settingWebApi"
+        "iconProxy"
         "#runtimeShell"
-        
+
     ]
     get:(name)->
        return dynamic[name] or null
@@ -36,6 +37,8 @@ module.exports = {
     nodeClientPort:5000
     logPath:"./sybil.log"
     logWithColor:false
+    resourceFolder:"./resources"
+    tempFolder:"./temp"
     p2pSharePullInterval:5 * 60 * 1000
     pluginSettingsPath:require("path").join(__dirname,"./settings/")
     root:__dirname

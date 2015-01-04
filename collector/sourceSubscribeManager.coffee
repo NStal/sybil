@@ -1,5 +1,5 @@
 EventEmitter = (require "events").EventEmitter
-States = require "./states.coffee"
+States = sybilRequire "common/states.coffee"
 sourceList = require "./sourceList.coffee"
 errorDoc = require "error-doc"
 async = require "async"

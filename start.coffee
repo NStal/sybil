@@ -7,6 +7,7 @@ http.globalAgent.maxSockets = 100 * 100;
 https = require "https"
 https.globalAgent.maxSockets = 100* 100;
 settings = require("./settings.coffee")
+pathModule = require "path"
 logger = require("./common/logger.coffee")
 try
     settings.parseConfig("./settings.user.json")
@@ -47,7 +48,10 @@ if settings.logPath and not settings.debug
     logStream = fs.createWriteStream(settings.logPath,{flags:"a"});
     process.__defineGetter__ "stdout",()->logStream
     process.__defineGetter__ "stderr",()->logStream
-
+if setttings.tempFolder
+    if not fs.existsSync settings.tempFolder
+        console.error "temp folder not available" pathModule.resolve settings.tempFolder
+        process.exit(1)
 # save pid
 fs.writeFileSync(pidPath,process.pid)
 

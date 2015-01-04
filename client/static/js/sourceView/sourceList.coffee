@@ -260,7 +260,7 @@ class SourceListItem extends SourceListItemBase
             @VM.state = "error"
         if not @iconLoaded
 
-            url = "//www.google.com/s2/favicons?domain=#{@source.uri}&alt=feed"
+            url = "plugins/iconProxy?url=#{encodeURIComponent @source.uri}"
             @VM.sourceIcon = url
             @UI.sourceIcon.onerror = ()->
                 this.src = "/image/favicon-default.png"

@@ -40,6 +40,7 @@ class States extends EventEmitter
         @state = "void"
         @lastException = null
         @states = {}
+        @rescues = []
         @data = {}
         @_listenBys = []
         if @_isDebugging
@@ -87,18 +88,30 @@ class States extends EventEmitter
     error:(error)->
         @panicError = error
         @panicState = @state
-        @setState "panic"
-    recover:(state)->
+        for rescue in @rescues
+            if rescue.state is @panicState and @panicError instanceof rescue.error
+                if @_debugRescueHandler
+                    @_debugRescueHandler()
+                @recover()
+                rescue.callback(error)
+                break
+        # does rescue handles all error
+        if @panicError
+            @setState "panic"
+    recover:(recoverState)->
         # For safety, recover just do a respawn.
         # So every async call should be ignored,
         # only if they forgot to check sole.
         error = @panicError
         state = @panicState
         @respawn()
-        if state
-            # recover to state
-            @setState state
+        if recoverState
+            @setState recoverState
         return {error,state}
+    rescue:(state,error,callback = ()-> )->
+        if not callback
+            throw new Error "rescue should provide callbacks"
+        @rescues.push {state,error,callback}
     give:(name,items...)->
         if @_waitingGiveName is name
             handler = @_waitingGiveHandler
@@ -118,6 +131,7 @@ class States extends EventEmitter
         else
             @_waitingGiveName = null
             @_waitingGiveHandler = null
+
     isWaitingFor:(name)->
         if not name and @_waitingGiveName
             return true
@@ -145,6 +159,8 @@ class States extends EventEmitter
         return @_sole
     checkSole:(sole)->
         return @_sole is sole
+    stale:(sole)->
+        return @_sole isnt sole
     respawn:()->
         @_sole = @_sole or 0
         @_sole += 1
@@ -197,6 +213,8 @@ class States extends EventEmitter
             log "#{@_debugName or ''} state: #{@state}"
         @_debugWaitHandler ?= ()=>
             log "#{@_debugName or ''} waiting: #{@_waitingGiveName}"
+        @_debugRescueHandler ?= ()=>
+            log "#{@_debugName or ''} rescue: #{@panicState} => #{@panicError}"
         @_debugPanicHandler ?= ()=>
             log "#{@_debugName or ''} panic: #{JSON.stringify @panicError}"
         @_debugRecieveHandler ?= (name,data...)=>

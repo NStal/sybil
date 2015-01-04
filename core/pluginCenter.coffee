@@ -1,5 +1,9 @@
+# need refactor
+
 EventEmitter = require("events").EventEmitter;
 async = require("async")
+pathModule = require "path"
+fs = require "fs"
 console = require("../common/logger.coffee").create("PluginCenter")
 class PluginCenter extends EventEmitter
     constructor:(sybil)->
@@ -13,7 +17,7 @@ class PluginCenter extends EventEmitter
         names.forEach (name)=>
             if name[0] is "#"
                 return
-            
+
             plugin = {name:name,provide:null,modulePath:"../plugins/#{name}"}
             try
                 plugin.module = require plugin.modulePath
@@ -23,7 +27,7 @@ class PluginCenter extends EventEmitter
             plugin.requires = plugin.module.requires
             @pluginAvailable.push plugin
             @dependencies.add plugin
-            
+
         @pluginAvailable = @pluginAvailable.filter (plugin)=>
             try
                 plugin.dependencies = @dependencies.get(plugin.name).flatten()
@@ -32,7 +36,7 @@ class PluginCenter extends EventEmitter
                 console.debug e
                 console.debug "plugin dependencies unmet",plugin.name
                 console.debug "disable it"
-                return false 
+                return false
             @pluginMap[plugin.name] = plugin
             return true
         async.forEachSeries @pluginAvailable,((plugin,done)=>
@@ -92,6 +96,11 @@ class PluginCenter extends EventEmitter
                         callback err
                         return
                     dependsMap.settings = settings
+                    dependsMap.pluginCenter = this
+                    dependsMap.resourceFolder = pathModule.resolve global.env.settings.resourceFolder,name
+                    dependsMap.tempFolder = pathModule.resolve global.env.settings.tempFolder,name
+                    if not fs.existsSync dependsMap.tempFolder
+                        fs.mkdirSync dependsMap.tempFolder
                     if not dependsMap.sybil
                         dependsMap.sybil = @sybil
                     current.module.register dependsMap,(err,me)->
@@ -103,8 +112,8 @@ class PluginCenter extends EventEmitter
     _assignGlobalModel:(map)->
         map.sybil = @sybil
         map.database = require("./db.coffee")
-        
-    
+
+
 
 
 class Dependency
@@ -150,7 +159,7 @@ class Dependencies
                 throw new Error "dependency #{child} not found"
             item.dependency.addDirectDependency(@getDependency(@items[child],stack.slice(0)))
         return item.dependency
-        
+
 exports.PluginCenter = PluginCenter
 exports.Dependency = Dependency
 exports.Dependencies = Dependencies

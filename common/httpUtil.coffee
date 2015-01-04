@@ -9,7 +9,7 @@
 #    acceptCache: return Object {cache:true} when recieve not modified
 #    noQueue    : send request event the queue is full
 #}
-# 
+#
 # callback(err,res,content)
 # callback(err,res,stream)  if useStream is set
 async = require "async"
@@ -31,14 +31,13 @@ Errors = errorDoc.create()
 exports.Errors = Errors
 
 httpGetQueue = async.queue ((job,done)->
-    console.debug "httpGetQueueLength solve #{job.option.url} at waiting",httpGetQueue.length()
+    console.debug "httpGetQueueLength solve #{job.option.url} at waiting",httpGetQueue.length(),"with proxy #{job.option.proxy}"
     exports._httpGet job.option,(err)->
         job.done = true
         job.callback.apply {},arguments
         done()
-        
     ),20
-    
+
 exports.httpGet = (option,callback)->
     if option.noQueue
         console.debug "instant http request for #{option.url}, proxy #{option.proxy or 'None'}"
@@ -58,10 +57,10 @@ exports._httpGet = (option,callback)->
             callback new Errors.MaxRedirect "max redirect #{option.maxRedirect} reach"
             return
     timeout = option.timeout or 1000 * 30
-    
+
     _callback = callback
     callback = (err,res,data)->
-        
+
         _callback err,res,data
         # call callback twice don't throw error
         _callback = ()->
@@ -127,14 +126,14 @@ exports._httpGet = (option,callback)->
         if useStream
             callback null,res,pipeline
             return
-        
+
         buffers = []
         pipeline.on "readable",()->
             while data = pipeline.read()
                 buffers.push data
         pipeline.on "error",(err)->
             callback new Errors.IOError("Pipeline error",{via:err})
-        pipeline.on "end",()->                    
+        pipeline.on "end",()->
             buffer = Buffer.concat buffers
             callback null,res,buffer
     req.hasTimeout = false
@@ -188,7 +187,7 @@ exports.httpPost = (option,callback)->
         postContent = require("querystring").stringify(postContent)
     _callback = callback
     callback = (err,res,data)->
-        
+
         _callback err,res,data
         # call callback twice don't throw error
         _callback = ()->
@@ -246,14 +245,14 @@ exports.httpPost = (option,callback)->
         if useStream
             callback null,res,pipeline
             return
-            
+
         buffers = []
         pipeline.on "readable",()->
             while data = pipeline.read()
                 buffers.push data
         pipeline.on "error",(err)->
             callback new Errors.IOError("Pipeline error",{via:err})
-        pipeline.on "end",()->                    
+        pipeline.on "end",()->
             buffer = Buffer.concat buffers
             callback null,res,buffer
     req.hasTimeout = false
@@ -285,5 +284,5 @@ exports._prepareAgent = (option)->
         return ProxyAgent(option.proxy,false)
     catch e
         return null
-        
+
 exports.defaultAgent = "Sybil Reader/0.0.1"

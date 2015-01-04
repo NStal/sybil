@@ -1,7 +1,7 @@
-States = require "../states.coffee"
+States = sybilRequire "common/states.coffee"
 createError = require "create-error"
 # Overview:
-# 
+#
 # Any implementer should implement atInitializing and do the initialization.
 # Initialize is a one time business, every error lead to a source panic
 # except AuthorizationFailed.
@@ -45,7 +45,7 @@ createError = require "create-error"
 # For some source like rss, a initialze process will just like a regular
 # update procedure, which only validate the success of update as a proof
 # of initialization.
-# 
+#
 class Initializer extends States
     constructor:(@source)->
         super()

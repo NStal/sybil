@@ -402,7 +402,7 @@
         this.VM.state = "error";
       }
       if (!this.iconLoaded) {
-        url = "//www.google.com/s2/favicons?domain=" + this.source.uri + "&alt=feed";
+        url = "plugins/iconProxy?url=" + (encodeURIComponent(this.source.uri));
         this.VM.sourceIcon = url;
         this.UI.sourceIcon.onerror = function() {
           return this.src = "/image/favicon-default.png";

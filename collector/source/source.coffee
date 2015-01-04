@@ -4,7 +4,7 @@ Updater = require "./updater.coffee"
 Authorizer = require "./authorizer.coffee"
 Errors = require "./errors.coffee"
 EventEmitter = (require "events").EventEmitter
-States = require "../states.coffee"
+States = sybilRequire "common/states.coffee"
 console = console = env.logger.create __filename
 # Network is complicated and standards are so powerless in the real world.
 # When it comes to a crawler, the difficulty doubles for me to build

@@ -1,5 +1,5 @@
 async = require "async"
-States = require "../../states.coffee"
+States = sybilRequire "common/states.coffee"
 ErrorDoc = require "error-doc"
 tough = require "tough-cookie"
 loadash = require "lodash"
@@ -37,7 +37,7 @@ exports.getAvailableProxy = (callback)->
                 complete()
         ),(result)=>
             if result is "done"
-                
+
                 return
             callback new Error("Not proxy available")
 exports.setPossibleProxies = (proxies = [])->

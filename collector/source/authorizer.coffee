@@ -1,4 +1,4 @@
-States = require "../states.coffee"
+States = sybilRequire "common/states.coffee"
 createError = require "create-error"
 Errors = require "./errors.coffee"
 console = console = env.logger.create __filename
