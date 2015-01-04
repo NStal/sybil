@@ -65,6 +65,10 @@
     ArchiveDisplayer.prototype.render = function() {
       var content, forceProxy, maybeList, originalLink, profile, shareRecords, toDisplay;
       this.UI.title$.text(this.archive.title);
+      console.debug(this.archive.author);
+      if (this.UI.avatar && this.archive.author && this.archive.author.avatar) {
+        this.UI.avatar$.attr("src", this.archive.author.avatar);
+      }
       if (this.archive.originalLink) {
         this.UI.title$.attr("href", this.archive.originalLink);
       }

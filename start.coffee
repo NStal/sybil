@@ -48,9 +48,9 @@ if settings.logPath and not settings.debug
     logStream = fs.createWriteStream(settings.logPath,{flags:"a"});
     process.__defineGetter__ "stdout",()->logStream
     process.__defineGetter__ "stderr",()->logStream
-if setttings.tempFolder
+if settings.tempFolder
     if not fs.existsSync settings.tempFolder
-        console.error "temp folder not available" pathModule.resolve settings.tempFolder
+        console.error "temp folder not available",pathModule.resolve settings.tempFolder
         process.exit(1)
 # save pid
 fs.writeFileSync(pidPath,process.pid)

@@ -2298,6 +2298,17 @@ html * {
   color: #444444;
   text-decoration: none;
 }
+.archive-list .archive-list-item .avatar {
+  display: inline;
+  max-height: 32px;
+  max-width: 32px;
+  border-radius: 100px;
+  border: 1px solid #aaa;
+  vertical-align: sub;
+  _position: absolute;
+  _left: 10px;
+  _top: 20px;
+}
 .archive-list .archive-list-item .date,
 .archive-list .archive-list-item .source-name,
 .archive-list .archive-list-item .action-button,
@@ -2955,6 +2966,17 @@ html * {
   color: #444444;
   text-decoration: none;
 }
+.search-view .archive-displayer .wrapper .avatar {
+  display: inline;
+  max-height: 32px;
+  max-width: 32px;
+  border-radius: 100px;
+  border: 1px solid #aaa;
+  vertical-align: sub;
+  _position: absolute;
+  _left: 10px;
+  _top: 20px;
+}
 .search-view .archive-displayer .wrapper .date,
 .search-view .archive-displayer .wrapper .source-name,
 .search-view .archive-displayer .wrapper .action-button,
@@ -3232,6 +3254,17 @@ html * {
   line-height: 32px;
   color: #444444;
   text-decoration: none;
+}
+.list-view .archive-displayer .wrapper .avatar {
+  display: inline;
+  max-height: 32px;
+  max-width: 32px;
+  border-radius: 100px;
+  border: 1px solid #aaa;
+  vertical-align: sub;
+  _position: absolute;
+  _left: 10px;
+  _top: 20px;
 }
 .list-view .archive-displayer .wrapper .date,
 .list-view .archive-displayer .wrapper .source-name,
@@ -3727,6 +3760,17 @@ html * {
   line-height: 32px;
   color: #444444;
   text-decoration: none;
+}
+.archive .avatar {
+  display: inline;
+  max-height: 32px;
+  max-width: 32px;
+  border-radius: 100px;
+  border: 1px solid #aaa;
+  vertical-align: sub;
+  _position: absolute;
+  _left: 10px;
+  _top: 20px;
 }
 .archive .date,
 .archive .source-name,

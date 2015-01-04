@@ -134,7 +134,7 @@ class Archive extends Model
 
     constructor:(data)->
         super()
-        @declare ["name","originalLink","content","displayContent","title","hasRead","star","guid","createDate","sourceGuid","sourceName","like","share","listName","meta"]
+        @declare ["name","originalLink","content","displayContent","title","hasRead","star","guid","createDate","sourceGuid","sourceName","like","share","listName","meta","author"]
         @sets data
         @data.meta = @data.meta or {}
     changeList:(name,callback)->

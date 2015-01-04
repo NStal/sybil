@@ -97,6 +97,8 @@ exports.register = (dep,callback)->
                 @data.iconBinary = buffer
                 @setState "returnIconBinary"
         atReturnIconBinary:(sole)->
+            DAY = 1000 * 60 * 60 * 24
+            @res.setHeader "Expires", new Date(Date.now() + DAY * 7).toGMTString()
             @res.end @data.iconBinary
             @emit "done"
         atReturnServerError:()->

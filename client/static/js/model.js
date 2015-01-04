@@ -273,7 +273,7 @@
 
     function Archive(data) {
       Archive.__super__.constructor.call(this);
-      this.declare(["name", "originalLink", "content", "displayContent", "title", "hasRead", "star", "guid", "createDate", "sourceGuid", "sourceName", "like", "share", "listName", "meta"]);
+      this.declare(["name", "originalLink", "content", "displayContent", "title", "hasRead", "star", "guid", "createDate", "sourceGuid", "sourceName", "like", "share", "listName", "meta", "author"]);
       this.sets(data);
       this.data.meta = this.data.meta || {};
     }
