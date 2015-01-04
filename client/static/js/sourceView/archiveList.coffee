@@ -320,8 +320,7 @@ class ArchiveListController extends Leaf.Widget
         @render()
     markAsReadBeforeFocus:()->
         max = @archiveList.archiveListItems.indexOf(@currentFocus)
-        console.debug "mark as read before"
-        if max > 0
+        if max >= 0
             for index in [0..max]
                 item = @archiveList.archiveListItems[index]
                 if item and not item.archive.hasRead

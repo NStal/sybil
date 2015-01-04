@@ -506,8 +506,7 @@
     ArchiveListController.prototype.markAsReadBeforeFocus = function() {
       var index, item, max, _i, _results;
       max = this.archiveList.archiveListItems.indexOf(this.currentFocus);
-      console.debug("mark as read before");
-      if (max > 0) {
+      if (max >= 0) {
         _results = [];
         for (index = _i = 0; 0 <= max ? _i <= max : _i >= max; index = 0 <= max ? ++_i : --_i) {
           item = this.archiveList.archiveListItems[index];
