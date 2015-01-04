@@ -239,7 +239,7 @@ class ArchiveList extends Model
         App.modelSyncManager.on "listChange",(info)=>
             if info.from is @name
                 @remove new Archive(info.archive)
-            else if info.to is @name
+            if info.to is @name
                 info.archive.listName = @name
                 @add new Archive(info.archive)
         return ArchiveList.lists.add this

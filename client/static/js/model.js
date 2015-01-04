@@ -490,8 +490,9 @@
       App.modelSyncManager.on("listChange", (function(_this) {
         return function(info) {
           if (info.from === _this.name) {
-            return _this.remove(new Archive(info.archive));
-          } else if (info.to === _this.name) {
+            _this.remove(new Archive(info.archive));
+          }
+          if (info.to === _this.name) {
             info.archive.listName = _this.name;
             return _this.add(new Archive(info.archive));
           }

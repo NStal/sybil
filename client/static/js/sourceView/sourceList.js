@@ -245,8 +245,8 @@
         child = _ref[_i];
         unreadCount += child.source.unreadCount || 0;
       }
-      this.renderData.name = this.model.name;
-      this.renderData.unreadCount = unreadCount;
+      this.VM.name = this.model.name;
+      this.VM.unreadCount = unreadCount;
       style = "no-update";
       if (parseInt(unreadCount) > 0) {
         style = "has-update";
@@ -254,14 +254,14 @@
       if (parseInt(unreadCount) >= 20) {
         style = "many-update";
       }
-      this.renderData.statusStyle = style;
+      this.VM.statusStyle = style;
       console.debug(style, "!!!");
       if (!this.model.collapse) {
-        this.renderData.collapseClass = "";
-        return this.renderData.iconClass = "fa-folder";
+        this.VM.collapseClass = "";
+        return this.VM.iconClass = "fa-folder";
       } else {
-        this.renderData.collapseClass = "collapse";
-        return this.renderData.iconClass = "fa-folder-open";
+        this.VM.collapseClass = "collapse";
+        return this.VM.iconClass = "fa-folder-open";
       }
     };
 
@@ -367,9 +367,9 @@
 
     SourceListItem.prototype.render = function() {
       var bigErrorTime, lastErrorDate, self, smallErrorTime, style, url;
-      this.renderData.name = this.source.name;
-      this.renderData.guid = this.source.guid;
-      this.renderData.unreadCount = (parseInt(this.source.unreadCount) >= 0) && parseInt(this.source.unreadCount).toString() || "?";
+      this.VM.name = this.source.name;
+      this.VM.guid = this.source.guid;
+      this.VM.unreadCount = (parseInt(this.source.unreadCount) >= 0) && parseInt(this.source.unreadCount).toString() || "?";
       style = "no-update";
       if (parseInt(this.source.unreadCount) > 0) {
         style = "has-update";
@@ -377,8 +377,8 @@
       if (parseInt(this.source.unreadCount) >= 20) {
         style = "many-update";
       }
-      this.renderData.statusStyle = style;
-      this.renderData.state = "ok";
+      this.VM.statusStyle = style;
+      this.VM.state = "ok";
       smallErrorTime = 1000 * 60 * 60;
       bigErrorTime = 1000 * 60 * 60 * 24 * 2;
       if (this.source.lastError) {
@@ -389,21 +389,21 @@
         }
         console.debug(lastErrorDate);
         if (lastErrorDate < 0) {
-          this.renderData.state = "warn";
+          this.VM.state = "warn";
         } else if (lastErrorDate < smallErrorTime) {
-          this.renderData.state = "unhealthy";
+          this.VM.state = "unhealthy";
         } else if (lastErrorDate < bigErrorTime) {
-          this.renderData.state = "warn";
+          this.VM.state = "warn";
         } else {
-          this.renderData.state = "error";
+          this.VM.state = "error";
         }
       }
       if (this.source.requireLocalAuth) {
-        this.renderData.state = "error";
+        this.VM.state = "error";
       }
       if (!this.iconLoaded) {
         url = "//www.google.com/s2/favicons?domain=" + this.source.uri + "&alt=feed";
-        this.renderData.sourceIcon = url;
+        this.VM.sourceIcon = url;
         this.UI.sourceIcon.onerror = function() {
           return this.src = "/image/favicon-default.png";
         };

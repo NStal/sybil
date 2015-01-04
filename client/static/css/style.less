@@ -589,21 +589,27 @@ html *{
         }
     }
     .archive-displayer{
+        position:relative;
+        overflow:hidden;
         z-index:0;
         height:100%;
         width:100%;
-        padding:10px;
         float:left;
         .box-sizing;
-        overflow:auto;
         background-color:#ddd;
         &.no-article{
             visibility:hidden;
         }
+        .list-side-controller{
+            position:absolute;
+        }
         .wrapper{
+            height:100%;
             padding:10px;
             .box-sizing;
             .archive;
+            overflow:auto;
+            background-color:#ddd;
         }
     }
 }

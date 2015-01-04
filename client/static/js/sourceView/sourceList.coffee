@@ -139,22 +139,22 @@ class SourceListFolder extends SourceListItemBase
     render:()->
         unreadCount = 0
         (unreadCount += child.source.unreadCount or 0 for child in @children)
-        @renderData.name = @model.name
-        @renderData.unreadCount = unreadCount
+        @VM.name = @model.name
+        @VM.unreadCount = unreadCount
 
         style = "no-update"
         if parseInt(unreadCount) > 0
             style = "has-update"
         if parseInt(unreadCount) >= 20
             style = "many-update"
-        @renderData.statusStyle = style
+        @VM.statusStyle = style
         console.debug style,"!!!"
         if not @model.collapse
-            @renderData.collapseClass = ""
-            @renderData.iconClass = "fa-folder"
+            @VM.collapseClass = ""
+            @VM.iconClass = "fa-folder"
         else
-            @renderData.collapseClass = "collapse"
-            @renderData.iconClass = "fa-folder-open"
+            @VM.collapseClass = "collapse"
+            @VM.iconClass = "fa-folder-open"
     onClickTitle:()->
         @emit "select",this
     onClickFolderIcon:(e)->
@@ -220,20 +220,20 @@ class SourceListItem extends SourceListItemBase
     unsubscribe:(callback = ()=>true)->
         @source.unsubscribe callback
     render:()->
-        @renderData.name = @source.name
-        @renderData.guid = @source.guid
-        @renderData.unreadCount = (parseInt(@source.unreadCount) >= 0) and parseInt(@source.unreadCount).toString() or "?"
+        @VM.name = @source.name
+        @VM.guid = @source.guid
+        @VM.unreadCount = (parseInt(@source.unreadCount) >= 0) and parseInt(@source.unreadCount).toString() or "?"
 
         style = "no-update"
         if parseInt(@source.unreadCount) > 0
             style = "has-update"
         if parseInt(@source.unreadCount) >= 20
             style = "many-update"
-        @renderData.statusStyle = style
+        @VM.statusStyle = style
         # only rerender the image when src changed
         # it just works for now, but may broken in future
         # don't change the src if it's loaded
-        @renderData.state = "ok"
+        @VM.state = "ok"
 
         # error for 2 day
         # day
@@ -249,18 +249,19 @@ class SourceListItem extends SourceListItemBase
                 lastErrorDate = -1
             console.debug lastErrorDate
             if lastErrorDate < 0
-                @renderData.state = "warn"
+                @VM.state = "warn"
             else if lastErrorDate < smallErrorTime
-                @renderData.state = "unhealthy"
+                @VM.state = "unhealthy"
             else if lastErrorDate < bigErrorTime
-                @renderData.state = "warn"
+                @VM.state = "warn"
             else
-                @renderData.state = "error"
+                @VM.state = "error"
         if @source.requireLocalAuth
-            @renderData.state = "error"
+            @VM.state = "error"
         if not @iconLoaded
+
             url = "//www.google.com/s2/favicons?domain=#{@source.uri}&alt=feed"
-            @renderData.sourceIcon = url
+            @VM.sourceIcon = url
             @UI.sourceIcon.onerror = ()->
                 this.src = "/image/favicon-default.png"
             self = this

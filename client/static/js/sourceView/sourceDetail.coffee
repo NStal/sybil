@@ -17,9 +17,9 @@ class SourceDetail extends Popup
         @render()
         @source.queryStatisticInfo()
     reset:()->
-        @renderData.refreshStyle = ""
+        @VM.refreshStyle = ""
     render:()->
-        @renderData = {
+        @VM = {
             "errorDescription":@source.lastError and JSON.stringify(@source.lastError) or @source.lastErrorDescription or "None"
             "lastUpdate":@source.lastUpdate and moment(@source.lastUpdate).fromNow() or "Never"
             "lastFetch":@source.lastFetch and moment(@source.lastFetch).fromNow() or "Never"
@@ -73,11 +73,11 @@ class SourceDetail extends Popup
     onClickForceUpdateButton:()->
         source = @source
         console.debug "source update"
-        @renderData.refreshStyle = "fa-spin"
+        @VM.refreshStyle = "fa-spin"
         source.forceUpdate (err)=>
             console.debug "source update done hehe?",err,"??"
 
-            @renderData.refreshStyle = ""
+            @VM.refreshStyle = ""
             if source isnt @source
                 # current source has changed, ignore the result
                 return

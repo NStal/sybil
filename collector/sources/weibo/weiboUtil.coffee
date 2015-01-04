@@ -38,6 +38,8 @@ exports.fetch = (info = {},callback)->
             catch e
                 callback new Errors.ParseError("fail to parse result vai #{e}",{via:e})
                 return
+            if result.ok is 0
+                callback null,[]
             if result.ok isnt 1
                 callback new Errors.AuthorizationFailed("result.ok isnt 1 result is #{JSON.stringify result}")
                 return

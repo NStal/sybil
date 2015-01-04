@@ -42,16 +42,16 @@ class ArchiveDisplayer extends Leaf.Widget
             @UI.like$.addClass("active")
         else
             @UI.like$.removeClass("active")
-        maybeList = @archive.listName or App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
+        maybeList = @archive.listName or @maybeList or App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
         @UI.readLater$.text maybeList
         if @archive.listName is maybeList
             @UI.readLater$.addClass("active")
         else
             @UI.readLater$.removeClass("active")
         if @archive.listName
-            @renderData.listText = "list (#{@archive.listName})"
+            @VM.listText = "list (#{@archive.listName})"
         else
-            @renderData.listText = "list"
+            @VM.listText = "list"
         if @archive.createDate
             @UI.date$.text moment(@archive.createDate).format(i18n.fullDateFormatString())
         if @archive.share
@@ -117,7 +117,7 @@ class ArchiveDisplayer extends Leaf.Widget
         # the read later button now has a different feature
         # we may choose a default list for a source as a read later list
         maybeList = App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
-        if @archive.listName
+        if not @archive.listName
             @archive.changeList maybeList,(err)=>
                 if err then console.error err
                 @render()
@@ -191,12 +191,12 @@ class ArchiveDisplayerListSelector extends Popup
 class ArchiveDisplayerListSelectorItem extends Leaf.Widget
     constructor:(@list)->
         super "<li data-text='name'></li>"
-        @renderData.name = @list.name
+        @VM.name = @list.name
     onClickNode:()->
         @emit "select",this
     active:()->
-        @renderData.name = "(current) "+@list.name
+        @VM.name = "(current) "+@list.name
     deactive:()->
-        @renderData.name = @list.name
+        @VM.name = @list.name
 #window.ArchiveDisplayer = ArchiveDisplayer
 module.exports = ArchiveDisplayer

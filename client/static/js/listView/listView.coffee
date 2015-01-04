@@ -7,12 +7,12 @@ ScrollChecker = require "/util/scrollChecker"
 CubeLoadingHint = require("/widget/cubeLoadingHint")
 moment = require "/lib/moment"
 tm = require "/templateManager"
-
+# Refactor to use only a single class or two
 class ListView extends View
     constructor:()->
-        @list = new List()
-        @archives = new ArchiveList()
-        @archiveDisplayer = new ListArchiveDisplayer()
+        @list = new List(this)
+        @archives = new ArchiveList(this)
+        @archiveDisplayer = new ListArchiveDisplayer(this)
         @list.on "init",()=>
             if @isShow
                 @show()
@@ -27,6 +27,7 @@ class ListView extends View
             @slideTo(1)
         @archives.on "select",(archiveListItem)=>
             @archiveDisplayer.display archiveListItem.archive
+            @archiveDisplayer.maybeList = archiveListItem.listName
             if @currentArchiveListItem
                 @currentArchiveListItem.deselect()
             @currentArchiveListItem = archiveListItem
@@ -72,7 +73,7 @@ class ListView extends View
 
 tm.use "listView/listViewList"
 class List extends Leaf.Widget
-    constructor:()->
+    constructor:(@context)->
         super App.templates.listView.listViewList
         @lists = Leaf.Widget.makeList(@UI.container)
         App.afterInitialLoad ()=>
@@ -121,7 +122,7 @@ class ListItem extends Leaf.Widget
         @select()
 tm.use "listView/listViewArchiveList"
 class ArchiveList extends Leaf.Widget
-    constructor:()->
+    constructor:(@context)->
         @include CubeLoadingHint
         super App.templates.listView.listViewArchiveList
         @archives = Leaf.Widget.makeList @UI.archives
@@ -236,16 +237,67 @@ class ArchiveListItem extends Leaf.Widget
             result = "( empty )"
         return result
 
-tm.use "baseView/archiveDisplayer"
+tm.use "listView/archiveDisplayer"
 class ListArchiveDisplayer extends ArchiveDisplayer
-    constructor:()->
+    constructor:(@context)->
         # share template with search view
-        super App.templates.baseView.archiveDisplayer
+        @archiveHelper = new ArchiveHelper(this)
+        super App.templates.listView.archiveDisplayer
         @node$.addClass("no-article")
     display:(archive)->
         @node$.removeClass("no-article")
         @setArchive(archive)
         @node.scrollTop = 0
         @render()
-
+tm.use "listView/archiveHelper"
+Flag = require "/util/flag"
+class ArchiveHelper extends Leaf.Widget
+    constructor:(@archiveDisplayer)->
+        super App.templates.listView.archiveHelper
+        @context = @archiveDisplayer.context
+        @showOptionFlag = new Flag().attach(@VM,"showOption").unset()
+    render:()->
+        archive = @archiveDisplayer.archive
+        @Data.cleared = not archive.listName
+    onClickExpandOption:()->
+        @showOptionFlag.toggle()
+    onClickClear:()->
+        @archiveDisplayer.onClickReadLater()
+        if @onClickNext()
+            return
+        else if @onClickPrevious()
+            return
+    goTop:()->
+        @archiveDisplayer.UI.scrollable.scrollTop = 0
+    goBottom:()->
+        @archiveDisplayer.UI.scrollable.scrollTop = @archiveDisplayer.UI.scrollable.offsetHeight
+    isTop:()->
+        @archiveDisplayer.UI.scrollable.scrollTop < 2
+    isBottom:()->
+        return true
+    onClickGoBottom:()->
+        @goBottom()
+    onClickNext:()->
+        if not @isBottom()
+            @goBottom()
+        archives = @context.archives.archives
+        for item,index in archives
+            if item.archive is @archiveDisplayer.archive
+                if archives[index+1]
+                    archives[index+1].select()
+                    @goTop()
+                return true
+        return false
+    onClickPrevious:()->
+        if not @isTop()
+            @goTop()
+            return
+        archives = @context.archives.archives
+        for item,index in archives
+            if item.archive is @archiveDisplayer.archive
+                if archives[index-1]
+                    archives[index-1].select()
+                    @goTop()
+                return true
+        return false
 module.exports = ListView

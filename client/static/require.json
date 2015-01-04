@@ -38,7 +38,7 @@
             },
             {
                 "path": "model.js",
-                "hash": "388f74"
+                "hash": "728f98"
             },
             {
                 "path": "modelSyncManager.js",
@@ -94,7 +94,7 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "22e3cb"
+                "hash": "35127a"
             },
             {
                 "path": "lib/async.js",
@@ -110,11 +110,11 @@
             },
             {
                 "path": "lib/leaf-require.js",
-                "hash": "a25a25"
+                "hash": "cf8b72"
             },
             {
                 "path": "lib/leaf.js",
-                "hash": "5f8961"
+                "hash": "573271"
             },
             {
                 "path": "lib/lodash.js",
@@ -138,7 +138,7 @@
             },
             {
                 "path": "listView/listView.js",
-                "hash": "75453b"
+                "hash": "ef96ac"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
@@ -150,7 +150,7 @@
             },
             {
                 "path": "searchView/searchView.js",
-                "hash": "6122a8"
+                "hash": "4f6303"
             },
             {
                 "path": "sourceUtil/adapterTerminal.js",
@@ -166,11 +166,11 @@
             },
             {
                 "path": "sourceUtil/subscribeAssistant.js",
-                "hash": "530754"
+                "hash": "ba7c99"
             },
             {
                 "path": "sourceView/archiveList.js",
-                "hash": "b2b695"
+                "hash": "6863f1"
             },
             {
                 "path": "sourceView/sourceDetail.js",
@@ -178,7 +178,7 @@
             },
             {
                 "path": "sourceView/sourceList.js",
-                "hash": "6a53e0"
+                "hash": "36aa06"
             },
             {
                 "path": "sourceView/sourceView.js",
@@ -193,12 +193,16 @@
                 "hash": "06711f"
             },
             {
+                "path": "util/flag.js",
+                "hash": "1d2a26"
+            },
+            {
                 "path": "util/messageCenter.js",
                 "hash": "2e4e08"
             },
             {
                 "path": "util/scrollChecker.js",
-                "hash": "897fa9"
+                "hash": "fed1ad"
             },
             {
                 "path": "util/serverConnection.js",
@@ -206,7 +210,7 @@
             },
             {
                 "path": "util/swipeChecker.js",
-                "hash": "8e1145"
+                "hash": "2ce655"
             },
             {
                 "path": "util/task.js",
@@ -218,11 +222,11 @@
             },
             {
                 "path": "widget/contextMenu.js",
-                "hash": "55504f"
+                "hash": "10bbb6"
             },
             {
                 "path": "widget/cubeLoadingHint.js",
-                "hash": "160bb4"
+                "hash": "5f4549"
             },
             {
                 "path": "widget/popup.js",
@@ -232,5 +236,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.1.22"
+    "version": "0.1.24"
 }

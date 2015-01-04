@@ -6,6 +6,7 @@ async = require "/lib/async"
 EndlessArchiveLoader = require "/procedure/endlessArchiveLoader"
 CubeLoadingHint = require "/widget/cubeLoadingHint"
 ArchiveDisplayer = require "/baseView/archiveDisplayer"
+Flag = require "/util/flag"
 tm = require "/templateManager"
 tm.use "sourceView/archiveList"
 class ArchiveList extends Leaf.Widget
@@ -378,20 +379,8 @@ class ArchiveListController extends Leaf.Widget
         if item
             @scrollToItem item
     onClickExpandOption:()->
-        if @isOptionShown
-            @hideOptions()
-        else
-            @showOptions()
-    showOptions:()->
-        if @isOptionShown
-            return
-        @isOptionShown = true
-        @Data.showOption = true
-    hideOptions:()->
-        if not @isOptionShown
-            return
-        @isOptionShown = false
-        @Data.showOption = false
+        @showOptionFlag ?= new Flag().attach(@VM,"showOption").unset()
+        @showOptionFlag.toggle()
     render:()->
         if not @currentFocus
             return
@@ -421,7 +410,6 @@ class ArchiveListController extends Leaf.Widget
     onClickKeepUnread:()->
         if @currentFocus
             @currentFocus.onClickKeepUnread()
-    reset:()->
 
 
 #window.ArchiveListItem = ArchiveListItem

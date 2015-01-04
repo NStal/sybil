@@ -73,7 +73,7 @@
       } else {
         this.UI.like$.removeClass("active");
       }
-      maybeList = this.archive.listName || App.userConfig.get("" + this.archive.sourceGuid + "/maybeList") || "read later";
+      maybeList = this.archive.listName || this.maybeList || App.userConfig.get("" + this.archive.sourceGuid + "/maybeList") || "read later";
       this.UI.readLater$.text(maybeList);
       if (this.archive.listName === maybeList) {
         this.UI.readLater$.addClass("active");
@@ -81,9 +81,9 @@
         this.UI.readLater$.removeClass("active");
       }
       if (this.archive.listName) {
-        this.renderData.listText = "list (" + this.archive.listName + ")";
+        this.VM.listText = "list (" + this.archive.listName + ")";
       } else {
-        this.renderData.listText = "list";
+        this.VM.listText = "list";
       }
       if (this.archive.createDate) {
         this.UI.date$.text(moment(this.archive.createDate).format(i18n.fullDateFormatString()));
@@ -174,7 +174,7 @@
     ArchiveDisplayer.prototype.onClickReadLater = function() {
       var maybeList;
       maybeList = App.userConfig.get("" + this.archive.sourceGuid + "/maybeList") || "read later";
-      if (this.archive.listName) {
+      if (!this.archive.listName) {
         return this.archive.changeList(maybeList, (function(_this) {
           return function(err) {
             if (err) {
@@ -349,7 +349,7 @@
     function ArchiveDisplayerListSelectorItem(list) {
       this.list = list;
       ArchiveDisplayerListSelectorItem.__super__.constructor.call(this, "<li data-text='name'></li>");
-      this.renderData.name = this.list.name;
+      this.VM.name = this.list.name;
     }
 
     ArchiveDisplayerListSelectorItem.prototype.onClickNode = function() {
@@ -357,11 +357,11 @@
     };
 
     ArchiveDisplayerListSelectorItem.prototype.active = function() {
-      return this.renderData.name = "(current) " + this.list.name;
+      return this.VM.name = "(current) " + this.list.name;
     };
 
     ArchiveDisplayerListSelectorItem.prototype.deactive = function() {
-      return this.renderData.name = this.list.name;
+      return this.VM.name = this.list.name;
     };
 
     return ArchiveDisplayerListSelectorItem;

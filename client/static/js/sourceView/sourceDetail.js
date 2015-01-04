@@ -34,12 +34,12 @@
     };
 
     SourceDetail.prototype.reset = function() {
-      return this.renderData.refreshStyle = "";
+      return this.VM.refreshStyle = "";
     };
 
     SourceDetail.prototype.render = function() {
       var item, perweek, result, _i, _len, _ref;
-      this.renderData = {
+      this.VM = {
         "errorDescription": this.source.lastError && JSON.stringify(this.source.lastError) || this.source.lastErrorDescription || "None",
         "lastUpdate": this.source.lastUpdate && moment(this.source.lastUpdate).fromNow() || "Never",
         "lastFetch": this.source.lastFetch && moment(this.source.lastFetch).fromNow() || "Never",
@@ -115,11 +115,11 @@
       var source;
       source = this.source;
       console.debug("source update");
-      this.renderData.refreshStyle = "fa-spin";
+      this.VM.refreshStyle = "fa-spin";
       return source.forceUpdate((function(_this) {
         return function(err) {
           console.debug("source update done hehe?", err, "??");
-          _this.renderData.refreshStyle = "";
+          _this.VM.refreshStyle = "";
           if (source !== _this.source) {
             return;
           }
