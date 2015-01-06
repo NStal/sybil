@@ -35,6 +35,8 @@
     "proxy-agent": "*",
     "safe-file-writer": "0.0.0",
     "sanitizer": "~0.0.15",
+    "socks5-http-client": "^0.1.6",
+    "socks5-https-client": "^0.2.2",
     "tough-cookie": "~0.12.1",
     "underscore": "~1.6.0",
     "ws": "~0.4.32",

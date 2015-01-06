@@ -17,7 +17,7 @@ class SourceManager extends EventEmitter
             return false
         if exists
             console.debug "source of guid:#{source.guid} exists, won't add"
-            return
+            return false
         @sources.push source
         source.on "archive",(archive)=>
             console.log "gbet archive",archive.guid
@@ -43,7 +43,7 @@ class SourceManager extends EventEmitter
         # be at initialized state and waiting for a startUpdateSignal
         if source.isWaitingFor "startUpdateSignal"
             source.give "startUpdateSignal"
-
+        return true
     remove:(source)->
         @sources = @sources.filter (target)->return target isnt source
         source.reset()

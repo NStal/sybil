@@ -1,7 +1,0 @@
-{
-    "dbName":"sybil-test",
-    "webApiHost":"localhost",
-    "webApiPort":3107,
-    "nickname":"test user",
-    "email":"nstal.robot@gmail.com"
-}

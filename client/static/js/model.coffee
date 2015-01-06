@@ -73,6 +73,15 @@ class Source extends Model
                 console.error "fail to unsubscribe #{@guid}",err
                 callback err
                 return
+            # MONKEY PATCH
+            # force unsubscribe success.
+            # Se we will force folder clean up.
+            # If we didn't unsubscribe
+            # user will see it next, it's sort of OK.
+            # If we subscribe but we fail to clean up
+            # the folder, we will not have change to clean up
+            # the folder any more.
+            # This is due to my bad folder design...
             console.log "unsubscribed #{@name} #{@guid}"
             @destroy()
             callback()
@@ -104,6 +113,7 @@ class Source extends Model
             else
                 @confirm()
             callback err
+
 class SourceFolder extends Model
     @loadFolderStore = (callback)->
         App.persistentDataStoreManager.load "sourceFolderConfig",(err,store)->

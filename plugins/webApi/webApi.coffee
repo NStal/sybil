@@ -32,8 +32,10 @@ class WebApiServer extends EventEmitter
         @sybil.on "friend/add",@pushFriendAdd.bind this
         @sybil.on "friend/remove",@pushFriendRemove.bind this
         cc = @sybil.collectorController
+        cc.on "source/duplicate",@genPush "source/duplicate"
         cc.on "candidate/subscribe",@genPush "candidate/subscribe"
         cc.on "candidate/requireAuth",@genPush "candidate/requireAuth"
+        cc.on "candidate/requireAccept",@genPush "candidate/requireAccept"
         cc.on "candidate/requireCaptcha",@genPush "candidate/requireCaptcha"
         cc.on "candidate/fail",@genPush "candidate/fail"
         cc.on "candidate/cancel",@genPush "candidate/cancel"
@@ -329,8 +331,8 @@ class WebApiServer extends EventEmitter
                     callback "not found"
                     return
                 @sybil.getCustomArchives {properties:{listName:name},viewRead:true,sort:{"listModifyDate":-1}},(err,archives)->
-                    #sortArchive archives
-                    archives = archives.slice(offset,offset+count)
+                    sortArchive archives
+                    #archives = archives.slice(offset,offset+count)
                     callback null,{name:"read later",archives:archives}
         messageCenter.registerApi "getSourceStatistic",(guid,callback)=>
             @sybil.getSourceStatistic guid,(err,result)->

@@ -16,10 +16,13 @@ class Collector extends EventEmitter
         super()
         @sourceManager = new SourceManager()
         @sourceSubscribeManager = new SourceSubscribeManager()
-        @sourceSubscribeManager.on "subscribe",(source)=>
+        @sourceSubscribeManager.on "source",(source)=>
             # ensure JSON serializable
-            @emit "subscribe",source.toSourceModel()
-            @sourceManager.add source
+            added = @sourceManager.add source
+            if not added
+                @emit "exists",source.toSourceModel()
+            else
+                @emit "subscribe",source.toSourceModel()
         @sourceMap = SourceList.getMap()
 #        @debug()
     setCustomSourceFolder:(folder)->

@@ -134,6 +134,7 @@ class Source extends States
         @data.properties = @info.properties or {}
         @standBy()
     reset:()->
+        console.log "reset #{@uri}"
         @authorizer.reset()
         @initializer.reset()
         @updater.reset()

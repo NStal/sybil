@@ -8,7 +8,7 @@ class Pixiv extends Source
     @detectStream = (uri = "")->
         stream = new EventEmitter()
         process.nextTick ()->
-            if uri.toLowerCase() is "pixiv" or new RegExp("pixiv.net","i").test(uri)
+            if uri.toString().toLowerCase() is "pixiv" or new RegExp("pixiv.net","i").test(uri)
                 stream.emit "data",new Pixiv()
             stream.emit "end"
         return stream

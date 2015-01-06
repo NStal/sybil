@@ -28,14 +28,19 @@ class CollectorController extends EventEmitter
             Database.saveSource source,(err,source)=>
                 if err
                     if err.name is "Duplication"
-                        @emit "duplicate",source
+                        @emit "source/duplicate",source
                     else
                         console.error err
                     return
                 @emit "subscribe",source
+        @collector.on "exists",(source)=>
+            console.debug "duplicate!"
+            @emit "source/duplicate",source
         ssm = @collector.sourceSubscribeManager
-        ssm.on "candidate/subscribe",(info)=>
+        ssm.on "subscribe",(info)=>
             @emit "candidate/subscribe",info
+        ssm.on "requireAccept",(info)=>
+            @emit "candidate/requireAccept",info
         ssm.on "requireLocalAuth",(info)=>
             @emit "candidate/requireAuth",info
         ssm.on "requireCaptcha",(info)=>

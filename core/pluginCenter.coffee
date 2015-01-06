@@ -114,6 +114,8 @@ class PluginCenter extends EventEmitter
         map.database = require("./db.coffee")
 
 
+class Plugin
+    constructor:()->
 
 
 class Dependency

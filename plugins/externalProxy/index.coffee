@@ -13,7 +13,7 @@ sybilHttpPort = 3006
 exports.requires = ["webApi"]
 exports.register = (_,callback)->
     sybil = require("../../core/sybil.coffee")
-    sybilHttpPort = sybil.settings.webApiPort or 3006
+    sybilHttpPort = sybil.settings.webApiPort or 3107
     connection = new CenterServerConnection()
     connection.connect()
     callback(null,connection)
@@ -29,7 +29,7 @@ class CenterServerConnection
         if @reconnectTimer
             clearTimeout @reconnectTimer
             @reconnectTimer = null
-            
+
         @log "connect..."
         @connection = new WebSocket("ws://#{host}:#{port}")
         @connection.on "error",(err)=>
@@ -98,4 +98,3 @@ class CenterServerConnection
         @messageCenter.registerApi "httpGet",(query,callback)=>
             httpUtil.httpGet {url:"http://localhost:#{sybilHttpPort}/#{query.path}",noQueue:true},(err,res,data)=>
                 callback null,{headers:res.headers,content:data}
-        

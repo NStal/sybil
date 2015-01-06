@@ -104,8 +104,8 @@ class SourceSubscribeManager extends EventEmitter
             info = adapter.getInfo()
             source = adapter.handover()
             @removeAdapter adapter
-            @emit "subscribe",source
-            @emit "candidate/subscribe",info
+            @emit "subscribe",info
+            @emit "source",source
         adapter.on "cancel",()=>
             info = adapter.getInfo()
             @removeAdapter(adapter)
@@ -189,7 +189,7 @@ class SourceSubscribeManager extends EventEmitter
     accept:(cid,callback = ()-> )->
         exists = @adapters.some (adapter)->
             if adapter.cid is cid
-                adapter.accept()
+                process.nextTick ()->adapter.accept()
                 callback()
                 return true
             return false
@@ -198,7 +198,7 @@ class SourceSubscribeManager extends EventEmitter
     decline:(cid,callback = ()-> )->
         exists = @adapters.some (adapter)->
             if adapter.cid is cid
-                adapter.decline()
+                process.nextTick ()->adapter.decline()
                 callback()
                 return true
             return false
