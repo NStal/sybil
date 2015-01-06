@@ -27,6 +27,7 @@ Errors = errorDoc.create()
     .define("IOError:MaxRedirect")
     .define("ProgrammerError:InvalidProtocol")
     .define("UnknownContentEncoding")
+    .define("ConnectionRefused")
     .generate()
 exports.Errors = Errors
 
@@ -278,6 +279,17 @@ exports._prepareAgent = (option)->
         return null
     if option.proxy.indexOf("phttp://") is 0
         return require("./phttp-proxy-agent")(option.proxy,option.url)
+    proxy = urlModule.parse option.proxy
+    url = urlModule.parse option.url
+    if proxy.protocol is "socks5:"
+        if url.protocol is "https:"
+            Agent = require("socks5-https-client/lib/Agent")
+        else
+            Agent = require("socks5-http-client/lib/Agent")
+        return new Agent {
+            socksHost:proxy.hostname
+            socksPort:proxy.port
+        }
     try
         if option.url.indexOf "https" is 0
             return ProxyAgent(option.proxy,true)
