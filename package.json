@@ -1,6 +1,6 @@
 {
   "name": "sybil",
-  "version": "0.1.0-0",
+  "version": "0.1.0",
   "description": "sybil is a reader",
   "main": "core/init.coffee",
   "directories": {
