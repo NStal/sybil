@@ -1,4 +1,4 @@
-SybilInterface = require "../../../node-sybil-interface"
+SybilInterface = require "sybil-interface"
 xml2js = require "xml2js"
 fs = require "fs"
 async = require "async"
