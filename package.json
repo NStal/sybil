@@ -1,66 +1,67 @@
 {
-  "name": "sybil",
-  "version": "0.0.1",
-  "description": "sybil =====",
-  "main": "core/init.coffee",
-  "directories": {
-    "doc": "doc",
-    "test": "test"
-  },
-  "dependencies": {
-    "agent-base": "*",
-    "async": "~0.2.9",
-    "cheerio": "~0.17.0",
-    "coffee-script": "~1.8.0",
-    "commander": "~2.2.0",
-    "cookie": "~0.1.0",
-    "create-error": "~0.3.1",
-    "debug": "~0.8.1",
-    "error-doc": "0.0.3",
-    "eventex": "0.0.0",
-    "express": "~3.4.0",
-    "extend": "~1.2.1",
-    "feedparser": "~0.16.1",
-    "iconv": "~2.0.7",
-    "install": "~0.1.7",
-    "jquery": "~1.8.3",
-    "lodash": "~2.4.1",
-    "lru-cache": "~2.5.0",
-    "message-center": "latest",
-    "moment": "~2.5.0",
-    "mongodb": "~1.3.10",
-    "node-http-gateway": "0.0.14",
-    "node-tasks": "~0.0.0",
-    "npm": "~1.3.5",
-    "proxy-agent": "*",
-    "safe-file-writer": "0.0.0",
-    "sanitizer": "~0.0.15",
-    "socks5-http-client": "^0.1.6",
-    "socks5-https-client": "^0.2.2",
-    "tough-cookie": "~0.12.1",
-    "underscore": "~1.6.0",
-    "ws": "~0.4.32",
-    "xml2js": "~0.2.8"
-  },
-  "devDependencies": {
-    "coffee-script": "~1.6.3",
-    "moment": "~2.5.1"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/NStal/sybil.git"
-  },
-  "keywords": [
-    "sybil",
-    "reader",
-    "p2p"
-  ],
-  "author": "NStal",
-  "license": "BSD-2-Clause",
-  "bugs": {
-    "url": "https://github.com/NStal/sybil/issues"
-  }
+    "name": "sybil",
+    "version": "0.0.2",
+    "description": "sybil is a reader",
+    "main": "core/init.coffee",
+    "directories": {
+        "doc": "doc",
+        "test": "test"
+    },
+    "dependencies": {
+        "agent-base": "*",
+        "async": "~0.2.9",
+        "cheerio": "~0.17.0",
+        "coffee-script": "~1.8.0",
+        "commander": "~2.2.0",
+        "cookie": "~0.1.0",
+        "create-error": "~0.3.1",
+        "debug": "~0.8.1",
+        "error-doc": "0.0.3",
+        "express": "~3.4.0",
+        "extend": "~1.2.1",
+        "feedparser": "~0.16.1",
+        "iconv": "~2.0.7",
+        "install": "~0.1.7",
+        "lodash": "~2.4.1",
+        "lru-cache": "~2.5.0",
+        "message-center": "latest",
+        "sybil-interface":"latest",
+        "logicoma":"latest",
+        "eventex":"latest",
+        "moment": "~2.5.0",
+        "mongodb": "~1.3.10",
+        "node-http-gateway": "0.0.14",
+        "node-tasks": "~0.0.0",
+        "npm": "~1.3.5",
+        "proxy-agent": "latest",
+        "safe-file-writer": "0.0.0",
+        "sanitizer": "~0.0.15",
+        "socks5-http-client": "^0.1.6",
+        "socks5-https-client": "^0.2.2",
+        "tough-cookie": "~0.12.1",
+        "underscore": "~1.6.0",
+        "ws": "~0.4.32",
+        "xml2js": "~0.2.8"
+    },
+    "devDependencies": {
+        "coffee-script": "~1.6.3",
+        "moment": "~2.5.1"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/NStal/sybil.git"
+    },
+    "keywords": [
+        "sybil",
+        "reader",
+        "p2p"
+    ],
+    "author": "NStal",
+    "license": "BSD-2-Clause",
+    "bugs": {
+        "url": "https://github.com/NStal/sybil/issues"
+    }
 }

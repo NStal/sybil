@@ -93,12 +93,12 @@ class Source extends States
         # than it's loaded from database or at least valid.
         # else we are now trying to make a new one,
         # see @isInitialized() for detail
-        @name = @info.name
+        @name ?= @info.name
         # collectorName is backward compatability
         # will be deleted at release
-        @type = @info.type or @info.collectorName
-        @uri  = @info.uri
-        @guid = @info.guid
+        @type ?= @info.type or @info.collectorName
+        @uri  ?= @info.uri
+        @guid ?= @info.guid
         # when initialize and authorizing, and we encounter
         # a network error we will give it a second chance before
         # we panic

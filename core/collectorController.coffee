@@ -82,6 +82,8 @@ class CollectorController extends EventEmitter
         @removeSource guid,callback
     removeSource:(guid,callback = ()->)->
         source = @collector.removeSource guid
+        console.log "try find source",guid,source
+        console.log @collector.sourceManager.sources
         if source
             Database.removeSource guid,(err)=>
                 console.log "remove source",guid

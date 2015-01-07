@@ -21,6 +21,7 @@ class Weibo extends Source
         return new Weibo(info)
     constructor:(info = {})->
         super(info)
+        @uri ?= "http://weibo.com"
         @type = "weibo"
 
 class WeiboUpdater extends Source::Updater

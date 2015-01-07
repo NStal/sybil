@@ -31,6 +31,7 @@ class Collector extends EventEmitter
     loadSource:(sourceInfo)->
         # load and create source instance from information
         # previously saved to database or something like that
+        console.log sourceInfo.type,"???",sourceInfo
         Source = @sourceMap[sourceInfo.type or sourceInfo.collectorName]
         if not Source
             console.error "Source type not supported"

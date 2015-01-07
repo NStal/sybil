@@ -9,7 +9,7 @@ class Pixiv extends Source
         stream = new EventEmitter()
         process.nextTick ()->
             if uri.toString().toLowerCase() is "pixiv" or new RegExp("pixiv.net","i").test(uri)
-                stream.emit "data",new Pixiv()
+                stream.emit "data",new Pixiv({uri:"http://pixiv.net/"})
             stream.emit "end"
         return stream
     constructor:(info)->
@@ -136,6 +136,8 @@ class PixivUpdater extends Source::Updater
                     node$  = $ this
                     title = node$.find("a.work > h1").text()
                     src = node$.find("a.work > div > img").attr("src")
+                    if src
+                        src = src.replace("150x150","600x600")
                     user$ = node$.find "a.user.ui-profile-popup"
                     username = user$.attr("data-user_name")
                     userId = user$.attr("data-user_id")
