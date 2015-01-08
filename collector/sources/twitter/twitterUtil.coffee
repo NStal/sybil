@@ -9,9 +9,9 @@ CookieJar = tough.CookieJar
 console = console = env.logger.create __filename
 cheerio = require "cheerio"
 exports.Errors = Errors = ErrorDoc.create()
-    .define "ConnectionNotAvailable"
-    .define "Timeout"
-    .define "UnkownError"
+    .define("ConnectionNotAvailable")
+    .define("Timeout")
+    .define("UnkownError")
     .generate()
 exports.getAvailableProxy = (callback)->
     proxies = exports.proxies.slice(0)
