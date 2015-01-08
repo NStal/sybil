@@ -21,8 +21,15 @@ getExternalIp = ()->
         inf = infs[name]
         for address in inf
             if not address.internal and address.family.toLowerCase() is "ipv4"
-                return address.address
-    return null
+                addresses.push address.address
+    addresses.sort (a,b)->
+        pa = a.split(".")[0]
+        pb = b.split(".")[0]
+        inner = ["10","192","127"]
+        innerA = pa in inner and 2 or 1
+        innerB = pb in inner and 2 or 1
+        return innerA - innerB
+    return address[0] or null
 #http = require("http")
 #ws = require "ws"
 #WebSocket = ws
