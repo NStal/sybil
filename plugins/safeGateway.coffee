@@ -17,6 +17,7 @@ getExternalIp = ()->
     if ip and ip isnt "auto"
         return ip
     infs = require("os").networkInterfaces()
+    addresses = []
     for name of infs
         inf = infs[name]
         for address in inf
@@ -29,7 +30,7 @@ getExternalIp = ()->
         innerA = pa in inner and 2 or 1
         innerB = pb in inner and 2 or 1
         return innerA - innerB
-    return address[0] or null
+    return addresses[0] or null
 #http = require("http")
 #ws = require "ws"
 #WebSocket = ws
