@@ -55,9 +55,9 @@ welcome = ()->
             return
     else
         startConfig()
-        
+
 startConfig = ()->
-    try 
+    try
         userSettings = JSON.parse(fs.readFileSync((require "path").join(__dirname,"../settings.user.json"),"utf8"))
     catch error
         userSettings = {}
@@ -74,7 +74,7 @@ setupP2p = ()->
     yesOrNo "would you like to enable experimental p2p api?","y",(answer)->
         if answer is "n"
             genRSA()
-        else 
+        else
             userSettings.hubServerHost = "sybil.nstal.me"
             userSettings.nodeServerHost = "sybil.nstal.me"
             asking "nickname(used in p2p sharing):",(answer,again)->
@@ -108,8 +108,5 @@ complete = ()->
     fs.writeFileSync((require "path").join(__dirname,"../settings.user.json"),JSON.stringify(userSettings,null,4))
     console.log "done"
     process.exit(0)
-    
 console.log "This is the sybil setup guide"
 welcome()
-
-
