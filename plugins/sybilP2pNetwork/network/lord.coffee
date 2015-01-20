@@ -15,23 +15,26 @@ class Lord extends EventEmitter
         @domains = []
 
         @connectionManager = new ConnectionManager(this);
-        
+
         # There are possible to have connection outside the management of lord
         # but any incoming connection should under management of lord
         # and distribute only by lord. And as long as the lord is in charge of
-        # any connection, the Node/Channel that connection belongs to is also
-        # considered a shared resource (say for domains).
-        # On the other hand, any connection other than
-        # 
+        # any connection, the Node/Channel that connection belongs to it also
+        # considered a shared resource (for domains).
+        # On the other hand, any connection out of lord, and only bridged
+        # by lord but not add to it's management, can be created privately.
+        # You may using such a special connection to do the large file transfer
+        # or some real time transfer.
+        #
         # 'incoming' hints that the connections are not build for specific reason
         # Though it's not necessarily really a incoming connection via listen.
         @connectionManager.listenBy this,"connection/incoming",this.bridge
 
-    bridge:(connection,callback = ()-> true)-> 
+    bridge:(connection,callback = ()-> true)->
         # Touch State:
         # An auther to try to get authed
-        
-        # any reason it's already Linked (has a chanel and node)
+
+        # any reason it's already Linked (has a channel and node)
         # so just callback successfully
         if not connection
             throw new Error "invalid connection"
@@ -95,7 +98,7 @@ class Lord extends EventEmitter
                 @bridge connection,(err)=>
                     if err
                         done()
-                        return 
+                        return
                     count++
                     done()
             ),(err)->

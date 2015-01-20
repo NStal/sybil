@@ -1,6 +1,7 @@
 Source = require "../../source/source.coffee"
 rssUtil = require "./rssUtil.coffee"
 Tasks = require "node-tasks"
+urlModule = require "url"
 global.env.settings
 EventEmitter = (require "events").EventEmitter
 console = global.env.logger.create(__filename)
@@ -72,6 +73,10 @@ class Updater extends Source::Updater
     parseRawArchive:(raw)->
         if not raw.guid and not raw.link and not raw.title
             throw new Error("no guid provide for archve")
+        if @source.uri and raw.link
+            originalLink = urlModule.resolve @source.uri,raw.link
+        else
+            originalLink = raw.link or @source.uri
         return result = {
             title:raw.title
             ,content:raw.description
@@ -84,7 +89,7 @@ class Updater extends Source::Updater
             ,author:{
                 name:raw.author
             }
-            ,originalLink:raw.link
+            ,originalLink:originalLink
             ,sourceName:@source.name
             ,sourceGuid:@source.guid
             ,sourceUrl:@source.uri

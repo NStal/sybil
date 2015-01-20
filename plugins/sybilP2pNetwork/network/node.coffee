@@ -2,7 +2,7 @@ EventEmitter = require("eventex").EventEmitter
 MessageCenter = require("message-center")
 # Event:
 # destroy: Channel is shutdown and all connection to node are lost
-# 
+#
 class Node extends EventEmitter
     constructor:(@lord,@key,option = {})->
         super()
@@ -21,7 +21,7 @@ class Node extends EventEmitter
             else
                 return "open"
     close:()->
-        @Channel.close()
+        @channel.close()
     retain:()->
         @_ref += 1
     release:()->
@@ -34,15 +34,18 @@ class Node extends EventEmitter
         if @state is "close"
             return
         @channel.addConnection connection
-        
+
 class Channel extends EventEmitter
-    constructor:(@node,connections)->
+    constructor:(@node,connections = [])->
         super()
+        @isPassive = true
         @channelEventListeners = []
-        @connections = connections
-        @_updateChannelState()
+        for connection in connections
+            @addConnection connection
     addConnection:(connection)->
         @connections.push connection
+        if not connection.isPassive
+            @isPassive = false
         @_attachConnection(connection)
         @_updateChannelState()
     removeConnection:(connection)->
@@ -98,11 +101,11 @@ class Channel extends EventEmitter
         # general strategy
         # * private connection won't be pickup
         # * passive connection will be choosed when no initiative connection available
-        #   because initiative connection are more reliable since we may have chance to 
+        #   because initiative connection are more reliable since we may have chance to
         #   recover
         # * earlier connection is prefered, since longer live time
         #   suggest that it will still remain alive which means more stable
-        # 
+        #
         result = null
         for connection in @connections
             if connection.private

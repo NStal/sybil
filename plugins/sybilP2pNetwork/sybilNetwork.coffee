@@ -16,5 +16,5 @@ class SybilNetwork extends Lord
     start:()->
         @standardConnectionProvider.startListening()
         @emit "ready"
-        
+
 module.exports = SybilNetwork

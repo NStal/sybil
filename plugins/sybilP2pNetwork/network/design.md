@@ -3,7 +3,6 @@
 # Design Goals.
 I'd like to build a peer to peer (P2P) network that maintain serveral different topology, but shares the connection(s) and same basic protocol. Thus the single network can support different application without wasting time building new network and tool sets.
 
-
 # Linking Phrase
 
 Verb: Touch,Bridge,Link
@@ -16,7 +15,7 @@ It's hard to design an general system to exchange domain infos correctly. So dom
 
 # Node Lookup
 
-We can implement a DHT like Kad on top of the network.
+We can implement a DHT, like Kad, on top of the network.
 
 # Fast RPC
 
@@ -32,3 +31,4 @@ Content lookup are left to application's dicision.
 
 # Domain
 Domain manage the exact topology of the network
+

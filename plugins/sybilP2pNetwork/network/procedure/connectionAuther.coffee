@@ -76,7 +76,7 @@ class ConnectionAuther extends EventEmitter
             @connection.publicKey = @unverifiedPublicKey
             @_checkState()
             callback()
-    
+
     getAuthToken:(info = {},callback)->
         if @confirmed
             callback "authed"

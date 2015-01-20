@@ -5,7 +5,8 @@ urlModule = require("url")
 WebSocket = require("ws")
 async = require "async"
 # StandardConnection are the most basic and stable connection in sybil network
-# the underly transfer protocol are websocket
+# the underly transfer protocol are websocket.
+# Create a standard connection are not easy. It requires both side have a external IP address and not filtered by the firewall.
 class StandardConnection extends Provider.Connection
     constructor:(ws)->
         super()
@@ -21,7 +22,7 @@ class StandardConnection extends Provider.Connection
             # ws should only used by me!
             @ws.removeAllListeners()
             @ws = null
-    send:(data)->
+    send:(data,callback = ()->)->
         @ws.send data
 
 class StandardConnectionAddress extends Provider.Address
@@ -41,6 +42,7 @@ class StandardConnectionAddress extends Provider.Address
         # path must be /
         # so we may extend this protocol in future by changing the path
         return "sybil://#{@host}:#{@port}/"
+
 class StandardConnectionProvider extends Provider
     @Address = StandardConnectionAddress
     constructor:(port,host)->
@@ -104,7 +106,7 @@ class StandardConnectionProvider extends Provider
         # not a strict test
         # but should be enough to against normal typo
         # (/sybil:\/\/[a-zA-Z1-9][a-zA-Z0-9.]+:[1-9][0-9]+\//ig).test str.toString()
-        return StandardConnectionAddress.test str 
+        return StandardConnectionAddress.test str
     addPotentialAddress:(addresses)->
         for address in addresses
             if address not in @potentialAddresses
@@ -124,7 +126,7 @@ class StandardConnectionProvider extends Provider
                 @emit "connection",connection
                 done()
             ),(done)->
-                
+
 class StandardConnectionServer extends EventEmitter
     constructor:(port,host)->
         super()
@@ -147,6 +149,7 @@ class StandardConnectionServer extends EventEmitter
         if @wsServer
             @wsServer.close()
             @wsServer = null
+
 module.exports = StandardConnectionProvider
 module.exports.Connection = StandardConnection
 module.exports.Address = StandardConnectionAddress

@@ -38,11 +38,11 @@ if fs.existsSync(pidPath)
         pm.ensureDeath(pid)
 
 # ensure it's running in background ( or suicide and respawn)
-if not settings.debug and process.stdin and process.stdin.isTTY
+if process.argv[2] is "fork"
     console.log "fork to background"
     if pidPath and fs.existsSync pidPath
         fs.unlinkSync pidPath
-    pm.background()
+    pm.background({paramFilter:["fork"]})
 
 if settings.logPath and not settings.debug
     logStream = fs.createWriteStream(settings.logPath,{flags:"a"});

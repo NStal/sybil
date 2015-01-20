@@ -1,7 +1,8 @@
 child_process = require "child_process"
 settings = require("../settings.coffee")
-exports.restart = ()->
+exports.restart = (option)->
     args = process.argv.slice(2)
+    args = args.filter (item)->item not in (option.paramFilter or [])
     root = module
     while root.parent
         root = root.parent
@@ -26,8 +27,8 @@ exports.exist = (pid)->
     catch e
         # if permission denied then some one must be running there (in usual case)
         return e.code is 'EPERM'
-exports.background = ()->
-    exports.restart()
+exports.background = (option)->
+    exports.restart(option)
 exports.ensureDeath = (pid)->
     # try my best to kill the process
     try

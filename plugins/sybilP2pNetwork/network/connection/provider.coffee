@@ -21,7 +21,7 @@ class Provider extends EventEmitter
         # 'incoming' hints that the connections are not build for specific reason
 
 # base class for all address
-# 
+#
 class Provider.Address
     # Accept a string of the address.
     # Return boolean to indicates weather the string can be parse
@@ -44,7 +44,7 @@ class Provider.Address
 # 'close'
 # 'error'
 #
-# there are not open message because any valid connection
+# there are not open method because any valid connection
 # should be open at beginning and can be reconnection, but create
 # from the provider by feeding the address again.
 class Provider.Connection extends EventEmitter
@@ -57,6 +57,7 @@ class Provider.Connection extends EventEmitter
         @isPassive = true
         @address = null
         @addressString = null
+        # temperory message center for simple communications.
         @messageCenter = new MessageCenter()
     send:(message)->
         # message should be string
