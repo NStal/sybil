@@ -1,9 +1,10 @@
 commander = require "commander"
 States = require "logicoma"
 fs = require "fs"
+os = require "os"
 pathModule = require "path"
 MongoServerManager = require "mongo-server-manager"
-SybilInstance = require "sybil-instance"
+SybilInstance = require "/home/wuminghan/workspace/sybil-core/sybil-instance"
 child_process = require "child_process"
 program = commander
     .option("--debug","set debug mode")
@@ -24,11 +25,12 @@ openUrl = (url)->
         exec = "xdg-open"
     else if os.platform() is "darwin"
         exec = "open"
-    child_process.spawn exec,[url],{detached:true,{stdio:["ignore",1,2]}
+    child_process.spawn exec,[url],{detached:true,stdio:["ignore",1,2]}
 class Loader extends States
     constructor:()->
         super()
         if program.debug
+            console.log "enable debug mode"
             @debug()
         @root = "./"
         @root = pathModule.resolve @root
@@ -45,17 +47,16 @@ class Loader extends States
             logPath:pathModule.resolve @root,DbRelativeConfig.logPath
         }
         @openWebUI = true
-    createUserConfig:(callback = ()-> )->
-        cp = require("child_process").spawn(@coffeePath,[])
+    createUserConfig:( callback = ()-> )->
+        cp = require("child_process").spawn(@coffeePath,["./guide/cli.coffee"])
         cp.on "exit",(code)->
             if code isnt 0
                 callback new Errors "config creater return with none zeror",{code:code}
-                return
             else
                 callback()
         cp.stdout.pipe process.stdout
         cp.stderr.pipe process.stderr
-        process.stdinn.pipe cp.stdin
+        process.stdin.pipe cp.stdin
     resolve:(path)->
         pathModule.resolve @root,path
     atPanic:()->
@@ -66,8 +67,15 @@ class Loader extends States
         @setState "checkUserConfig"
     atCheckUserConfig:()->
         if fs.existsSync @resolve "./settings.user.json"
-            @sybil = SybilInstance.createInstance @root,{stdio:["pipe","pipe","pipe"]}
+            @sybil = SybilInstance.createInstance @root,{stdio:["pipe","pipe","pipe"],args:["fork"]}
 
+            console.log "create sybil instance"
+            try
+                @sybil.loadSettings()
+            catch e
+                console.error
+                @error new Errors "fail to load setting file",{via:e}
+                return
             @mongo = MongoServerManager.createInstance {
                 host:@sybil.settings.dbHost or @dbConfig.host
                 port:@sybil.settings.dbPort or @dbConfig.port
@@ -79,12 +87,6 @@ class Loader extends States
                 stderr:process.stderr
                 cwd:@dbPath
             }
-            try
-                sybil.loadSettings()
-            catch e
-                console.error
-                @error new Errors "fail to load setting file",{via:e}
-                return
             @setState "checkDatabase"
         else
             @setState "createUserConfig"
@@ -93,7 +95,9 @@ class Loader extends States
             if err
                 console.error err
                 console.error "fail to create user config, and try again."
-                @setState "checkUserConfig"
+                @setState "createUserConfig"
+                return
+            @setState "checkUserConfig"
     atCheckDatabase:(sole)->
         @mongo.isDaemonUp (err,pid)=>
             if @stale sole
@@ -107,7 +111,11 @@ class Loader extends States
                 else
                     @setState "checkSybilInstance"
     atEnsureDatabase:(sole)->
-        @mongo.restart (err)=>
+        @mongo.stop (err)=>
+            # try my best to stop it
+            @setState "startDatabase"
+    atStartDatabase:(sole)->
+        @mongo.start (err)=>
             if @stale sole
                 return
             if err
@@ -126,21 +134,38 @@ class Loader extends States
     atEnsureSybilInstance:()->
         # stop at my best
         @sybil.stop (err)=>
-            @sybil.start (err)->
+            @sybil.start (err)=>
                 if err
                     @error err
                     return
                 @setState "checkSybilInstance"
 
     atCheckWebUI:()->
-        @sybil.waitServiceReady (err)->
+        @sybil.waitServiceReady (err)=>
             if err
                 console.error err
                 @error new Error "fail to load web UI"
                 return
-            openUrl @sybil.getWebUIAddress() + "#{@debug and "?debug=true" or ""}"
+            isUnix = os.platform() in ["linux","darwin"]
+            url = @sybil.getWebUIAddress() + "#{@debug and "?debug=true" or ""}"
+            if isUnix and process.env["DISPLAY"]
+                openUrl url
+            else
+                console.log "no display detected, we are likely on a headless server"
+                console.log "You can open #{url} to access the sybil."
+                console.log "For external access other than localhost, the default username/password is sybil/libsy"
+                console.log """
+                you can set
+                    "safeGatewayUsername":"your user name",
+                    "safeGatewayPassword":"your password",
+                """
+                console.log "at #{pathModule.join @root,"./settings.user.json"}"
             @setState "done"
     atDone:()->
         console.log "loader complete"
         # don't exit the process
         # sybil may run at none fork mode
+
+loader = new Loader()
+console.log "start"
+loader.setState("start")
