@@ -53,6 +53,8 @@
             _this.archiveList.archiveListController.onClickPrevious();
           } else if (e.which === Leaf.Key.n && e.altKey) {
             _this.archiveList.archiveListController.onClickNext();
+          } else if (e.which === Leaf.Key.b && e.altKey) {
+            _this.archiveList.archiveListController.onClickGoBottom();
           } else {
             use = false;
           }

@@ -41,13 +41,22 @@
     };
 
     ContextMenu.prototype.show = function(e) {
+      var X, Y;
       e.stopImmediatePropagation();
       e.preventDefault();
       ContextMenu.show(this);
       this.node$.show();
+      X = e.clientX || 0;
+      Y = e.clientY || 0;
+      if (X < 20) {
+        X = 20;
+      }
+      if (Y < 20) {
+        Y = 20;
+      }
       return this.node$.css({
-        top: e.clientY - 15,
-        left: e.clientX - 10
+        top: Y - 15,
+        left: X - 10
       });
     };
 

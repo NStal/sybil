@@ -206,6 +206,19 @@ class ArchiveListItem extends ArchiveDisplayer
         e.preventDefault()
         e.stopImmediatePropagation()
         return false
+    fix:()->
+        if @isFix
+            return
+        @isFix = true
+        height = @node.clientHeight
+        height = @node.offsetHeight
+#        console.log @node$.height(),@node.clientHeight,@node.offsetHeight
+        @node$.css {height:height,overflow:"hidden",visibility:"hidden"}
+    unfix:()->
+        if not @isFix
+            return
+        @isFix = false
+        @node$.css {height:"auto",visibility:"visible"}
     onClickHeader:(e)->
         @node$.toggleClass("collapse")
         @markAsRead()
@@ -270,7 +283,7 @@ class ArchiveListController extends Leaf.Widget
             e.stopImmediatePropagation()
             @node$.removeClass "left-mode"
         @archiveList.scrollChecker.listenBy this,"scroll",()=>
-            @updatePosition()
+            @checkLoadMore()
             @updateFocus()
             if not @archiveList.disableMarkAsRead
                 @markAsReadBeforeFocus()
@@ -279,7 +292,7 @@ class ArchiveListController extends Leaf.Widget
             @updateFocus()
         @archiveList.on "load",()=>
             @locationStacks = []
-    updatePosition:()->
+    checkLoadMore:()->
         if @archiveList.archiveListItems.length - 5 >= 0
             last = @archiveList.archiveListItems[@archiveList.archiveListItems.length - 5]
         else
@@ -289,8 +302,16 @@ class ArchiveListController extends Leaf.Widget
         if last.node.offsetTop < @archiveList.UI.containerWrapper.scrollTop
             @archiveList.more (err)->
                 console.debug "load more",err
-    getFocusItem:()->
-        current = @getCurrentItem()
+    at:(index)->
+        return  @archiveList.archiveListItems[index] or null
+    getFocus:()->
+        if @focusIndex
+            return @at @focusIndex
+        else
+            return @at 0
+    updateFocusIndex:()->
+        currentIndex = @getCurrentItemIndex()
+        current = @at currentIndex
         height = @archiveList.UI.containerWrapper$.height()
         top = current.node.offsetTop
         bottom = top + current.node.offsetHeight
@@ -299,12 +320,13 @@ class ArchiveListController extends Leaf.Widget
 
         # If first item is short item.
         # we focus at least it's header is not visible
-        if visible < height/2 and scrollTop - top > 5
-            return @getNextItem() or current
+        if visible < height/2 and scrollTop - top > 5 and @at currentIndex + 1
+            @focusIndex = currentIndex + 1
         else
-            return current
+            @focusIndex = currentIndex
     updateFocus:()->
-        current = @getFocusItem()
+        @updateFocusIndex()
+        current = @getFocus()
         if not current
             return
         if current is @currentFocus
@@ -317,27 +339,30 @@ class ArchiveListController extends Leaf.Widget
         @currentFocus.listenBy this,"change",()=>
             @render()
         @currentFocus.focus()
+        for item,index in @archiveList.archiveListItems
+            if Math.abs(index - @focusIndex) <= 2
+                item.unfix()
+            else
+                item.fix()
         @render()
     markAsReadBeforeFocus:()->
-        max = @archiveList.archiveListItems.indexOf(@currentFocus)
-        if max >= 0
-            for index in [0..max]
-                item = @archiveList.archiveListItems[index]
-                if item and not item.archive.hasRead
-                    item.markAsRead()
+        for index in [0..@focusIndex]
+            item = @at index
+            if item and not item.archive.hasRead
+                item.markAsRead()
     onClickPrevious:()->
         # try scroll to top of the current item
         # only scroll to previous item when beginning of the
         # current item is visible
-        current =  @getCurrentItem()
+        focus = @getFocus()
         adjust = 5
-        if @isItemTopVisible current,adjust
+        if @isItemTopVisible focus,adjust
             @scrollToItem @getPreviousItem()
         else
-            @scrollToItem current
+            @scrollToItem focus
     onClickNext:()->
-        if @isLast @getCurrentItem()
-            @archiveList.UI.containerWrapper.scrollTop = @getCurrentItem().node.offsetTop + @getCurrentItem().node.offsetHeight
+        if @isLast @getFocus()
+            @archiveList.UI.containerWrapper.scrollTop = @getFocus().node.offsetTop + @getFocus().node.offsetHeight
             return
         @scrollToItem @getNextItem()
     scrollToItem:(item)->
@@ -349,30 +374,26 @@ class ArchiveListController extends Leaf.Widget
         top = @archiveList.UI.containerWrapper.scrollTop
         console.log item.node.offsetTop + adjust > top
         return item.node.offsetTop + adjust > top
-    getCurrentItem:()->
+    getCurrentItemIndex:()->
         top = @archiveList.UI.containerWrapper.scrollTop
         currentItem = @archiveList.archiveListItems[0]
-        for item in @archiveList.archiveListItems
+        currentIndex = 0
+        for item,index in @archiveList.archiveListItems
             if item.node.offsetTop > top
                 break
             currentItem = item
-        return currentItem
+            currentIndex = index
+        return currentIndex
     getPreviousItem:()->
-        current = @getCurrentItem()
-        for item,index in @archiveList.archiveListItems
-            if item is current
-                return @archiveList.archiveListItems[index-1] or null
+        return @at @focusIndex - 1
     getNextItem:()->
-        current = @getCurrentItem()
-        for item,index in @archiveList.archiveListItems
-            if item is current
-                return @archiveList.archiveListItems[index+1] or null
+        return @at @focusIndex + 1
     isLast:(item)->
         return @archiveList.archiveListItems[@archiveList.archiveListItems.length - 1] is item
     saveLocation:()->
-        current = @getCurrentItem()
-        if current
-            @locationStacks.push current
+        focus = @getFocus()
+        if focus
+            @locationStacks.push focus
     restoreLocation:()->
         item = @locationStacks.pop()
         if item

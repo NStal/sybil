@@ -27,6 +27,8 @@ class SourceView extends require("/view")
                 @archiveList.archiveListController.onClickPrevious()
             else if e.which is Leaf.Key.n and e.altKey
                 @archiveList.archiveListController.onClickNext()
+            else if e.which is Leaf.Key.b and e.altKey
+                @archiveList.archiveListController.onClickGoBottom()
             else
                 use = false
             if use

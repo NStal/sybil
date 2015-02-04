@@ -22,7 +22,7 @@ class SourceListFolderContextMenu extends ContextMenu
         @selections = [
                 {
                     name:"remove folder"
-                    ,callback:@remove.bind(this)
+                    ,callback:@delete.bind(this)
                 },{
                     name:"unsubscribe all"
                     ,callback:@unsubscribeAll.bind(this)
@@ -42,10 +42,10 @@ class SourceListFolderContextMenu extends ContextMenu
         if not confirm("unsubscribe all in this folder #{@folder.model.name}?")
             return
         @folder.unsubscribeAll()
-    remove:()->
+    delete:()->
         if not confirm("remove this folder #{@folder.model.name}?")
             return
-        @folder.remove()
+        @folder.delete()
 
 # Events
 # change:  some children add/remove or other general change
@@ -129,7 +129,7 @@ class SourceListFolder extends SourceListItemBase
             item.unsubscribe()
     rename:(name)->
         @model.name = name
-    remove:()->
+    delete:()->
         # oh my parent list please remove me.
         @emit "remove",this
     delayRender:()->
@@ -271,7 +271,7 @@ class SourceListItem extends SourceListItemBase
     onClickNode:(e)->
         e.capture()
         @select()
-    remove:()->
+    delete:()->
         @emit "remove",this
     select:()->
         if @source.requireLocalAuth
@@ -326,20 +326,27 @@ class SourceList extends Leaf.Widget
         folder = new SourceListFolder(folderModel)
         guids = folder.children.map (item)->item.source.guid
         index = 0
+        console.debug "merge folder",guids
         while index < @children.length
             child = @children[index]
             if child instanceof SourceListItem
                 if child.source.guid in guids
-                    child.remove()
+                    @children.removeItem(child)
+                    console.log "remove item",@children.length
                     continue
             else if child instanceof SourceListFolder
-                for item in child.children
+                _index = 0
+                while _index < child.children.length
+                    item = child.children[_index]
                     if item.source.guid in guids
                         console.debug "conflict source in folder",child.model.name,"and",folder.model.name,item.source.name
-                        item.remove()
+                        child.children.delete(item)
                         child.updateModel()
+                        continue
+                    _index++
             index++
         @children.push folder
+        console.log "finally",@children.length,"!!"
     mergeSource:(sourceModel,top)->
         for item in @children
             if item instanceof SourceListItem
@@ -418,7 +425,7 @@ class SourceList extends Leaf.Widget
         item.stopListenBy this
         if item.list is this
             item.list = null
-        @dragController.remove item
+        @dragController.delete item
     save:(callback = ()->true)->
         clearTimeout @_saveTimer
         _save = ()=>
@@ -487,7 +494,7 @@ class SourceListDragController extends Leaf.EventEmitter
             @dragContext.addContext item.UI.title
         else
             throw new Error "add invalid drag item"
-    remove:(item)->
+    delete:(item)->
         if item instanceof SourceListItem
             @dragContext.addContext item.node
         else if item instanceof SourceListFolder
@@ -502,7 +509,7 @@ class SourceListDragController extends Leaf.EventEmitter
                     @hintFolder.deactive()
                 @hintFolder = null
             console.assert from instanceof SourceListItem
-            from.remove()
+            from.delete()
             move.target.children.splice(0,0,from)
             move.target.updateModel()
             @list.save()
@@ -517,7 +524,7 @@ class SourceListDragController extends Leaf.EventEmitter
         if not parent
             console.debug move.target
             throw new Error "can move to orphan item"
-        from.remove()
+        from.delete()
         console.assert not from.list
         console.assert not from.folder
         index = parent.children.indexOf move.target
@@ -592,6 +599,7 @@ class SourceListInitializer extends Leaf.EventEmitter
                 @loadFolder()
     loadSources:(callback = ()->true )->
         Model.Source.sources.sync ()=>
+            console.debug "merge source"
             for source in Model.Source.sources.models
                 @list.mergeSource source
             callback()

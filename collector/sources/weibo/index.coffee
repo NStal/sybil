@@ -166,12 +166,13 @@ class WeiboAuthorizer extends Source::Authorizer
 #        }
 #        loginUrl = "https://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4"
 
-        loginUrl = "https://passport.sina.cn/sso/login"
-        referer = "https://passport.sina.cn/signin/login?entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F"
+        loginUrl = "https://passport.weibo.cn/sso/login"
+        referer = "https://passport.weibo.cn/signin/login?entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F"
         postData = {
             username:@data.username
             password:@data.secret
             savestate:1
+            pagereferer:"https://passport.weibo.cn/signin/welcome"
             ec:0
             entry:"mweibo"
         }
@@ -204,6 +205,12 @@ class WeiboAuthorizer extends Source::Authorizer
             result.data ?= {}
             domain = result.data.crossdomainlist or {}
             ticketUrl = domain["weibo.cn"]
+            if not ticketUrl
+                # latest weibo updates
+                @data.authorized = true
+                @data.authorizeInfo = {cookie:@jar.getCookieStringSync "http://m.weibo.cn"}
+                @setState "authorized"
+                return
             httpUtil.httpGet {
                 url:"http:"+ticketUrl
                 jar:@jar
@@ -218,6 +225,7 @@ class WeiboAuthorizer extends Source::Authorizer
                 @data.authorized = true
                 @data.authorizeInfo = {cookie:@jar.getCookieStringSync "http://m.weibo.cn"}
                 @setState "authorized"
+        atState:(directLogin)->
 
 
 Weibo::Updater = WeiboUpdater

@@ -330,6 +330,32 @@
       return false;
     };
 
+    ArchiveListItem.prototype.fix = function() {
+      var height;
+      if (this.isFix) {
+        return;
+      }
+      this.isFix = true;
+      height = this.node.clientHeight;
+      height = this.node.offsetHeight;
+      return this.node$.css({
+        height: height,
+        overflow: "hidden",
+        visibility: "hidden"
+      });
+    };
+
+    ArchiveListItem.prototype.unfix = function() {
+      if (!this.isFix) {
+        return;
+      }
+      this.isFix = false;
+      return this.node$.css({
+        height: "auto",
+        visibility: "visible"
+      });
+    };
+
     ArchiveListItem.prototype.onClickHeader = function(e) {
       this.node$.toggleClass("collapse");
       return this.markAsRead();
@@ -427,7 +453,7 @@
       })(this));
       this.archiveList.scrollChecker.listenBy(this, "scroll", (function(_this) {
         return function() {
-          _this.updatePosition();
+          _this.checkLoadMore();
           _this.updateFocus();
           if (!_this.archiveList.disableMarkAsRead) {
             return _this.markAsReadBeforeFocus();
@@ -447,7 +473,7 @@
       })(this));
     }
 
-    ArchiveListController.prototype.updatePosition = function() {
+    ArchiveListController.prototype.checkLoadMore = function() {
       var last;
       if (this.archiveList.archiveListItems.length - 5 >= 0) {
         last = this.archiveList.archiveListItems[this.archiveList.archiveListItems.length - 5];
@@ -464,24 +490,38 @@
       }
     };
 
-    ArchiveListController.prototype.getFocusItem = function() {
-      var bottom, current, height, scrollTop, top, visible;
-      current = this.getCurrentItem();
+    ArchiveListController.prototype.at = function(index) {
+      return this.archiveList.archiveListItems[index] || null;
+    };
+
+    ArchiveListController.prototype.getFocus = function() {
+      if (this.focusIndex) {
+        return this.at(this.focusIndex);
+      } else {
+        return this.at(0);
+      }
+    };
+
+    ArchiveListController.prototype.updateFocusIndex = function() {
+      var bottom, current, currentIndex, height, scrollTop, top, visible;
+      currentIndex = this.getCurrentItemIndex();
+      current = this.at(currentIndex);
       height = this.archiveList.UI.containerWrapper$.height();
       top = current.node.offsetTop;
       bottom = top + current.node.offsetHeight;
       scrollTop = this.archiveList.UI.containerWrapper.scrollTop;
       visible = bottom - scrollTop;
-      if (visible < height / 2 && scrollTop - top > 5) {
-        return this.getNextItem() || current;
+      if (visible < height / 2 && scrollTop - top > 5 && this.at(currentIndex + 1)) {
+        return this.focusIndex = currentIndex + 1;
       } else {
-        return current;
+        return this.focusIndex = currentIndex;
       }
     };
 
     ArchiveListController.prototype.updateFocus = function() {
-      var current;
-      current = this.getFocusItem();
+      var current, index, item, _i, _len, _ref;
+      this.updateFocusIndex();
+      current = this.getFocus();
       if (!current) {
         return;
       }
@@ -500,40 +540,46 @@
         };
       })(this));
       this.currentFocus.focus();
+      _ref = this.archiveList.archiveListItems;
+      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+        item = _ref[index];
+        if (Math.abs(index - this.focusIndex) <= 2) {
+          item.unfix();
+        } else {
+          item.fix();
+        }
+      }
       return this.render();
     };
 
     ArchiveListController.prototype.markAsReadBeforeFocus = function() {
-      var index, item, max, _i, _results;
-      max = this.archiveList.archiveListItems.indexOf(this.currentFocus);
-      if (max >= 0) {
-        _results = [];
-        for (index = _i = 0; 0 <= max ? _i <= max : _i >= max; index = 0 <= max ? ++_i : --_i) {
-          item = this.archiveList.archiveListItems[index];
-          if (item && !item.archive.hasRead) {
-            _results.push(item.markAsRead());
-          } else {
-            _results.push(void 0);
-          }
+      var index, item, _i, _ref, _results;
+      _results = [];
+      for (index = _i = 0, _ref = this.focusIndex; 0 <= _ref ? _i <= _ref : _i >= _ref; index = 0 <= _ref ? ++_i : --_i) {
+        item = this.at(index);
+        if (item && !item.archive.hasRead) {
+          _results.push(item.markAsRead());
+        } else {
+          _results.push(void 0);
         }
-        return _results;
       }
+      return _results;
     };
 
     ArchiveListController.prototype.onClickPrevious = function() {
-      var adjust, current;
-      current = this.getCurrentItem();
+      var adjust, focus;
+      focus = this.getFocus();
       adjust = 5;
-      if (this.isItemTopVisible(current, adjust)) {
+      if (this.isItemTopVisible(focus, adjust)) {
         return this.scrollToItem(this.getPreviousItem());
       } else {
-        return this.scrollToItem(current);
+        return this.scrollToItem(focus);
       }
     };
 
     ArchiveListController.prototype.onClickNext = function() {
-      if (this.isLast(this.getCurrentItem())) {
-        this.archiveList.UI.containerWrapper.scrollTop = this.getCurrentItem().node.offsetTop + this.getCurrentItem().node.offsetHeight;
+      if (this.isLast(this.getFocus())) {
+        this.archiveList.UI.containerWrapper.scrollTop = this.getFocus().node.offsetTop + this.getFocus().node.offsetHeight;
         return;
       }
       return this.scrollToItem(this.getNextItem());
@@ -558,43 +604,29 @@
       return item.node.offsetTop + adjust > top;
     };
 
-    ArchiveListController.prototype.getCurrentItem = function() {
-      var currentItem, item, top, _i, _len, _ref;
+    ArchiveListController.prototype.getCurrentItemIndex = function() {
+      var currentIndex, currentItem, index, item, top, _i, _len, _ref;
       top = this.archiveList.UI.containerWrapper.scrollTop;
       currentItem = this.archiveList.archiveListItems[0];
+      currentIndex = 0;
       _ref = this.archiveList.archiveListItems;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        item = _ref[_i];
+      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+        item = _ref[index];
         if (item.node.offsetTop > top) {
           break;
         }
         currentItem = item;
+        currentIndex = index;
       }
-      return currentItem;
+      return currentIndex;
     };
 
     ArchiveListController.prototype.getPreviousItem = function() {
-      var current, index, item, _i, _len, _ref;
-      current = this.getCurrentItem();
-      _ref = this.archiveList.archiveListItems;
-      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-        item = _ref[index];
-        if (item === current) {
-          return this.archiveList.archiveListItems[index - 1] || null;
-        }
-      }
+      return this.at(this.focusIndex - 1);
     };
 
     ArchiveListController.prototype.getNextItem = function() {
-      var current, index, item, _i, _len, _ref;
-      current = this.getCurrentItem();
-      _ref = this.archiveList.archiveListItems;
-      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-        item = _ref[index];
-        if (item === current) {
-          return this.archiveList.archiveListItems[index + 1] || null;
-        }
-      }
+      return this.at(this.focusIndex + 1);
     };
 
     ArchiveListController.prototype.isLast = function(item) {
@@ -602,10 +634,10 @@
     };
 
     ArchiveListController.prototype.saveLocation = function() {
-      var current;
-      current = this.getCurrentItem();
-      if (current) {
-        return this.locationStacks.push(current);
+      var focus;
+      focus = this.getFocus();
+      if (focus) {
+        return this.locationStacks.push(focus);
       }
     };
 

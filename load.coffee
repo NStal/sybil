@@ -4,7 +4,7 @@ fs = require "fs"
 os = require "os"
 pathModule = require "path"
 MongoServerManager = require "mongo-server-manager"
-SybilInstance = require "/home/wuminghan/workspace/sybil-core/sybil-instance"
+SybilInstance = require "sybil-instance"
 child_process = require "child_process"
 program = commander
     .option("--debug","set debug mode")
@@ -67,7 +67,10 @@ class Loader extends States
         @setState "checkUserConfig"
     atCheckUserConfig:()->
         if fs.existsSync @resolve "./settings.user.json"
-            @sybil = SybilInstance.createInstance @root,{stdio:["pipe","pipe","pipe"],args:["fork"]}
+            if @data.newby
+                console.log "it's first sybil start"
+                console.log "it may take sometime to do the initialization"
+            @sybil = SybilInstance.createInstance @root,{stdio:"inherit",args:["fork"]}
 
             console.log "create sybil instance"
             try
@@ -89,6 +92,7 @@ class Loader extends States
             }
             @setState "checkDatabase"
         else
+            @data.newby = true
             @setState "createUserConfig"
     atCreateUserConfig:(sole)->
         @createUserConfig (err)=>
@@ -138,7 +142,9 @@ class Loader extends States
                 if err
                     @error err
                     return
-                @setState "checkSybilInstance"
+                setTimeout (()=>
+                    @setState "checkSybilInstance"
+                ),500
 
     atCheckWebUI:()->
         @sybil.waitServiceReady (err)=>
@@ -163,6 +169,13 @@ class Loader extends States
             @setState "done"
     atDone:()->
         console.log "loader complete"
+#        setTimeout ()=>
+#            items = process._getActiveHandles()
+#            for req in items#process._getActiveRequests()
+#                console.log req
+#            console.log items.length
+#        ,300
+#        console.log process._getActiveHandles()
         # don't exit the process
         # sybil may run at none fork mode
 

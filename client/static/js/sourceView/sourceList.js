@@ -52,7 +52,7 @@
       this.selections = [
         {
           name: "remove folder",
-          callback: this.remove.bind(this)
+          callback: this["delete"].bind(this)
         }, {
           name: "unsubscribe all",
           callback: this.unsubscribeAll.bind(this)
@@ -81,11 +81,11 @@
       return this.folder.unsubscribeAll();
     };
 
-    SourceListFolderContextMenu.prototype.remove = function() {
+    SourceListFolderContextMenu.prototype["delete"] = function() {
       if (!confirm("remove this folder " + this.folder.model.name + "?")) {
         return;
       }
-      return this.folder.remove();
+      return this.folder["delete"]();
     };
 
     return SourceListFolderContextMenu;
@@ -226,7 +226,7 @@
       return this.model.name = name;
     };
 
-    SourceListFolder.prototype.remove = function() {
+    SourceListFolder.prototype["delete"] = function() {
       return this.emit("remove", this);
     };
 
@@ -420,7 +420,7 @@
       return this.select();
     };
 
-    SourceListItem.prototype.remove = function() {
+    SourceListItem.prototype["delete"] = function() {
       return this.emit("remove", this);
     };
 
@@ -498,7 +498,7 @@
     };
 
     SourceList.prototype.mergeFolder = function(folderModel) {
-      var child, folder, guids, index, item, _i, _len, _ref, _ref1, _ref2;
+      var child, folder, guids, index, item, _index, _ref, _ref1;
       folderModel.children = folderModel.children.map(function(source) {
         if (source instanceof Model.Source) {
           return source;
@@ -516,27 +516,32 @@
         return item.source.guid;
       });
       index = 0;
+      console.debug("merge folder", guids);
       while (index < this.children.length) {
         child = this.children[index];
         if (child instanceof SourceListItem) {
           if (_ref = child.source.guid, __indexOf.call(guids, _ref) >= 0) {
-            child.remove();
+            this.children.removeItem(child);
+            console.log("remove item", this.children.length);
             continue;
           }
         } else if (child instanceof SourceListFolder) {
-          _ref1 = child.children;
-          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-            item = _ref1[_i];
-            if (_ref2 = item.source.guid, __indexOf.call(guids, _ref2) >= 0) {
+          _index = 0;
+          while (_index < child.children.length) {
+            item = child.children[_index];
+            if (_ref1 = item.source.guid, __indexOf.call(guids, _ref1) >= 0) {
               console.debug("conflict source in folder", child.model.name, "and", folder.model.name, item.source.name);
-              item.remove();
+              child.children["delete"](item);
               child.updateModel();
+              continue;
             }
+            _index++;
           }
         }
         index++;
       }
-      return this.children.push(folder);
+      this.children.push(folder);
+      return console.log("finally", this.children.length, "!!");
     };
 
     SourceList.prototype.mergeSource = function(sourceModel, top) {
@@ -654,7 +659,7 @@
       if (item.list === this) {
         item.list = null;
       }
-      return this.dragController.remove(item);
+      return this.dragController["delete"](item);
     };
 
     SourceList.prototype.save = function(callback) {
@@ -799,7 +804,7 @@
       }
     };
 
-    SourceListDragController.prototype.remove = function(item) {
+    SourceListDragController.prototype["delete"] = function(item) {
       if (item instanceof SourceListItem) {
         return this.dragContext.addContext(item.node);
       } else if (item instanceof SourceListFolder) {
@@ -819,7 +824,7 @@
           this.hintFolder = null;
         }
         console.assert(from instanceof SourceListItem);
-        from.remove();
+        from["delete"]();
         move.target.children.splice(0, 0, from);
         move.target.updateModel();
         this.list.save();
@@ -836,7 +841,7 @@
         console.debug(move.target);
         throw new Error("can move to orphan item");
       }
-      from.remove();
+      from["delete"]();
       console.assert(!from.list);
       console.assert(!from.folder);
       index = parent.children.indexOf(move.target);
@@ -953,6 +958,7 @@
       return Model.Source.sources.sync((function(_this) {
         return function() {
           var source, _i, _len, _ref;
+          console.debug("merge source");
           _ref = Model.Source.sources.models;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             source = _ref[_i];

@@ -1,3 +1,4 @@
+env = require "../../core/env"
 SourceBasicTester = require("../lib/sourceTester").SourceBasicTester
 Weibo = require("../../collector/sources/weibo")
 tester = new SourceBasicTester({Source:Weibo,uri:"http://weibo.com/"})

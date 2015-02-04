@@ -7,6 +7,7 @@ exports.register = (dep,callback)->
     username = settings.safeGatewayUsername or "sybil"
     password = settings.safeGatewayPassword or "libys"
     gateway = new Gateway({username:username,password:password,port:dep.webApi.httpPort,ip:getExternalIp()})
+    gateway.cookieExpires = (24 * 60 * 60 * 1000) * 31
     console.log "safe gateway start at","http://localhost:#{dep.webApi.httpPort}/"
     gateway.addRoute new Gateway.Route("all","/","http://localhost:#{dep.webApi.httpPort}/")
     gateway.on "ready",()->
