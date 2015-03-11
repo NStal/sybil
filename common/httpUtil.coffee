@@ -315,6 +315,7 @@ exports._prepareAgent = (option)->
             return ProxyAgent(option.proxy,true)
         return ProxyAgent(option.proxy,false)
     catch e
+        console.error "invalid proxy #{option.proxy}"
         return null
 
 exports.defaultAgent = "Sybil Reader/0.0.1"
