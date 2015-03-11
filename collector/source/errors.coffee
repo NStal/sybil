@@ -12,5 +12,5 @@ module.exports = Errors = ErrorDoc.create()
     .define("ParseError")
     .define("LogicError")
     .define("Duplication")
+    .define("NotReady")
     .generate()
-

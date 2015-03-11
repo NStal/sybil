@@ -2,18 +2,14 @@ async = require "async"
 States = sybilRequire "common/states.coffee"
 ErrorDoc = require "error-doc"
 tough = require "tough-cookie"
+Source = require "../../source/source"
 loadash = require "lodash"
 httpUtil = global.env.httpUtil
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
 console = console = env.logger.create __filename
 cheerio = require "cheerio"
-exports.Errors = Errors = ErrorDoc.create()
-    .define("ConnectionNotAvailable")
-    .define("Timeout")
-    .define("UnkownError")
-    .define("NetworkError")
-    .generate()
+exports.Errors = Errors = Source.Errors
 exports.getAvailableProxy = (callback)->
     proxies = exports.proxies.slice(0)
     proxies.unshift(null)
@@ -99,7 +95,7 @@ class exports.TwitterRequestClient extends States
     atPreparing:()->
         exports.getAvailableProxy (err,proxy)=>
             if err
-                @lastError = new Errors.ConnectionNotAvailable
+                @lastError = new Errors.NotReady("fail to get available proxy")
                 @lastRequestState = "fail"
                 @setState "notAvailable"
                 return
@@ -132,7 +128,7 @@ class exports.TwitterRequestClient extends States
     _request:(option = {},callback)->
         if @state isnt "prepared"
             @prepare()
-            callback new Errors.ConnectionNotAvailable("proxy not ready")
+            callback new Errors.NotReady("proxy not ready")
             return
         option.method = option.method or "GET"
         option.headers = option.headers or {}
