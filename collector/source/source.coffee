@@ -74,15 +74,18 @@ class Source extends States
             # a general infer for debug.
             ,lastError:@data.lastError or null
             ,lastErrorDate:@data.lastErrorDate or null
+            ,lastErrorState:@data.lastErrorState or null
             ,panic:@data.panicError or null
         }
     logError:(err)->
         @data.lastError = err
         @data.lastErrorDate = new Date()
+        @data.lastErrorState = @state
         @emit "modify"
     clearError:()->
         @data.lastError = null
         @data.lastErrorDate = null
+        @data.lastErrorState = null
         @emit "modify"
     constructor:(@info = {})->
         # @info are the data stored of the current source
@@ -253,15 +256,15 @@ class Source extends States
             # I don't panic for now
             return
 
-            if err instanceof Errors.AuthorizationFailed
-                # Maybe maker will abondon this source
-                # or they may try to change the password and try again
-                @error err
-                return
-            else
-                # For other none AuthorizationFailed  error from authorizer
-                # it is appear to outside world as an AuthorizationFailed
-                @error new Errors.AuthorizationFailed("authorizer failed to authorize, see @via for detail",{via:err})
+#            if err instanceof Errors.AuthorizationFailed
+#                # Maybe maker will abondon this source
+#                # or they may try to change the password and try again
+#                @error err
+#                return
+#            else
+#                # For other none AuthorizationFailed  error from authorizer
+#                # it is appear to outside world as an AuthorizationFailed
+#                @error new Errors.AuthorizationFailed("authorizer failed to authorize, see @via for detail",{via:err})
             return
         @authorizer.give "startSignal"
     atPrepareUpdate:()->
@@ -357,6 +360,9 @@ class Source extends States
         @authorizer.debug(option)
         @initializer.debug(option)
     forceUpdate:(callback = ()-> )->
+        if @state is "panic"
+            callback new Errors.LogicError "Fail to force update we are in unrecoverable panic",{@state,@panicError,@panicState}
+            return
         if @state isnt "updating"
             callback new Errors.LogicError "Force updating only allowed when source is at updating state, current state is #{@state}"
             return

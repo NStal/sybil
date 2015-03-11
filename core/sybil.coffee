@@ -199,7 +199,7 @@ class Sybil extends (require "events").EventEmitter
                 callback err,archives
     getCustomArchives:(query,callback)->
         Database.getCustomArchives query,(err,archives)=>
-            @completeArchivesMeta archives,(err,archives)=>
+            @completeArchivesMeta archives or [],(err,archives)=>
                 callback err,archives
     completeArchivesMeta:(archives = [],callback)->
         links = archives.map (archive)->archive.originalLink

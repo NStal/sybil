@@ -74,7 +74,7 @@ exports._httpGet = (option,callback)->
     if not headers["user-agent"]
         headers["user-agent"] = exports.defaultAgent
     if not headers["cookie"] and jar
-        headers["cookie"] = jar.getCookieStringSync url
+        headers["cookie"] = (jar.getCookieStringSync url) or ""
     _urlObject = urlModule.parse(url)
     requestOption = {}
     requestOption.path = _urlObject.path
@@ -82,6 +82,24 @@ exports._httpGet = (option,callback)->
     requestOption.port = _urlObject.port
     requestOption.method = "GET"
     requestOption.headers = headers
+#2015-03-07 12:37:13 ERROR:[events.js:107:17] [Error: "name" and "value" are required for setHeader().] [EOL]
+#2015-03-07 12:37:13 ERROR:[events.js:107:17] Error: "name" and "value" are required for setHeader().
+#  at ClientRequest.OutgoingMessage.setHeader (_http_outgoing.js:333:11)
+#  at new ClientRequest (_http_client.js:101:14)
+#  at Object.exports.request (http.js:49:10)
+#  at Object.exports._httpGet (/home/wuminghan/sybil/common/httpUtil.coffee:86:18)
+#  at ClientRequest.<anonymous> (/home/wuminghan/sybil/common/httpUtil.coffee:112:21)
+#  at ClientRequest.g (events.js:199:16)
+#  at ClientRequest.emit (events.js:107:17)
+#  at HTTPParser.parserOnIncomingClient [as onIncoming] (_http_client.js:419:21)
+#  at HTTPParser.parserOnHeadersComplete (_http_common.js:111:23)
+#  at Socket.socketOnData (_http_client.js:310:20)
+#  at Socket.emit (events.js:107:17)
+#  at readableAddChunk (_stream_readable.js:163:16)
+#  at Socket.Readable.push (_stream_readable.js:126:10)
+#  at TCP.onread (net.js:529:20)
+
+#    console.debug requestOption.headers,"I recieve a set Header failure"
     requestOption.agent = agent
     req = scheme.request requestOption,(res)=>
         if req.initialTimeout
@@ -106,7 +124,8 @@ exports._httpGet = (option,callback)->
             newUrl = require("url").resolve(url,res.headers["location"])
             ro = _.clone(option)
             ro.headers = ro.headers or {}
-            ro.headers["Cookie"] = res.headers["set-cookie"]
+            if res.headers["set-cookie"]
+                ro.headers["Cookie"] = res.headers["set-cookie"]
             ro.url = newUrl
             ro.maxRedirect -= 1
             exports._httpGet ro,callback
@@ -201,7 +220,7 @@ exports.httpPost = (option,callback)->
     if not headers["user-agent"]
         headers["user-agent"] = exports.defaultAgent
     if not headers["cookie"] and jar
-        headers["cookie"] = jar.getCookieStringSync url
+        headers["cookie"] = (jar.getCookieStringSync url) or ""
     if not headers["content-type"]
         headers["content-type"] = "application/x-www-form-urlencoded"
     headers["content-length"] = postContent.length
@@ -224,6 +243,7 @@ exports.httpPost = (option,callback)->
                 rawCookie = [cookie]
             rawCookie.forEach (rc)=>
                 try
+#                    console.log "set cookie or",option.url,rc
                     jar.setCookieSync rc,option.url
                 catch e
                     true

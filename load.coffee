@@ -60,6 +60,7 @@ class Loader extends States
     resolve:(path)->
         pathModule.resolve @root,path
     atPanic:()->
+        console.log "error..."
         console.error "fail to load sybil at state #{@panicState}"
         console.error @panicError
         process.exit(0)

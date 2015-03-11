@@ -270,12 +270,14 @@ class ArchiveHelper extends Leaf.Widget
     goTop:()->
         @archiveDisplayer.UI.scrollable.scrollTop = 0
     goBottom:()->
-        @archiveDisplayer.UI.scrollable.scrollTop = @archiveDisplayer.UI.scrollable.offsetHeight
+        scrollable = @archiveDisplayer.UI.scrollable
+        scrollable.scrollTop = scrollable.scrollHeight
     isTop:()->
         @archiveDisplayer.UI.scrollable.scrollTop < 2
     isBottom:()->
         return true
     onClickGoBottom:()->
+        console.log "go bottom???"
         @goBottom()
     onClickNext:()->
         if not @isBottom()

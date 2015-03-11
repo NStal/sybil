@@ -22,7 +22,7 @@ exports.register = (dep,callback)->
         @tempFolder = dep.tempFolder
         constructor:(@req,@res)->
             super()
-            @url = req.param("url")
+            @url = @req.param("url")
             @iconUrl = urlModule.resolve @url,"/favicon.ico"
             @fileName = crypto.createHash("md5").update(@iconUrl).digest("hex") + ".icon"
             @filePath = pathModule.resolve IconResponser.tempFolder,@fileName

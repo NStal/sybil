@@ -460,8 +460,9 @@ exports.getCustomArchives = (query,callback)->
     if query.properties
         for prop of query.properties
             finalQuery[prop] = query.properties[prop]
-    console.log finalQuery,"~~~",{limit:query.limit or 1000,skip:query.offset or 0}
-    cursor = Collections.archive.find finalQuery,{limit:query.limit or 1000,skip:query.offset or 0}
+    cursor = Collections.archive.find finalQuery
+    cursor.limit query.limit or 200
+    cursor.skip query.offset or 0
     if not query.sort
         cursor.sort({createDate:-1})
     else
@@ -470,7 +471,9 @@ exports.getCustomArchives = (query,callback)->
     # here maybe some performance issue one day
     # but we are designed for single user
     # so it may not be a problem here
+    items = []
     cursor.toArray (err,arr)->
+        console.log finalQuery,err,arr and arr.length or null,"???"
         callback err,arr
 exports.getConfig = (name,callback)->
     Collections.clientConfig.findOne {name:name},(err,config)->

@@ -16,50 +16,30 @@ class TwitterList extends Source
             for cookie in info.properties.jar
                 @jar.setCookieSync cookie,"https://twitter.com/"
         @type = "twitter"
-        @client = new twitterUtil.TwitterRequestClient()
+        @client = new twitterUtil.TwitterRequestClient({jar:@jar})
         @reg = new RegExp("twitter.com/([^/]+)/lists/([^/]+)$","i")
-        @mobileUserAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
-    getCSRFToken:(url,callback)->
-        @client.request {
-            url:url
-            ,headers:{
-                "user-agent":@mobileUserAgent
-            }
-            ,jar:@jar
-        },(err,res,content)=>
-            if err
-                callback new Errors.NetworkError("fail to get csrf token due to network error",{via:err})
-                return
-            $ = cheerio.load content.toString()
-            code = $("[name='csrf_id']").attr("content")
-            if not code or code.toString().length isnt 20
-                console.debug content.toString()
-                callback new Errors.ParseError("invalid code",{code:code})
-                return
-            callback null,code
     toSourceModel:()->
         json = super()
         json.properties.jar = @jar.getSetCookieStringsSync("https://twitter.com/")
         return json
     @test = (uri)->
         return (new RegExp("twitter.com/([^/]+)/lists/([^/]+)$","i")).test(uri)
-    
+
 class TwitterListUpdater extends Source::Updater
     constructor:(@source)->
         super(@source)
         @timeout = 60 * 1000
         @minFetchInterval = 10 * 1000
         @userAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
-        
+
     atFetching:(sole)->
         if not @data.authorizeInfo.cookie
             @error new Errors.AuthorizationFailed("twitter initialize need authorize")
             return
         path = urlModule.parse(@source.uri).path
         pageUrl = urlModule.resolve "https://mobile.twitter.com/",path
-        
-        @source.getCSRFToken pageUrl,(err,code)=>
-            
+
+        @source.client.getCSRFToken pageUrl,(err,code)=>
             @_fetchHasCheckSole = true
             if not @checkSole sole
                 return
@@ -75,10 +55,9 @@ class TwitterListUpdater extends Source::Updater
             option = {
                 url:requestUrl
                 ,headers:{
-                    "cookie":@source.jar.getCookieStringSync(requestUrl)
                     ,"user-agent":@userAgent
                     ,"referer":@source.uri
-                } 
+                }
                 ,method:"POST"
                 ,timeout:15 * 1000
                 ,data:{
@@ -94,7 +73,7 @@ class TwitterListUpdater extends Source::Updater
                 if err
                     @error new Errors.NetworkError("fail to initialize",{via:err})
                     return
-                
+
                 content = content.toString()
                 if res.headers["location"]
                     @error new Errors.AuthorizationFailed "recieve redirect maybe authorization outdated"
@@ -145,7 +124,7 @@ class TwitterListUpdater extends Source::Updater
             }
         }
         return result
-            
+
 class TwitterListInitializer extends Source::Initializer
     constructor:(@source)->
         super(@source)
@@ -157,7 +136,7 @@ class TwitterListInitializer extends Source::Initializer
         path = urlModule.parse(@source.uri).path
         pageUrl = urlModule.resolve "https://mobile.twitter.com/",path
         console.debug "start csrf"
-        @source.getCSRFToken pageUrl,(err,code)=>
+        @source.client.getCSRFToken pageUrl,(err,code)=>
             if not @checkSole sole
                 return
             if err
@@ -172,7 +151,6 @@ class TwitterListInitializer extends Source::Initializer
             option = {
                 url:requestUrl
                 ,headers:{
-                    "cookie":@source.jar.getCookieStringSync(requestUrl)
                     ,"user-agent":@userAgent
                     ,"referer":@source.uri
                 }
@@ -190,7 +168,7 @@ class TwitterListInitializer extends Source::Initializer
                 if err
                     @error new Errors.NetworkError("fail to initialize",{via:err})
                     return
-                
+
                 content = content.toString()
                 if res.headers["location"] or content.length < 2 * 1024
                     @error new Errors.AuthorizationFailed("get redirect header or content is too small")
@@ -199,7 +177,7 @@ class TwitterListInitializer extends Source::Initializer
                 if not result
                     @error new Errors.ParseError("fail to parse init content")
                     return
-                    
+
                 @data.guid = "twitterList_"+@source.uri
                 @data.name = "Twitter list \"#{list}\" via #{user}"
                 @data.prefetchArchiveBuffer = result.archives
@@ -215,7 +193,7 @@ class TwitterListInitializer extends Source::Initializer
         return {
             archives:(archive for archive in data)
         }
-                
+
 # Authorizer should provide @cookie
 # should stored to @source.properties.cookie
 querystring = require "querystring"
@@ -229,7 +207,7 @@ httpUtil = global.env.httpUtil
 class TwitterListAuthorizer extends Source::Authorizer
     constructor:(@source)->
         super(@source)
-        @jar = @source.jar 
+        @jar = @source.jar
         @timeout = 1000 * 60
     atPrelogin:(sole)->
         @data.requireCaptcha = false
@@ -254,7 +232,7 @@ class TwitterListAuthorizer extends Source::Authorizer
             try
                 data = JSON.parse $("#init-data").attr("value")
             catch e
-            
+
                 data = {}
             if not data.formAuthenticityToken
                 @error new Errors.ParseError("fail to get prelogin data")
@@ -287,13 +265,13 @@ class TwitterListAuthorizer extends Source::Authorizer
             if err
                 @error new Errors.NetworkError("fail to get prelogin data",{via:err})
                 return
-            
+
             content = content.toString()
             @data.postSessionResult = content
             if @data.postSessionResult.indexOf("error") > 0
                 @error new Errors.AuthorizationFailed("invalid authentication info")
                 return
-                
+
             @data.authorized = true
             @data.cookie = @jar.getCookieStringSync("https://twitter.com")
             @data.authorizeInfo = {cookie:@data.cookie}

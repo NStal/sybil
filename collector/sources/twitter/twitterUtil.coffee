@@ -12,6 +12,7 @@ exports.Errors = Errors = ErrorDoc.create()
     .define("ConnectionNotAvailable")
     .define("Timeout")
     .define("UnkownError")
+    .define("NetworkError")
     .generate()
 exports.getAvailableProxy = (callback)->
     proxies = exports.proxies.slice(0)
@@ -59,14 +60,35 @@ exports.renderDisplayContent = (data)->
 # void
 # proxyAttemped
 class exports.TwitterRequestClient extends States
-    constructor:()->
+    constructor:(option = {})->
         super()
+        @jar = option.jar
         @userAgent = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
         @proxy = exports.lastAvailableProxy or null
         # available states
         # void,success,fail
         @setState "void"
         @lastRequestState = "void"
+    getCSRFToken:(url,callback)->
+        @request {
+            url:url
+        },(err,res,content)=>
+            if err
+                callback new Errors.NetworkError("fail to get csrf token due to network error",{via:err})
+                return
+            $ = cheerio.load content.toString()
+            try
+                code = $("[name='csrf_id']").attr("content").toString().trim()
+            catch e
+                console.error "twitter content",content
+                console.error "fail to get twitter CSRF code"
+                code = null
+            if not code
+                console.debug "Invalid code",content.toString()
+                callback new Errors.ParseError("invalid code",{code:code})
+                return
+            callback null,code
+
     prepare:()->
         if @state is "prepareing" or @state is "prepared"
             return
@@ -89,10 +111,11 @@ class exports.TwitterRequestClient extends States
     atNotAvailable:()->
         @emit "exception",@lastError
         @emit "notAvailable"
-    request:(option,callback)->
+    request:(option = {},callback)->
         if @state is "prepared"
             @_request option,callback
             return
+        option.jar ?= @jar
         timeout = option.timeout or 20 * 1000
         hasTimeout = false
         timer = setTimeout (()->
@@ -113,8 +136,8 @@ class exports.TwitterRequestClient extends States
             return
         option.method = option.method or "GET"
         option.headers = option.headers or {}
-        if option.jar and not option.headers.cookie
-            option.headers["cookie"] = option.jar.getCookieStringSync(option.url)
+        option.headers["user-agent"] ?= @userAgent
+        option.jar ?= @jar
         option.proxy = @proxy
 #        option.headers["user-agent"] = option.headers["user-agent"] or @userAgent
         if option.method is "GET"

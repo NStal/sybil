@@ -11,8 +11,7 @@ EventEmitter = (require "events").EventEmitter
 querystring = require "querystring"
 createError = require "create-error"
 tough = require "tough-cookie"
-https = require "https"
-http = require "http"
+httpUtil = global.env.httpUtil
 urlModule = require "url"
 cheerio = require "cheerio"
 Cookie = tough.Cookie
@@ -23,37 +22,35 @@ exports.fetch = (info = {},callback)->
     cookie = info.cookie
     timeout = info.timeout or 30 * 1000
     url = "http://m.weibo.cn/searchs/searchFeed?&feature=0&uicode=20000060&rl=1&ext=plt%3A490&page=1"
-    option = urlModule.parse url
-    option.method = "GET"
-    option.headers = {
-        "Cookie":cookie
+    option = {
+        url:url
+        headers:{
+            cookie:cookie
+        }
+        maxRedirect:0
     }
-    req = http.request option,(res)->
-        buffers = []
-        res.on "data",(data)->
-            buffers.push data
-        res.on "end",()->
-            try
-                result = JSON.parse (Buffer.concat buffers).toString()
-            catch e
-                callback new Errors.ParseError("fail to parse result vai #{e}",{via:e})
+    httpUtil.httpGet option,(err,res,content = "")->
+        if err
+            if err instanceof httpUtil.Errors.MaxRedirect
+                callback new Errors.AuthorizationFailed "fetch recieve redirect, likely due to session outdated.",{via:err}
                 return
-            if result.ok is 0
-                callback null,[]
-            if result.ok isnt 1
-                callback new Errors.AuthorizationFailed("result.ok isnt 1 result is #{JSON.stringify result}")
+            else
+                callback new Errors.NetworkError "fail to weibo fetch content"
                 return
-            callback null,result.mblogList or []
-    hasTimeout = false
-    req.on "error",(err)=>
-        if hasTimeout
-            callback new Errors.Timeout "max timeout #{timeout} exceed"
-        else
-            callback new Errors.NetworkError()
-    req.setTimeout timeout,()=>
-        hasTimeout = true
-        req.abort()
-    req.end()
+            return
+
+        content = content.toString()
+        try
+            result = JSON.parse content
+        catch e
+            callback new Errors.ParseError("fail to parse result via #{e}",{via:e,statusCode:res.statusCode,raw:content})
+            return
+        if result.ok is 0
+            callback null,[]
+        if result.ok isnt 1
+            callback new Errors.AuthorizationFailed("result.ok isnt 1 result is #{JSON.stringify result}")
+            return
+        callback null,result.mblogList or []
 
 
 exports.renderDisplayContent = (raw)=>

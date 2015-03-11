@@ -4,7 +4,8 @@
 # 3. Connect to the sybil websocket API
 # 3.5 (app ready)
 # 4. Sync the required data like source/list/nodes
-#
+
+
 View = require "view"
 ViewSwitcher = View.ViewSwitcher
 AddSourcePopup = require "sourceUtil/addSourcePopup"

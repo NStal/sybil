@@ -485,7 +485,9 @@
     };
 
     ArchiveHelper.prototype.goBottom = function() {
-      return this.archiveDisplayer.UI.scrollable.scrollTop = this.archiveDisplayer.UI.scrollable.offsetHeight;
+      var scrollable;
+      scrollable = this.archiveDisplayer.UI.scrollable;
+      return scrollable.scrollTop = scrollable.scrollHeight;
     };
 
     ArchiveHelper.prototype.isTop = function() {
@@ -497,6 +499,7 @@
     };
 
     ArchiveHelper.prototype.onClickGoBottom = function() {
+      console.log("go bottom???");
       return this.goBottom();
     };
 
