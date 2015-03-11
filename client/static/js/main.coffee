@@ -5,6 +5,8 @@
 # 3.5 (app ready)
 # 4. Sync the required data like source/list/nodes
 
+ImageLoader = require "/util/imageLoader"
+SmartImage = require "/widget/smartImage"
 
 View = require "view"
 ViewSwitcher = View.ViewSwitcher
@@ -15,10 +17,12 @@ SearchView = require "searchView/searchView"
 OfflineHinter = require "offlineHinter"
 SettingPanel = require "settingPanel"
 HintStack = require "hintStack"
+
+
 App = require("./app")
 
 
-require "enhancement"
+require "/enhancement"
 
 App.connect = ()->
     @messageCenter.on "error",(e)=>
@@ -45,9 +49,9 @@ App.afterInitialLoad = (callback)->
         @once "connect",callback
 App.init = ()->
     # public components
-
-
     App.viewSwitcher = new ViewSwitcher()
+    App.imageLoader = new ImageLoader()
+    SmartImage.setLoader App.imageLoader
 
     # views
     App.addSourcePopup = new AddSourcePopup()

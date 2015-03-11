@@ -1,4 +1,5 @@
 ContextMenu = require "/widget/contextMenu"
+SmartImage = require "/widget/smartImage"
 DragContext = require "/util/dragContext"
 SourceAuthorizeTerminal = require "/sourceUtil/sourceAuthorizeTerminal"
 App = require "/app"
@@ -196,10 +197,14 @@ class SourceListItemContextMenu extends ContextMenu
 tm.use "sourceView/sourceListItem"
 class SourceListItem extends SourceListItemBase
     constructor:(source)->
+        @include SmartImage
         super App.templates.sourceView.sourceListItem
         if source not instanceof Model.Source
             throw new Error "invalid source"
         @source = source
+        @UI.sourceIcon.on "state",(state)->
+            if state is "success"
+                @UI.sourceIcon.style.display = "inline"
         @node.oncontextmenu = (e)=>
             e.preventDefault()
             e.stopImmediatePropagation()
@@ -256,18 +261,13 @@ class SourceListItem extends SourceListItemBase
                 @VM.state = "warn"
             else
                 @VM.state = "error"
+
         if @source.requireLocalAuth
             @VM.state = "error"
-        if not @iconLoaded
 
-            url = "plugins/iconProxy?url=#{encodeURIComponent @source.uri}"
-            @VM.sourceIcon = url
-            @UI.sourceIcon.onerror = ()->
-                this.src = "/image/favicon-default.png"
-            self = this
-            @UI.sourceIcon.onload = ()->
-                this.style.display = "inline"
-                self.iconLoaded = true
+        @UI.sourceIcon.loadingSrc = "/image/favicon-default.png"
+        @UI.sourceIcon.errorSrc = "/image/favicon-default.png"
+        @UI.sourceIcon.src = "plugins/iconProxy?url=#{encodeURIComponent @source.uri}"
     onClickNode:(e)->
         e.capture()
         @select()

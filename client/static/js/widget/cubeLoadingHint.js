@@ -10,8 +10,6 @@
 
   tm.use("widget/cubeLoadingHint");
 
-  console.debug("use cube");
-
   CubeLoadingHint = (function(_super) {
     __extends(CubeLoadingHint, _super);
 

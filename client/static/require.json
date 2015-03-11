@@ -30,7 +30,7 @@
             },
             {
                 "path": "main.js",
-                "hash": "9f7dc1"
+                "hash": "181941"
             },
             {
                 "path": "mobile.js",
@@ -38,7 +38,7 @@
             },
             {
                 "path": "model.js",
-                "hash": "728f98"
+                "hash": "cb9949"
             },
             {
                 "path": "modelSyncManager.js",
@@ -94,7 +94,7 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "35127a"
+                "hash": "942e25"
             },
             {
                 "path": "lib/async.js",
@@ -110,11 +110,11 @@
             },
             {
                 "path": "lib/leaf-require.js",
-                "hash": "cf8b72"
+                "hash": "9fbd9a"
             },
             {
                 "path": "lib/leaf.js",
-                "hash": "573271"
+                "hash": "6d8930"
             },
             {
                 "path": "lib/lodash.js",
@@ -138,7 +138,7 @@
             },
             {
                 "path": "listView/listView.js",
-                "hash": "ef96ac"
+                "hash": "2c6433"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
@@ -170,19 +170,19 @@
             },
             {
                 "path": "sourceView/archiveList.js",
-                "hash": "6863f1"
+                "hash": "1dd9e1"
             },
             {
                 "path": "sourceView/sourceDetail.js",
-                "hash": "cd10b7"
+                "hash": "1558ab"
             },
             {
                 "path": "sourceView/sourceList.js",
-                "hash": "36aa06"
+                "hash": "0d5a9f"
             },
             {
                 "path": "sourceView/sourceView.js",
-                "hash": "ba5c3b"
+                "hash": "e0fc3e"
             },
             {
                 "path": "util/delayWorker.js",
@@ -194,7 +194,11 @@
             },
             {
                 "path": "util/flag.js",
-                "hash": "1d2a26"
+                "hash": "cd346c"
+            },
+            {
+                "path": "util/imageLoader.js",
+                "hash": "c0ad7b"
             },
             {
                 "path": "util/messageCenter.js",
@@ -222,19 +226,23 @@
             },
             {
                 "path": "widget/contextMenu.js",
-                "hash": "10bbb6"
+                "hash": "6e8766"
             },
             {
                 "path": "widget/cubeLoadingHint.js",
-                "hash": "5f4549"
+                "hash": "04c27a"
             },
             {
                 "path": "widget/popup.js",
                 "hash": "4932f4"
+            },
+            {
+                "path": "widget/smartImage.js",
+                "hash": "6ac210"
             }
         ]
     },
     "debug": false,
     "cache": false,
-    "version": "0.1.24"
+    "version": "0.1.26"
 }

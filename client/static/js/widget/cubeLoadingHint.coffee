@@ -1,7 +1,6 @@
 App = require "/app"
 tm = require "/templateManager"
 tm.use "widget/cubeLoadingHint"
-console.debug "use cube"
 class CubeLoadingHint extends Leaf.Widget
     constructor:(elem,params = {})->
         super App.templates.widget.cubeLoadingHint
