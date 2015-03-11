@@ -17,6 +17,10 @@
                 "hash": "7aa698"
             },
             {
+                "path": "errors.js",
+                "hash": "2ec66b"
+            },
+            {
                 "path": "hintStack.js",
                 "hash": "a36cb2"
             },
@@ -141,6 +145,10 @@
                 "hash": "2c6433"
             },
             {
+                "path": "procedure/bufferedEndlessArchiveLoader.js",
+                "hash": "5e6bb7"
+            },
+            {
                 "path": "procedure/endlessArchiveLoader.js",
                 "hash": "e557e1"
             },
@@ -170,7 +178,7 @@
             },
             {
                 "path": "sourceView/archiveList.js",
-                "hash": "1dd9e1"
+                "hash": "ce344f"
             },
             {
                 "path": "sourceView/sourceDetail.js",
@@ -238,11 +246,11 @@
             },
             {
                 "path": "widget/smartImage.js",
-                "hash": "6ac210"
+                "hash": "75cdb3"
             }
         ]
     },
     "debug": false,
     "cache": false,
-    "version": "0.1.26"
+    "version": "0.1.30"
 }

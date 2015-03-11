@@ -36,7 +36,6 @@ class ArchiveDisplayer extends Leaf.Widget
 
     render:()->
         @UI.title$.text(@archive.title)
-        console.debug @archive.author
         if @UI.avatar and @archive.author and @archive.author.avatar
             @UI.avatar$.attr "src",@archive.author.avatar
         if @archive.originalLink
