@@ -12,7 +12,8 @@ class EndlessArchiveLoader extends Leaf.EventEmitter
         @count = option.count or 10
         @query = option.query or {}
     _load:(option,callback)->
-        option.query = @query or {}
+        for prop of @query or {}
+            option[prop] = @query[prop]
         Model.Archive.getByCustom option,callback
     more:(callback = ()-> true)->
         if @isLoading
@@ -22,12 +23,12 @@ class EndlessArchiveLoader extends Leaf.EventEmitter
             callback "noMore"
             return
         if @archives.length > 0
-            offset = @archives[@archives.length-1].guid
+            splitter = @archives[@archives.length-1].guid
         else
-            offset = null
+            splitter = null
         @isLoading = true
         @emit "startLoading"
-        @_load {@viewRead,@sort,@count,offset},(err,archives)=>
+        @_load {@viewRead,@sort,@count,splitter},(err,archives)=>
             @emit "endLoading"
             @isLoading = false
             if err

@@ -17,6 +17,7 @@ SearchView = require "searchView/searchView"
 OfflineHinter = require "offlineHinter"
 SettingPanel = require "settingPanel"
 HintStack = require "hintStack"
+Toaster = require "/view/toaster"
 
 
 App = require("./app")
@@ -85,12 +86,20 @@ App.init = ()->
 App.showHint = (str)->
     console.log "HINT:",str
     alert str
+
 App.showError = (str)->
     console.error str
     return
     alert str
+
 App.toast = (str)->
-    console.log "TOAST:",str
+    if not @toaster
+        @toaster = new Toaster()
+        @toaster.appendTo document.body
+    @toaster.show str
+
+
+
 App.confirm = (str,callback)->
     if confirm(str)
         callback true
@@ -106,10 +115,16 @@ App.modelSyncManager = new (require "modelSyncManager")
 
 
 $ ()->
+    if $(window).width() < 700
+        App.isMobile = true
+    console.log "script load complete version #{window.SybilMainContext.version}"
     App.templateManager.start()
     console.debug "start tm"
     App.templateManager.on "ready",(templates)->
         App.templates = templates
         App.init()
-
+        App.toast "just toast a message"
     require "test"
+
+window.onclick = ()=>
+    App.toast "???????+#{Math.random()}"

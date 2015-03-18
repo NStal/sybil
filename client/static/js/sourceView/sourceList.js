@@ -257,7 +257,6 @@
         style = "many-update";
       }
       this.VM.statusStyle = style;
-      console.debug(style, "!!!");
       if (!this.model.collapse) {
         this.VM.collapseClass = "";
         return this.VM.iconClass = "fa-folder";
@@ -395,7 +394,6 @@
         } else {
           lastErrorDate = -1;
         }
-        console.debug(lastErrorDate);
         if (lastErrorDate < 0) {
           this.VM.state = "warn";
         } else if (lastErrorDate < smallErrorTime) {
@@ -515,7 +513,6 @@
         return item.source.guid;
       });
       index = 0;
-      console.debug("merge folder", guids);
       while (index < this.children.length) {
         child = this.children[index];
         if (child instanceof SourceListItem) {
@@ -957,7 +954,6 @@
       return Model.Source.sources.sync((function(_this) {
         return function() {
           var source, _i, _len, _ref;
-          console.debug("merge source");
           _ref = Model.Source.sources.models;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             source = _ref[_i];

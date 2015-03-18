@@ -427,6 +427,11 @@
           return App.modelSyncManager.emit("archiveList/add", list);
         };
       })(this));
+      this.on("remove", (function(_this) {
+        return function(list) {
+          return App.modelSyncManager.emit("archiveList/remove", list);
+        };
+      })(this));
     }
 
     return AllArchiveListCollection;
@@ -502,16 +507,20 @@
     }
 
     ArchiveList.prototype.getArchives = function(option, callback) {
-      var count, offset;
+      var count, offset, sort, splitter;
       if (option == null) {
         option = {};
       }
       count = option.count || 20;
       offset = option.offset || 0;
+      splitter = option.splitter || null;
+      sort = option.sort || "latest";
       return App.messageCenter.invoke("getList", {
         name: this.name,
         count: count,
-        offset: offset
+        offset: offset,
+        splitter: splitter,
+        sort: sort
       }, (function(_this) {
         return function(err, listInfo) {
           if (listInfo == null) {
@@ -529,11 +538,16 @@
     };
 
     ArchiveList.prototype["delete"] = function(callback) {
-      ArchiveList.list = ArchiveList.list.filter(function(item) {
-        return item !== this;
-      });
-      callback(null);
-      return Model.emit("archiveList/delete", this);
+      return App.messageCenter.invoke("removeList", this.name, (function(_this) {
+        return function(err) {
+          if (err) {
+            callback(err);
+            return;
+          }
+          ArchiveList.lists.remove(_this);
+          return callback(null);
+        };
+      })(this));
     };
 
     ArchiveList.prototype.add = function(archive) {

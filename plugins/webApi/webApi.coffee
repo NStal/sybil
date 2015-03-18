@@ -6,14 +6,14 @@ WebSocket = ws
 http = require "http"
 
 console = require("../../common/logger.coffee").create("web-api")
-sortArchive = (archives,what)->
-    console.log "sort called!"
-    archives.forEach (archive)->
-        if archive.createDate
-            return
-        archive.createDate = archive.fetchDate or new Date(0)
-    archives.sort (b,a)->
-        return a.createDate.getTime() - b.createDate.getTime()
+#sortArchive = (archives,what)->
+#    console.log "sort called!"
+#    archives.forEach (archive)->
+#        if archive.createDate
+#            return
+#        archive.createDate = archive.fetchDate or new Date(0)
+#    archives.sort (b,a)->
+#        return a.createDate.getTime() - b.createDate.getTime()
 
 class WebApiServer extends EventEmitter
     constructor:(sybil,@settings)->
@@ -87,40 +87,20 @@ class WebApiServer extends EventEmitter
         messageCenter.registerApi "saveCustomWorkspace",(query,callback)=>
             @sybil.saveCustomWorkspace query.name,query.data,(err)->
                 callback err
-        messageCenter.registerApi "getCustomArchives",(query,callback)=>
-            query.query.viewRead = query.viewRead or false
-            @sybil.getCustomArchives query.query,(err,archives)=>
+        messageCenter.registerApi "getCustomArchives",(query = {},callback)=>
+            query.viewRead = query.viewRead or false
+            if query.sort is "latest"
+                query.sort = {createDate:-1}
+            else if query.sort is "oldest"
+                query.sort = {createDate:1}
+
+            @sybil.getCustomArchives query,(err,archives)=>
                 if err
                     console.error err
                     err = "db error"
                     callback err
                     return
-                sort = query.sort or "latest"
-                if sort is "sybil"
-                    true
-                else if sort is "oldest"
-                    true
-                else
-                    # default by latest
-                    sortArchive(archives)
-                if not query.viewRead
-                    archives = archives.filter (item)->not item.hasRead
-                console.log query,archives.length
-                offset = query.offset or null
-                count = query.count or 20
-                if offset is null
-                    offsetIndex = 0
-                else if typeof offset is "number"
-                    # handled by db
-                    offsetIndex = 0
-                else
-                    for item,index in archives
-                        if item.guid is offset
-                            offsetIndex = index+1
-                            break
-                if not offsetIndex
-                    offsetIndex = 0
-                callback err,archives.slice(offsetIndex,offsetIndex+count)
+                callback err,archives
         messageCenter.registerApi "getSource",(guid,callback)=>
             @sybil.getSource guid,(err,source)->
                 callback err,source
@@ -136,64 +116,72 @@ class WebApiServer extends EventEmitter
                 return
             @sybil.setArchiveDisplayContent data.guid,data.content,(err,archive)=>
                 callback err,archive
-        messageCenter.registerApi "getTagArchives",(query,callback)=>
-            @sybil.getTagArchives query.name,(err,archives)->
-                if err
-                    console.error err
-                    err = "db error"
-                    callback err
-                    return
-                sort = query.sort or "latest"
-                if sort is "sybil"
-                    true
-                else if sort is "oldest"
-                    true
-                else
-                    # default by latest
-                    sortArchive(archives)
-                if not query.viewRead
-                    archives = archives.filter (item)->not item.hasRead
-                console.log query,archives.length
-                offset = query.offset or null
-                count = query.count or 20
-                if offset is null
-                    offsetIndex = 0
-                else
-                    for item,index in archives
-                        if item.guid is offset
-                            offsetIndex = index+1
-                            break
-                if not offsetIndex
-                    offsetIndex = 0
-                callback err,archives.slice(offsetIndex,offsetIndex+count)
-        messageCenter.registerApi "getSourceArchives",(query,callback)=>
-            @sybil.getSourceArchives query.guid,(err,archives)->
-                if err
-                    console.error err
-                    err = "db error"
-                sort = query.sort or "latest"
-                if sort is "sybil"
-                    true
-                else if sort is "oldest"
-                    true
-                else
-                    # default by latest
-                    sortArchive(archives)
-                if not query.viewRead
-                    archives = archives.filter (item)->not item.hasRead
-                console.log query,archives.length
-                offset = query.offset or null
-                count = query.count or 20
-                if offset is null
-                    offsetIndex = 0
-                else
-                    for item,index in archives
-                        if item.guid is offset
-                            offsetIndex = index+1
-                            break
-                if not offsetIndex
-                    offsetIndex = 0
-                callback err,archives.slice(offsetIndex,offsetIndex+count)
+#        messageCenter.registerApi "getTagArchives",(query,callback)=>
+#            @sybil.getTagArchives query.name,(err,archives)->
+#                if err
+#                    console.error err
+#                    err = "db error"
+#                    callback err
+#                    return
+#                sort = query.sort or "latest"
+#                if sort is "sybil"
+#                    true
+#                else if sort is "oldest"
+#                    true
+#                else
+#                    # default by latest
+#                    sortArchive(archives)
+#                if not query.viewRead
+#                    archives = archives.filter (item)->not item.hasRead
+#                console.log query,archives.length
+#                offset = query.offset or null
+#                count = query.count or 20
+#                if offset is null
+#                    offsetIndex = 0
+#                else
+#                    for item,index in archives
+#                        if item.guid is offset
+#                            offsetIndex = index+1
+#                            break
+#                if not offsetIndex
+#                    offsetIndex = 0
+#                callback err,archives.slice(offsetIndex,offsetIndex+count)
+#        messageCenter.registerApi "getSourceArchives",(query,callback)=>
+#            option = {}
+#            for prop of query
+#                if prop is "guid"
+#                    option.sourceGuids ?= []
+#                    option.sourceGuids.push query.guid
+#                else
+#                    option[prop] = query[prop]
+#            @sybil.getCustomArchives option,(archives)
+#            @sybil.getSourceArchives query.guid,(err,archives)->
+#                if err
+#                    console.error err
+#                    err = "db error"
+#                sort = query.sort or "latest"
+#                if sort is "sybil"
+#                    true
+#                else if sort is "oldest"
+#                    true
+#                else
+#                    # default by latest
+#                    sortArchive(archives)
+#                if not query.viewRead
+#                    archives = archives.filter (item)->not item.hasRead
+#                console.log query,archives.length
+#                offset = query.offset or null
+#                count = query.count or 20
+#                if offset is null
+#                    offsetIndex = 0
+#                else
+#                    for item,index in archives
+#                        if item.guid is offset
+#                            offsetIndex = index+1
+#                            break
+#                if not offsetIndex
+#                    offsetIndex = 0
+#                callback err,archives.slice(offsetIndex,offsetIndex+count)
         messageCenter.registerApi "addTagToSource",(data,callback)=>
             if not data.guid or not data.name
                 callback "invalid parameter"
@@ -248,6 +236,9 @@ class WebApiServer extends EventEmitter
 #            @sybil.subscribe source,(err,available)->
 #                callback err,available
         messageCenter.registerApi "search",(query,callback)=>
+            # disable is for now
+            callback null,[]
+            return
             input = query.input
             count = query.count or 100
             @sybil.search input,{},(err,archives)->
@@ -325,13 +316,17 @@ class WebApiServer extends EventEmitter
             if not name
                 callback "invalid list name"
                 return
+            # don't worry get lists is fast.
             @sybil.getLists (err,lists = [])=>
                 found = lists.some (list)->list.name is name
                 if err or not lists or not found
                     callback "not found"
                     return
-                @sybil.getCustomArchives {properties:{listName:name},viewRead:true,sort:{"listModifyDate":-1}},(err,archives)->
-                    sortArchive archives
+                if option.sort is "oldest"
+                    dateSort = 1
+                else
+                    dateSort = -1
+                @sybil.getCustomArchives {properties:{listName:name},viewRead:true,sort:{"listModifyDate":dateSort},splitter:option.splitter},(err,archives)->
                     #archives = archives.slice(offset,offset+count)
                     callback null,{name:"read later",archives:archives}
         messageCenter.registerApi "getSourceStatistic",(guid,callback)=>

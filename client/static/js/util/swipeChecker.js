@@ -33,14 +33,15 @@
     };
 
     SwipeChecker.prototype.onend = function(e) {
-      var endDate, swipeFloor;
+      var endDate, interval, swipeFloor;
       if (!this.endPoint) {
         return;
       }
       swipeFloor = this.swipeFloor || 60;
       if (e.touches.length === 0) {
         endDate = Date.now();
-        if (endDate - this.startDate < 1000) {
+        interval = endDate - this.startDate;
+        if (interval < (this.maxSwipeTime || 1000) && interval > (this.minSwipeTime || 100)) {
           if (this.startPoint[0] - this.endPoint[0] > swipeFloor) {
             this.emit("swipeleft", e);
           } else if (this.startPoint[0] - this.endPoint[0] < -swipeFloor) {

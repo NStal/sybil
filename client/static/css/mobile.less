@@ -88,13 +88,12 @@ body,html{
                 text-align:left;
                 height:@button-height;
                 line-height:@button-height;
-                font-size:18px;
+                font-size:16px;
             }
         }
         .archive-list-item{
-            padding:0;
+            padding:10px;
             .content{
-                
                 img{
                     box-shadow:none;
                     border:1px solid #aaa;
@@ -158,13 +157,15 @@ body,html{
     background-color:white;
     color:black;
     padding:10px;
-    border-radius:5px;
+    border-radius:0px;
     .light-shadow;
     .close-button{
         display:none;
     }
     width:80%;
     height:80%;
+    overflow:auto;
+    transform:translateZ(0);
     top:10%;
     left:10%;
     margin:0 auto;
@@ -172,8 +173,8 @@ body,html{
     ul{
         li{
             list-style:none;
-            padding:5px; 
-            font-size:24px;
+            padding:12px; 
+            font-size:16px;
             .clickable;
             &:hover{
                 text-decoration:underline;

@@ -14,6 +14,7 @@ class SourceView extends require("/view")
         super $(".source-view")[0],"source view"
         @node$.addClass "show-list"
         checker = new SwipeChecker(this.node)
+        checker.swipeFloor = $(window).width()/4
         checker.on "swiperight",(ev)=>
             @node$.addClass "show-list"
         checker.on "swipeleft",(ev)=>

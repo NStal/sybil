@@ -5,6 +5,7 @@ View = require "/view"
 ArchiveDisplayer = require "/baseView/archiveDisplayer"
 ScrollChecker = require "/util/scrollChecker"
 CubeLoadingHint = require("/widget/cubeLoadingHint")
+ContextMenu = require "/widget/contextMenu"
 moment = require "/lib/moment"
 tm = require "/templateManager"
 # Refactor to use only a single class or two
@@ -80,6 +81,12 @@ class List extends Leaf.Widget
             Model.ArchiveList.sync ()=>
                 @emit "init"
         # WARN: no add currently
+        App.modelSyncManager.on "archiveList/remove",(list)=>
+            for item,index in @lists
+                if item.archiveList.name is list.name
+                    @lists.splice(index,1)
+                    break
+
         App.modelSyncManager.on "archiveList/add",(list)=>
             @lists.push new ListItem(list)
         # refactor here
@@ -111,6 +118,19 @@ class ListItem extends Leaf.Widget
         @archiveList.on "change",()=>
             @render()
         @render()
+        @node.oncontextmenu = (e)=>
+            e.preventDefault()
+            e.stopImmediatePropagation()
+            @contextMenu ?= new ContextMenu [
+                {
+                    name:"remove list"
+                    callback:@removeList.bind(this)
+                }
+            ]
+            @contextMenu.show(e)
+    removeList:()->
+        @archiveList.delete ()->
+            console.log "delete?"
     render:()->
         @UI.name$.text @archiveList.name
         @UI.unreadCounter$.text @archiveList.count
@@ -118,7 +138,7 @@ class ListItem extends Leaf.Widget
     select:()->
         @emit "select",this
         @node$.addClass("select");
-    onClickNode:()=>
+    onClickNode:(e)=>
         @select()
 tm.use "listView/listViewArchiveList"
 class ArchiveList extends Leaf.Widget
@@ -131,13 +151,22 @@ class ArchiveList extends Leaf.Widget
             archiveListItem.listenBy this,"select",()=>
                 @emit "select",archiveListItem
         @archives.on "child/remove",(item)=>
-            # we don't remove it instead we should a delete dash at middle of it
+            # we don't remove it instead we should display a delete dash at middle of it
             return
             #item.destroy()
         @scrollChecker = new ScrollChecker(@node)
         @scrollChecker.on "scrollBottom",()=>
             @more()
-
+    render:()->
+        if not @currentList
+            return
+        @sort ?= "latest"
+        if @sort is "latest"
+            @VM.orderName = "Latest"
+            @VM.orderIcon = "fa-caret-up"
+        else
+            @VM.orderName = "Oldest"
+            @VM.orderIcon = "fa-caret-down"
 
     load:(list)->
         if @currentList
@@ -145,24 +174,38 @@ class ArchiveList extends Leaf.Widget
         @currentList = list
         @currentList.listenBy this,"add",@prependArchive
         @currentList.listenBy this,"remove",@removeArchive
+        @sort = (App.userConfig.get "listOrder/#{@currentList.name}") or "latest"
+        @render()
         @archives.length  = 0
         @noMore = false
         @UI.loadingHint.hide()
         @more()
-
+    onClickReorder:()->
+        if not @currentList
+            return
+        @sort ?= "latest"
+        if @sort is "latest"
+            App.userConfig.set "listOrder/#{@currentList.name}","oldest"
+        else
+            App.userConfig.set "listOrder/#{@currentList.name}","latest"
+        @load(@currentList)
     more:()->
         if @noMore
             return
-        loadCount = 20
+        count = 20
         list = @currentList
         @UI.loadingHint.show()
-        @currentList.getArchives {offset:@archives.length,count:loadCount},(err,archives)=>
+        for item in @archives
+            if item.archive.listName is @currentList.name
+                lastGuid = item.guid
+        splitter = lastGuid or null
+        @currentList.getArchives {splitter,count,@sort},(err,archives)=>
             if @currentList isnt list
                 return
             @UI.loadingHint.hide()
             for archive in archives
                 @archives.push new ArchiveListItem(archive)
-            if archives.length isnt loadCount
+            if archives.length isnt count
                 @noMore = true
 
     prependArchive:(archive)->
@@ -262,7 +305,8 @@ class ArchiveHelper extends Leaf.Widget
     onClickExpandOption:()->
         @showOptionFlag.toggle()
     onClickClear:()->
-        @archiveDisplayer.onClickReadLater()
+        if @archiveDisplayer.archive.listName is @context.archives.currentList.name
+            @archiveDisplayer.onClickReadLater()
         if @onClickNext()
             return
         else if @onClickPrevious()

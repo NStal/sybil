@@ -2015,6 +2015,13 @@ input:focus {
     opacity: 0.2;
   }
 }
+smart-image {
+  overflow: hidden;
+}
+smart-image img {
+  max-width: 100%;
+  max-height: 100%;
+}
 html,
 body {
   background-color: #ddd;
@@ -2270,8 +2277,15 @@ html * {
   -webkit-box-sizing: border-box;
   padding: 20px 80px 15px;
   border-bottom: 1px solid #aaaaaa;
+  background-color: #ddd;
   position: relative;
   box-shadow: inset -4px 0 0 0 #aaaaaa, inset 4px 0 0 0 #aaaaaa;
+}
+.archive-list .archive-list-item.rich .extra {
+  display: inline;
+}
+.archive-list .archive-list-item .extra {
+  display: none;
 }
 .archive-list .archive-list-item .header {
   padding: 0px 20px;
@@ -2299,15 +2313,19 @@ html * {
   text-decoration: none;
 }
 .archive-list .archive-list-item .avatar {
-  display: inline;
+  display: none;
   max-height: 32px;
   max-width: 32px;
+  overflow: hidden;
   border-radius: 100px;
   border: 1px solid #aaa;
   vertical-align: sub;
   _position: absolute;
   _left: 10px;
   _top: 20px;
+}
+.archive-list .archive-list-item .avatar.show {
+  display: inline-block;
 }
 .archive-list .archive-list-item .date,
 .archive-list .archive-list-item .source-name,
@@ -2383,7 +2401,8 @@ html * {
   padding-left: 20px;
 }
 .archive-list .archive-list-item .tool-bar .tool-button {
-  border-radius: 6px;
+  display: inline-block;
+  overflow: hidden;
   cursor: pointer;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -2395,7 +2414,7 @@ html * {
   padding: 1px 8px 1px 0;
   line-height: 28px;
 }
-.archive-list .archive-list-item .tool-bar .tool-button:before {
+.archive-list .archive-list-item .tool-bar .tool-button i {
   padding-right: 6px;
   text-shadow: 1px 1px #eee;
 }
@@ -2404,6 +2423,10 @@ html * {
 }
 .archive-list .archive-list-item .tool-bar .tool-button.active {
   color: #444444;
+}
+.archive-list .archive-list-item .tool-bar .like,
+.archive-list .archive-list-item .tool-bar .share {
+  display: none;
 }
 .archive-list .archive-list-item .mark-as-unread:before {
   text-shadow: 1px 1px #eee;
@@ -2946,6 +2969,12 @@ html * {
   -webkit-box-sizing: border-box;
   position: relative;
 }
+.search-view .archive-displayer .wrapper.rich .extra {
+  display: inline;
+}
+.search-view .archive-displayer .wrapper .extra {
+  display: none;
+}
 .search-view .archive-displayer .wrapper .header {
   padding: 0px 20px;
   box-sizing: border-box;
@@ -2972,15 +3001,19 @@ html * {
   text-decoration: none;
 }
 .search-view .archive-displayer .wrapper .avatar {
-  display: inline;
+  display: none;
   max-height: 32px;
   max-width: 32px;
+  overflow: hidden;
   border-radius: 100px;
   border: 1px solid #aaa;
   vertical-align: sub;
   _position: absolute;
   _left: 10px;
   _top: 20px;
+}
+.search-view .archive-displayer .wrapper .avatar.show {
+  display: inline-block;
 }
 .search-view .archive-displayer .wrapper .date,
 .search-view .archive-displayer .wrapper .source-name,
@@ -3056,7 +3089,8 @@ html * {
   padding-left: 20px;
 }
 .search-view .archive-displayer .wrapper .tool-bar .tool-button {
-  border-radius: 6px;
+  display: inline-block;
+  overflow: hidden;
   cursor: pointer;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -3068,7 +3102,7 @@ html * {
   padding: 1px 8px 1px 0;
   line-height: 28px;
 }
-.search-view .archive-displayer .wrapper .tool-bar .tool-button:before {
+.search-view .archive-displayer .wrapper .tool-bar .tool-button i {
   padding-right: 6px;
   text-shadow: 1px 1px #eee;
 }
@@ -3077,6 +3111,10 @@ html * {
 }
 .search-view .archive-displayer .wrapper .tool-bar .tool-button.active {
   color: #444444;
+}
+.search-view .archive-displayer .wrapper .tool-bar .like,
+.search-view .archive-displayer .wrapper .tool-bar .share {
+  display: none;
 }
 .list-view {
   display: flex;
@@ -3105,7 +3143,6 @@ html * {
 }
 .list-view .list-view-list .actions .button {
   float: left;
-  padding: 5px;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -3151,6 +3188,7 @@ html * {
   color: #33bbee;
 }
 .list-view .list-view-archive-list {
+  position: relative;
   background-color: #404040;
   height: 100%;
   min-width: 300px;
@@ -3161,6 +3199,28 @@ html * {
   color: #bbb;
   width: 50%;
   margin: 20px auto;
+}
+.list-view .list-view-archive-list .archives {
+  padding-top: 45px;
+}
+.list-view .list-view-archive-list .actions {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 45px;
+  color: #d9d9d9;
+}
+.list-view .list-view-archive-list .actions .action {
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  line-height: 45px;
+  padding-left: 10px;
 }
 .list-view .list-view-archive-list .list-view-archive-list-item {
   position: relative;
@@ -3235,6 +3295,12 @@ html * {
   overflow: auto;
   background-color: #ddd;
 }
+.list-view .archive-displayer .wrapper.rich .extra {
+  display: inline;
+}
+.list-view .archive-displayer .wrapper .extra {
+  display: none;
+}
 .list-view .archive-displayer .wrapper .header {
   padding: 0px 20px;
   box-sizing: border-box;
@@ -3261,15 +3327,19 @@ html * {
   text-decoration: none;
 }
 .list-view .archive-displayer .wrapper .avatar {
-  display: inline;
+  display: none;
   max-height: 32px;
   max-width: 32px;
+  overflow: hidden;
   border-radius: 100px;
   border: 1px solid #aaa;
   vertical-align: sub;
   _position: absolute;
   _left: 10px;
   _top: 20px;
+}
+.list-view .archive-displayer .wrapper .avatar.show {
+  display: inline-block;
 }
 .list-view .archive-displayer .wrapper .date,
 .list-view .archive-displayer .wrapper .source-name,
@@ -3345,7 +3415,8 @@ html * {
   padding-left: 20px;
 }
 .list-view .archive-displayer .wrapper .tool-bar .tool-button {
-  border-radius: 6px;
+  display: inline-block;
+  overflow: hidden;
   cursor: pointer;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -3357,7 +3428,7 @@ html * {
   padding: 1px 8px 1px 0;
   line-height: 28px;
 }
-.list-view .archive-displayer .wrapper .tool-bar .tool-button:before {
+.list-view .archive-displayer .wrapper .tool-bar .tool-button i {
   padding-right: 6px;
   text-shadow: 1px 1px #eee;
 }
@@ -3366,6 +3437,10 @@ html * {
 }
 .list-view .archive-displayer .wrapper .tool-bar .tool-button.active {
   color: #444444;
+}
+.list-view .archive-displayer .wrapper .tool-bar .like,
+.list-view .archive-displayer .wrapper .tool-bar .share {
+  display: none;
 }
 .p2p-view {
   width: 100%;
@@ -3741,6 +3816,12 @@ html * {
 .archive {
   position: relative;
 }
+.archive.rich .extra {
+  display: inline;
+}
+.archive .extra {
+  display: none;
+}
 .archive .header {
   padding: 0px 20px;
   box-sizing: border-box;
@@ -3767,15 +3848,19 @@ html * {
   text-decoration: none;
 }
 .archive .avatar {
-  display: inline;
+  display: none;
   max-height: 32px;
   max-width: 32px;
+  overflow: hidden;
   border-radius: 100px;
   border: 1px solid #aaa;
   vertical-align: sub;
   _position: absolute;
   _left: 10px;
   _top: 20px;
+}
+.archive .avatar.show {
+  display: inline-block;
 }
 .archive .date,
 .archive .source-name,
@@ -3851,7 +3936,8 @@ html * {
   padding-left: 20px;
 }
 .archive .tool-bar .tool-button {
-  border-radius: 6px;
+  display: inline-block;
+  overflow: hidden;
   cursor: pointer;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -3863,7 +3949,7 @@ html * {
   padding: 1px 8px 1px 0;
   line-height: 28px;
 }
-.archive .tool-bar .tool-button:before {
+.archive .tool-bar .tool-button i {
   padding-right: 6px;
   text-shadow: 1px 1px #eee;
 }
@@ -3872,6 +3958,10 @@ html * {
 }
 .archive .tool-bar .tool-button.active {
   color: #444444;
+}
+.archive .tool-bar .like,
+.archive .tool-bar .share {
+  display: none;
 }
 .fancy-scroll ::-webkit-scrollbar {
   width: 12px;
@@ -4550,4 +4640,38 @@ cube-loading-hint .box .face-back {
   margin-top: 5px;
   position: relative;
   padding: 10px;
+}
+.toaster {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  height: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 600ms ease;
+  -moz-transition: opacity 600ms ease;
+  -webkit-transition: opacity 600ms ease;
+  -o-transition: opacity 600ms ease;
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexflex;
+  -webkit-flex-flow: column;
+  -moz-flex-flow: column;
+  flex-flow: column;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.toaster.show {
+  opacity: 1;
+}
+.toaster .content {
+  margin: 0 auto;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  display: inline-block;
+  text-align: center;
+  padding: 8px 12px;
 }

@@ -149,7 +149,7 @@ class SourceListFolder extends SourceListItemBase
         if parseInt(unreadCount) >= 20
             style = "many-update"
         @VM.statusStyle = style
-        console.debug style,"!!!"
+
         if not @model.collapse
             @VM.collapseClass = ""
             @VM.iconClass = "fa-folder"
@@ -252,7 +252,7 @@ class SourceListItem extends SourceListItemBase
                 lastErrorDate = (Date.now() - new Date(@source.lastErrorDate).getTime()) or 0
             else
                 lastErrorDate = -1
-            console.debug lastErrorDate
+
             if lastErrorDate < 0
                 @VM.state = "warn"
             else if lastErrorDate < smallErrorTime
@@ -326,7 +326,7 @@ class SourceList extends Leaf.Widget
         folder = new SourceListFolder(folderModel)
         guids = folder.children.map (item)->item.source.guid
         index = 0
-        console.debug "merge folder",guids
+#        console.debug "merge folder",guids
         while index < @children.length
             child = @children[index]
             if child instanceof SourceListItem
@@ -599,7 +599,7 @@ class SourceListInitializer extends Leaf.EventEmitter
                 @loadFolder()
     loadSources:(callback = ()->true )->
         Model.Source.sources.sync ()=>
-            console.debug "merge source"
+#            console.debug "merge source"
             for source in Model.Source.sources.models
                 @list.mergeSource source
             callback()

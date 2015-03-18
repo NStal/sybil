@@ -2100,10 +2100,10 @@ html {
   text-align: left;
   height: 32px;
   line-height: 32px;
-  font-size: 18px;
+  font-size: 16px;
 }
 .source-view .archive-list .archive-list-item {
-  padding: 0;
+  padding: 10px;
 }
 .source-view .archive-list .archive-list-item .content img {
   box-shadow: none;
@@ -2177,10 +2177,12 @@ html {
   background-color: white;
   color: black;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 0px;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
   width: 80%;
   height: 80%;
+  overflow: auto;
+  transform: translateZ(0);
   top: 10%;
   left: 10%;
   margin: 0 auto;
@@ -2191,8 +2193,8 @@ html {
 }
 .archive-displayer-list-selector ul li {
   list-style: none;
-  padding: 5px;
-  font-size: 24px;
+  padding: 12px;
+  font-size: 16px;
   cursor: pointer;
   -webkit-touch-callout: none;
   -webkit-user-select: none;

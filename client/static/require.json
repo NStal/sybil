@@ -1,7 +1,6 @@
 {
     "name": "leaf-require",
     "js": {
-        "main": "main.js",
         "root": "./js/",
         "files": [
             {
@@ -18,7 +17,7 @@
             },
             {
                 "path": "errors.js",
-                "hash": "2ec66b"
+                "hash": "a4d1fa"
             },
             {
                 "path": "hintStack.js",
@@ -30,11 +29,11 @@
             },
             {
                 "path": "init.js",
-                "hash": "b81c89"
+                "hash": "e86d2d"
             },
             {
                 "path": "main.js",
-                "hash": "181941"
+                "hash": "a93433"
             },
             {
                 "path": "mobile.js",
@@ -42,7 +41,7 @@
             },
             {
                 "path": "model.js",
-                "hash": "cb9949"
+                "hash": "7bc67d"
             },
             {
                 "path": "modelSyncManager.js",
@@ -98,7 +97,7 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "942e25"
+                "hash": "89ee4a"
             },
             {
                 "path": "lib/async.js",
@@ -107,18 +106,6 @@
             {
                 "path": "lib/hammer.min.js",
                 "hash": "85e022"
-            },
-            {
-                "path": "lib/jquery.js",
-                "hash": "e12881"
-            },
-            {
-                "path": "lib/leaf-require.js",
-                "hash": "9fbd9a"
-            },
-            {
-                "path": "lib/leaf.js",
-                "hash": "6d8930"
             },
             {
                 "path": "lib/lodash.js",
@@ -142,15 +129,15 @@
             },
             {
                 "path": "listView/listView.js",
-                "hash": "2c6433"
+                "hash": "232b77"
             },
             {
                 "path": "procedure/bufferedEndlessArchiveLoader.js",
-                "hash": "5e6bb7"
+                "hash": "c98ee0"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
-                "hash": "e557e1"
+                "hash": "b918f1"
             },
             {
                 "path": "procedure/endlessSearchArchiveLoader.js",
@@ -178,7 +165,7 @@
             },
             {
                 "path": "sourceView/archiveList.js",
-                "hash": "ce344f"
+                "hash": "1c13de"
             },
             {
                 "path": "sourceView/sourceDetail.js",
@@ -186,11 +173,11 @@
             },
             {
                 "path": "sourceView/sourceList.js",
-                "hash": "0d5a9f"
+                "hash": "efdb87"
             },
             {
                 "path": "sourceView/sourceView.js",
-                "hash": "e0fc3e"
+                "hash": "32b92f"
             },
             {
                 "path": "util/delayWorker.js",
@@ -206,11 +193,15 @@
             },
             {
                 "path": "util/imageLoader.js",
-                "hash": "c0ad7b"
+                "hash": "56548c"
             },
             {
                 "path": "util/messageCenter.js",
                 "hash": "2e4e08"
+            },
+            {
+                "path": "util/resizeChecker.js",
+                "hash": "83b90a"
             },
             {
                 "path": "util/scrollChecker.js",
@@ -222,7 +213,7 @@
             },
             {
                 "path": "util/swipeChecker.js",
-                "hash": "2ce655"
+                "hash": "79a50e"
             },
             {
                 "path": "util/task.js",
@@ -231,6 +222,10 @@
             {
                 "path": "util/textGhost.js",
                 "hash": "a789f2"
+            },
+            {
+                "path": "view/toaster.js",
+                "hash": "ed8528"
             },
             {
                 "path": "widget/contextMenu.js",
@@ -246,11 +241,11 @@
             },
             {
                 "path": "widget/smartImage.js",
-                "hash": "75cdb3"
+                "hash": "b5e9ef"
             }
         ]
     },
     "debug": false,
     "cache": false,
-    "version": "0.1.30"
+    "version": ".62"
 }

@@ -8,6 +8,7 @@ while read type value; do
   esac
 done < version
 
+
 sub=$(( $sub + 1 ))
 echo main $main > version
 echo sub $sub >> version 

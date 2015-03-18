@@ -181,7 +181,6 @@
     };
 
     ImageLoader.prototype._load = function(worker, info) {
-      console.log("_load", info.src);
       worker.reserve();
       if (worker.isPending()) {
         worker.give("giveup");
@@ -199,8 +198,8 @@
           } else {
             _this.fails[info.src] = err;
           }
-          _this._onWorkerIdle(worker);
-          return info.callback(err, img);
+          info.callback(err, img);
+          return _this._onWorkerIdle(worker);
         };
       })(this));
       if (info.option) {
@@ -264,7 +263,6 @@
           }
           delayInfo = worker.info;
           this.queue.unshift(delayInfo);
-          console.log("unshift", delayInfo.src);
           worker.reset();
           this._load(worker, info);
           return;

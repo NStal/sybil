@@ -35,7 +35,7 @@
       this.reset();
       this.viewRead = option.viewRead || false;
       this.sort = option.sort || "latest";
-      this.bufferSize = option.buffer || 30;
+      this.bufferSize = option.bufferSize || 20;
       return this.query = option.query || {};
     };
 
@@ -84,13 +84,22 @@
     };
 
     BufferedEndlessArchiveLoader.prototype._bufferMore = function(callback) {
+      var _ref;
       if (this.data.archives.length - this.data.cursor > this.bufferSize) {
         callback();
         return;
       }
       if (this.state === "drain") {
+        this.emit("endLoading");
         callback();
         return;
+      }
+      if (this.state === "panic") {
+        this.recover();
+        this.setState("loading");
+      }
+      if ((_ref = this.state) === "loading" || _ref === "pause" || _ref === "void") {
+        this.emit("startLoading");
       }
       if (this.state === "pause") {
         this.give("continue");
@@ -99,48 +108,49 @@
       } else if (this.state === "loading") {
         true;
       }
-      return this.once("state", (function(_this) {
-        return function(state) {
-          if (state === "panic") {
-            return callback(_this.panicError);
-          } else if (state === "pause") {
-            return callback();
-          } else if (state === "drain") {
-            return callback();
-          } else if (state === "void") {
-            return callback(new Errors.Abort("abort"));
-          } else {
-            return callback(new Errors.UnkownError("buffer state change to unexpected", {
-              state: state
-            }));
+      return this.once("loadend", (function(_this) {
+        return function(err) {
+          if (err instanceof Errors.Drained) {
+            callback();
+            return;
           }
+          _this.emit("endLoading");
+          return callback(err);
         };
       })(this));
     };
 
-    BufferedEndlessArchiveLoader.prototype.atLoading = function(sole) {
-      var offset;
-      if (this.data.archives.length > 0) {
-        offset = this.data.archives[this.data.archives.length - 1].guid;
-      } else {
-        offset = null;
+    BufferedEndlessArchiveLoader.prototype.atPanic = function() {
+      if (this.panicState === "loading") {
+        return this.emit("loadend");
       }
-      this.emit("startLoading");
-      console.log(this.query, "???");
-      return Model.Archive.getByCustom({
-        query: this.query || {},
+    };
+
+    BufferedEndlessArchiveLoader.prototype.atLoading = function(sole) {
+      var option, prop, splitter;
+      if (this.data.archives.length > 0) {
+        splitter = this.data.archives[this.data.archives.length - 1].guid;
+      } else {
+        splitter = null;
+      }
+      option = {
         sort: this.sort,
         count: this.bufferSize,
         viewRead: this.viewRead,
-        offset: offset
-      }, (function(_this) {
+        splitter: splitter
+      };
+      for (prop in this.query || {}) {
+        option[prop] = this.query[prop];
+      }
+      return Model.Archive.getByCustom(option, (function(_this) {
         return function(err, archives) {
           var archive, _i, _len, _ref;
+          console.debug(archives);
           if (_this.stale(sole)) {
             return;
           }
-          _this.emit("endLoading");
           if (err) {
+            _this.emit("loadend", err);
             _this.error(err);
             return;
           }
@@ -162,15 +172,22 @@
       })(this));
     };
 
-    BufferedEndlessArchiveLoader.prototype.atPause = function() {
-      return this.waitFor("continue", (function(_this) {
+    BufferedEndlessArchiveLoader.prototype.atPause = function(sole) {
+      this.waitFor("continue", (function(_this) {
         return function() {
+          if (_this.stale(sole)) {
+            return;
+          }
           return _this.setState("loading");
         };
       })(this));
+      return this.emit("loadend");
     };
 
-    BufferedEndlessArchiveLoader.prototype.atDrained = function() {};
+    BufferedEndlessArchiveLoader.prototype.atDrained = function() {
+      this.emit("loadend", new Errors.Drained("drained"));
+      this.emit("endLoading");
+    };
 
     return BufferedEndlessArchiveLoader;
 

@@ -20,7 +20,7 @@ class BufferedEndlessArchiveLoader extends Leaf.States
         @reset()
         @viewRead = option.viewRead or false
         @sort = option.sort or "latest"
-        @bufferSize = option.buffer or 30
+        @bufferSize = option.bufferSize or 20
         @query = option.query or {}
     more:(count,callback)->
         # not enough item but has something
@@ -56,10 +56,14 @@ class BufferedEndlessArchiveLoader extends Leaf.States
             callback()
             return
         if @state is "drain"
+            @emit "endLoading"
             callback()
             return
-#        if @state in ["loading","pause"]
-#            @emit "startLoading"
+        if @state is "panic"
+            @recover()
+            @setState "loading"
+        if @state in ["loading","pause","void"]
+            @emit "startLoading"
         if @state is "pause"
             @give "continue"
         else if @state is "void"
@@ -67,36 +71,34 @@ class BufferedEndlessArchiveLoader extends Leaf.States
         else if @state is "loading"
             # do nothing
             true
-
-        @once "state",(state)=>
-            if state is "panic"
-                callback @panicError
-            else if state is "pause"
+        @once "loadend",(err)=>
+            if err instanceof Errors.Drained
                 callback()
-            else if state is "drain"
-                callback()
-            else if state is "void"
-                callback(new Errors.Abort("abort"))
-            else
-                callback(new Errors.UnkownError("buffer state change to unexpected",{state:state}))
+                return
+            @emit "endLoading"
+            callback err
+    atPanic:()->
+        if @panicState is "loading"
+            @emit "loadend"
     atLoading:(sole)->
         if @data.archives.length > 0
-            offset = @data.archives[@data.archives.length-1].guid
+            splitter = @data.archives[@data.archives.length-1].guid
         else
-            offset = null
-        @emit "startLoading"
-        console.log @query,"???"
-        Model.Archive.getByCustom {
-            query:@query or {}
+            splitter = null
+        option = {
             sort:@sort
             count:@bufferSize
             viewRead:@viewRead
-            offset:offset
-        },(err,archives)=>
+            splitter:splitter
+        }
+        for prop of @query or {}
+            option[prop] = @query[prop]
+        Model.Archive.getByCustom option,(err,archives)=>
+            console.debug archives
             if @stale sole
                 return
-            @emit "endLoading"
             if err
+                @emit "loadend",err
                 @error err
                 return
             for archive in archives
@@ -109,9 +111,14 @@ class BufferedEndlessArchiveLoader extends Leaf.States
                 @setState "drained"
             else
                 @setState "pause"
-    atPause:()->
+    atPause:(sole)->
         @waitFor "continue",()=>
+            if @stale sole
+                return
             @setState "loading"
+        @emit "loadend"
     atDrained:()->
+        @emit "loadend",new Errors.Drained("drained")
+        @emit "endLoading"
         return
 module.exports = BufferedEndlessArchiveLoader

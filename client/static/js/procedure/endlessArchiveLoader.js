@@ -29,12 +29,15 @@
     };
 
     EndlessArchiveLoader.prototype._load = function(option, callback) {
-      option.query = this.query || {};
+      var prop;
+      for (prop in this.query || {}) {
+        option[prop] = this.query[prop];
+      }
       return Model.Archive.getByCustom(option, callback);
     };
 
     EndlessArchiveLoader.prototype.more = function(callback) {
-      var offset;
+      var splitter;
       if (callback == null) {
         callback = function() {
           return true;
@@ -49,9 +52,9 @@
         return;
       }
       if (this.archives.length > 0) {
-        offset = this.archives[this.archives.length - 1].guid;
+        splitter = this.archives[this.archives.length - 1].guid;
       } else {
-        offset = null;
+        splitter = null;
       }
       this.isLoading = true;
       this.emit("startLoading");
@@ -59,7 +62,7 @@
         viewRead: this.viewRead,
         sort: this.sort,
         count: this.count,
-        offset: offset
+        splitter: splitter
       }, (function(_this) {
         return function(err, archives) {
           var archive, _i, _len, _ref;

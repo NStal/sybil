@@ -2,9 +2,11 @@ i18n = require "/i18n"
 moment = require "/lib/moment"
 App = require "/app"
 Model = require "/model"
+SmartImage = require "/widget/smartImage"
 tm = require "/templateManager"
 class ArchiveDisplayer extends Leaf.Widget
     constructor:(template)->
+        @include SmartImage
         super template
         @useDisplayContent = true
     setArchive:(archive)->
@@ -37,7 +39,12 @@ class ArchiveDisplayer extends Leaf.Widget
     render:()->
         @UI.title$.text(@archive.title)
         if @UI.avatar and @archive.author and @archive.author.avatar
-            @UI.avatar$.attr "src",@archive.author.avatar
+            @UI.avatar$.addClass "show"
+            @UI.avatar.src = @archive.author.avatar
+            @UI.avatar.errorSrc = "/image/author-avatar-default.png"
+            @UI.avatar.loadingSrc = "/image/author-avatar-default.png"
+        else
+            @UI.avatar$.removeClass "show"
         if @archive.originalLink
             @UI.title$.attr("href",@archive.originalLink)
         if @archive.like
@@ -45,7 +52,7 @@ class ArchiveDisplayer extends Leaf.Widget
         else
             @UI.like$.removeClass("active")
         maybeList = @archive.listName or @maybeList or App.userConfig.get("#{@archive.sourceGuid}/maybeList") or "read later"
-        @UI.readLater$.text maybeList
+        @VM.listName = maybeList
         if @archive.listName is maybeList
             @UI.readLater$.addClass("active")
         else
@@ -178,7 +185,11 @@ class ArchiveDisplayerListSelector extends Popup
             return
         @node$.width(300)
         height = @node$.height()
-        @node$.css({position:"absolute",top:e.clientY+15-height,left:e.clientX-10})
+        top = e.clientY+15-height
+        left = e.clientX-10
+        top = top > 0 and top or 0
+        left = left > 0 and left or 0
+        @node$.css({position:"absolute",top,left})
     select:(item)->
         @emit "select",item.list
     active:(name)->

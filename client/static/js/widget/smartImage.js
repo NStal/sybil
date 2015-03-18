@@ -25,12 +25,29 @@
       SmartImage.__super__.constructor.call(this, App.templates.widget.smartImage);
       this.expose("src");
       this.expose("loadingSrc");
+      this.expose("errorSrc");
+      this.expose("fallbackSrcs");
       this.expose("on");
       this.node.state = "void";
+      this.fallbacks = [];
       for (prop in this.params) {
         this.node[prop] = this.params[prop];
       }
     }
+
+    SmartImage.prototype.onSetFallbackSrcs = function(fallbacks) {
+      if (fallbacks == null) {
+        fallbacks = [];
+      }
+      if (typeof fallbacks === "string") {
+        fallbacks = fallbacks.split(",");
+      } else if (fallbacks instanceof Array) {
+        fallbacks = fallbacks.filter(function(item) {
+          return typeof item === "string";
+        });
+      }
+      return this.fallbacks = fallbacks;
+    };
 
     SmartImage.prototype.onSetState = function(state) {
       this.state = state;
@@ -62,6 +79,10 @@
         return;
       }
       this.src = src;
+      return this.trySrc(src);
+    };
+
+    SmartImage.prototype.trySrc = function(src) {
       if (this.loadingSrc) {
         this.UI.image.src = this.loadingSrc;
       }
@@ -69,6 +90,11 @@
       return SmartImage.loader.cache(src, (function(_this) {
         return function(error) {
           if (error) {
+            if (_this.fallbacks.length > 0) {
+              _this.node.state = "fallback";
+              _this.trySrc(_this.fallbacks.shift());
+              return;
+            }
             _this.node.state = "fail";
             if (_this.errorSrc) {
               _this.UI.image.src = _this.errorSrc;

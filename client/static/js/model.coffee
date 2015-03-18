@@ -79,7 +79,7 @@ class Source extends Model
             # If we didn't unsubscribe
             # user will see it next, it's sort of OK.
             # If we subscribe but we fail to clean up
-            # the folder, we will not have change to clean up
+            # the folder, we will not have chance to clean up
             # the folder any more.
             # This is due to my bad folder design...
             console.log "unsubscribed #{@name} #{@guid}"
@@ -221,6 +221,8 @@ class AllArchiveListCollection extends Leaf.Collection
         @setId "name"
         @on "add",(list)=>
             App.modelSyncManager.emit "archiveList/add",list
+        @on "remove",(list)=>
+            App.modelSyncManager.emit "archiveList/remove",list
 class ArchiveList extends Model
     @lists = new AllArchiveListCollection()
     @sync = (callback = ->)->
@@ -256,16 +258,21 @@ class ArchiveList extends Model
     getArchives:(option = {},callback)->
         count = option.count or 20
         offset = option.offset or 0
-        App.messageCenter.invoke "getList",{name:@name,count:count,offset:offset},(err,listInfo = {})=>
+        splitter = option.splitter or null
+        sort = option.sort or "latest"
+        App.messageCenter.invoke "getList",{@name,count,offset,splitter,sort},(err,listInfo = {})=>
             if not listInfo or not listInfo.archives
                 callback err,null
                 return
             callback err,listInfo.archives.map (info)-> new Archive info
     delete:(callback)->
         # Not done need for other list
-        ArchiveList.list = ArchiveList.list.filter (item)->item isnt this
-        callback null
-        Model.emit "archiveList/delete",this
+        App.messageCenter.invoke "removeList",@name,(err)=>
+            if err
+                callback err
+                return
+            ArchiveList.lists.remove this
+            callback null
     add:(archive)->
         this.count++;
         console.debug @name,"emit add archive"

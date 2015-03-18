@@ -29,6 +29,7 @@
       SourceView.__super__.constructor.call(this, $(".source-view")[0], "source view");
       this.node$.addClass("show-list");
       checker = new SwipeChecker(this.node);
+      checker.swipeFloor = $(window).width() / 4;
       checker.on("swiperight", (function(_this) {
         return function(ev) {
           return _this.node$.addClass("show-list");

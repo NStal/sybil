@@ -26,7 +26,6 @@ module.exports.Collections = Collections
 dbServer = new mongodb.Server config.dbHost,config.dbPort,config.dbOption
 dbConnector = new mongodb.Db(config.dbName,dbServer,{safe:false})
 
-
 exports.init = (callback)->
     dbConnector.open (err,db)->
         if err or not db
@@ -176,13 +175,6 @@ exports.getSourceStatistic = (guid,callback)->
                 callback err
                 return
             callback null,{totalArchive:count,statistic:statistic}
-exports.getSourceArchives = (guid,callback)->
-    cursor = Collections.archive.find {sourceGuid:guid}
-    cursor.toArray (err,arr)->
-        if err
-            callback err
-            return
-        callback null,arr
 exports.getTagArchives = (name,callback)->
     if name is "untagged"
         cursor = Collections.source.find {$or:[{tags:{$exists:false}},{tags:{$size:0}}]}
@@ -206,7 +198,7 @@ exports.updateUnreadCount = (query = {},callback)->
         if err
             callback err
             return
-        (require "async").each arr,((source,done)->
+        (require "async").eachLimit arr,4,((source,done)->
             Collections.archive.find({sourceGuid:source.guid,hasRead:false}).count (err,count)->
 
                 Collections.source.update {_id:source._id},{$set:{unreadCount:count}},{safe:true},(err)->
@@ -346,7 +338,7 @@ exports.removeList = (listName,callback)->
         callback new Errors.InvalidParameter "invalid listname"
         return
     exports._ensureList ()=>
-        find = @archiveList.some (list,index)->
+        find = @archiveList.some (list,index)=>
             if list.name is listName
                 @archiveList.splice(index,1)
                 exports._saveLists()
@@ -418,6 +410,12 @@ exports.getShareArchiveByNodeHashes = (hashes,option = {},callback)->
         cursor.toArray (err,arr = [])->
             callback err,arr
             return
+exports.getArchiveByGuid = (guid,callback)->
+    if not guid
+        callback(null,null)
+        return
+    Collections.archive.findOne {guid:guid},(err,item)->
+        callback err,item
 exports.getCustomArchives = (query,callback)->
     # NEEEEED refactor...
     console.log "initl",query
@@ -460,21 +458,56 @@ exports.getCustomArchives = (query,callback)->
     if query.properties
         for prop of query.properties
             finalQuery[prop] = query.properties[prop]
-    cursor = Collections.archive.find finalQuery
-    cursor.limit query.limit or 200
-    cursor.skip query.offset or 0
-    if not query.sort
-        cursor.sort({createDate:-1})
-    else
-        console.log "SORT",query.sort
+    exports.getArchiveByGuid query.splitter or null,(err,item)=>
+        if err
+            callback err
+            return
+        query.sort ?= {createDate:-1}
+        if query.splitter and item
+            sortFields = Object.keys query.sort
+            for field in sortFields
+                op = null
+                # -1 => 142s 140s 135s
+                if query.sort[field] < 0
+                    op = "$lte"
+                else if query.sort[field] > 0
+                    op = "$gte"
+                action = {}
+                # we only support direct field like archive.createDate
+                # NOT nested like archive.author.name.
+
+                action[op] = item[field]
+                finalQuery[field] = action
+
+
+        cursor = Collections.archive.find finalQuery
         cursor.sort query.sort
-    # here maybe some performance issue one day
-    # but we are designed for single user
-    # so it may not be a problem here
-    items = []
-    cursor.toArray (err,arr)->
-        console.log finalQuery,err,arr and arr.length or null,"???"
-        callback err,arr
+
+        limit = query.limit or query.count or 200
+        if query.splitter
+            limit += 1
+        cursor.limit limit
+
+        cursor.skip query.offset or 0
+        console.log finalQuery,query,"DBCustom"
+        # here maybe some performance issue one day
+        # but we are designed for single user
+        # so it may not be a problem here
+        items = []
+        # to avoid some one has the createDate same with splitter
+        # to be droped, I have to $gte not $gt
+        # so I will manually filter it myself.
+        # But make count +1
+        cursor.toArray (err,arr)->
+            # remove splitter
+            console.log query.count,"and actually",
+            if query.splitter
+                for item,index in arr
+                    if item.guid is query.splitter
+                        arr.splice(index,1)
+                        break
+            console.log finalQuery,err,arr and arr.length or null,"???"
+            callback err,arr
 exports.getConfig = (name,callback)->
     Collections.clientConfig.findOne {name:name},(err,config)->
         callback err,config and config.data or null
@@ -636,5 +669,6 @@ class Friend
             ,publicKey:@publicKey.toString()
             ,_id:@keyHash
         }
+
 exports.Archive = Archive
 exports.Source = Source

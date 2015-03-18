@@ -66,17 +66,20 @@ class CollectorController extends EventEmitter
         return
     initCollector:(callback = ()-> )->
         console.log "start sync unread count"
+        @initLoadSource (err)=>
+            console.log "done init source"
+            if err
+                callback err
+            callback
+        # this one is not important
+        # I may move this piece of code to some whereelse.
         @syncUnreadCount (err)=>
             console.log "done sync unread count"
             if err
-                callback err
                 return
+#                callback err
+#                return
             console.log "start init source"
-            @initLoadSource (err)=>
-                console.log "done init source"
-                if err
-                    callback err
-                callback
 
     unsubscribe:(guid,callback)->
         @removeSource guid,callback

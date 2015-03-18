@@ -113,10 +113,10 @@ class Sybil extends (require "events").EventEmitter
     getSourceStatistic:(guid,callback)->
         Database.getSourceStatistic guid,(err,result)->
             callback err,result
-    getSourceArchives:(guid,callback)->
-        Database.getSourceArchives guid,(err,archives)=>
-            @completeArchivesMeta archives,(err,archives)=>
-                callback err,archives
+#    getSourceArchives:(guid,callback)->
+#        Database.getSourceArchives guid,(err,archives)=>
+#            @completeArchivesMeta archives,(err,archives)=>
+#                callback err,archives
     getTagArchives:(name,callback)->
         Database.getTagArchives name,(err,archives)=>
             @completeArchivesMeta archives,(err,archives)=>
@@ -202,6 +202,9 @@ class Sybil extends (require "events").EventEmitter
             @completeArchivesMeta archives or [],(err,archives)=>
                 callback err,archives
     completeArchivesMeta:(archives = [],callback)->
+        # we don't have any shares in this version.
+        callback null,archives
+        return
         links = archives.map (archive)->archive.originalLink
         Database.getShareRecordsByLinks links,(err,records)->
             if err
@@ -228,6 +231,9 @@ class Sybil extends (require "events").EventEmitter
                 @emit "friend/remove",friend
             callback err,friend
     search:(query,option,callback)->
+        # currently disable searchs
+        callback null,[]
+        return
         # search is a key feature and complicated work
         # The performance is considered as an important factor
         # thus it's hard to build seperately with database
@@ -245,6 +251,7 @@ class Sybil extends (require "events").EventEmitter
                 inurl = c.value
             if c.type is "title"
                 title = c.value
+        # rank it
         Database.getCustomArchives {viewRead:true,keywords:keywords,inurl:inurl,title:title},(err,archives)->
             # scoring
             archives.forEach (archive)->

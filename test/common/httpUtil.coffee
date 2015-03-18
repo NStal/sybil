@@ -1,3 +1,4 @@
+env = require "../../core/env"
 httpUtil = require("../../common/httpUtil.coffee")
 http = require("http")
 server = null
@@ -6,13 +7,25 @@ socksProxyUrl = "http://localhost:7070/"
 phttpProxyUrl = "phttp://nstal.me:12222/"
 before ()->
     server = http.createServer (req,res)->
+        if req.url is "/reset"
+            setTimeout ()=>
+                console.log "destroy"
+                res.destroy()
+            ,1000
+            return
         if req.url is "/timeout"
             return
         res.write("get")
         res.end()
         return
+
     server.listen 12345
 describe "basic function test",()->
+    it "test reset shouldn't abort timeout",(done)=>
+        httpUtil.httpGet {url:"http://localhost:12345/reset",timeout:2000},(err,res,content)->
+            console.log "timeout?"
+            done()
+        return
 #    it "basic http connection test",(done)->
 #        httpUtil.httpGet {url:"http://localhost:12345/abc"},(err,res,content)->
 #            console.assert content.toString() is "get"
@@ -43,12 +56,12 @@ describe "basic function test",()->
 #        httpUtil.httpGet {url:"http://www.youtube.com/",proxy:phttpProxyUrl},(err,res,content)->
 #            console.assert not err
 #            done()
-    it "test redirect",(done)->
-        httpUtil.httpGet {url:"http://g.e-hentai.org/rss/ehtracker.xml",proxy:phttpProxyUrl},(err,res,content)->
-            console.error err
-            console.assert not err
-            console.error err,content.toString().substring(0,100)
-            done()
+#    it "test redirect",(done)->
+#        httpUtil.httpGet {url:"http://g.e-hentai.org/rss/ehtracker.xml",proxy:phttpProxyUrl},(err,res,content)->
+#            console.error err
+#            console.assert not err
+#            console.error err,content.toString().substring(0,100)
+#            done()
 
 after ()->
     server.close()

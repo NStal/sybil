@@ -1,22 +1,23 @@
 <div class="archive archive-displayer" data-id="archiveDisplayer" >
   <div class="wrapper"> 
     <div class="header" data-id="header">
-      <img data-id="avatar" src="" class="avatar" alt="" />
+      <smart-image data-id="avatar" class="avatar" alt=""></smart-image>
       <a class="title" data-id="title" href="javascript:void(0)" target="_blank">
       </a>
       <br />
       
-      <span data-id="date" class="date"></span>
-      <span data-id="sourceName" class="source-name"></span>
-      <span data-id="shareInfo" class="share-info"></span>
+      <span data-id="date" class="extra date"></span>
+      <span data-id="sourceName" class="extra source-name"></span>
+      <span data-id="shareInfo" class="extra share-info"></span>
     </div>
     <div class="content" data-id="content" >
     </div>
     <div class="tool-bar">
-      <span class="tool-button fa fa-inbox read-later" data-id="readLater">read later</span>
-      <span class="tool-button fa fa-heart like" data-id="like">like</span>
-      <span class="tool-button fa fa-share share" data-id="share">share</span> 
-      <span class="tool-button fa fa-list list" data-id="list" data-text="listText">list</span>
+      <div class="tool-button mark-as-unread" data-id="keepUnread"><i class="fa fa-check"></i><span>unread</span></div>
+      <div class="tool-button read-later" data-id="readLater"><i class="fa fa-inbox"></i><span>read later</span></div>
+      <div class="tool-button like" data-id="like"><i class="fa fa-heart"></i><span>like</span></div>
+      <div class="tool-button share" data-id="share"><i class="fa fa-share"></i><span>share</span></div>
+      <div class="tool-button list" data-id="list" data-text="listText"><i class="fa fa-list"></i><span>list</span></div>
     </div>
   </div>
 </div>

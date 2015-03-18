@@ -104,7 +104,6 @@ class ImageLoader extends Leaf.EventEmitter
                 @_next()
                 return
     _load:(worker,info)->
-        console.log "_load",info.src
         worker.reserve()
         if worker.isPending()
             worker.give("giveup")
@@ -117,8 +116,8 @@ class ImageLoader extends Leaf.EventEmitter
                 @caches[info.src] = true
             else
                 @fails[info.src] = err
-            @_onWorkerIdle(worker)
             info.callback err,img
+            @_onWorkerIdle(worker)
         if info.option
             if info.option.giveup
                 worker.timeout = info.option.giveup
@@ -154,7 +153,6 @@ class ImageLoader extends Leaf.EventEmitter
                 # put the delayed job at the begin of the queue
                 delayInfo = worker.info
                 @queue.unshift(delayInfo)
-                console.log "unshift",delayInfo.src
                 worker.reset()
                 @_load(worker,info)
 

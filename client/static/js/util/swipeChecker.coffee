@@ -18,8 +18,8 @@ class SwipeChecker extends Leaf.EventEmitter
         swipeFloor = @swipeFloor or 60
         if e.touches.length is 0
             endDate = Date.now()
-
-            if endDate - @startDate < 1000
+            interval = endDate - @startDate
+            if interval < (@maxSwipeTime or 1000) and interval > (@minSwipeTime or 100)
                 if @startPoint[0] - @endPoint[0] > swipeFloor
                     @emit "swipeleft",e
                 else if @startPoint[0] - @endPoint[0] < -swipeFloor

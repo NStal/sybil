@@ -27,7 +27,6 @@ class ContextMenu extends Leaf.Widget
             X = 20
         if Y < 20
             Y = 20
-
         @node$.css({top:Y-15,left:X-10})
     hide:()->
         @node$.hide()

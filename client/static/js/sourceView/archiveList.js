@@ -56,10 +56,17 @@
       globalPreviewMode = App.userConfig.get("previewMode", false);
       infoPreviewMode = App.userConfig.get("previewModeFor" + this.archiveInfo.name, globalPreviewMode);
       this.disableMarkAsRead = true;
+      if ((this.previewMode != null) && this.previewMode === infoPreviewMode) {
+        this.disableMarkAsRead = false;
+        return;
+      }
+      this.previewMode = infoPreviewMode;
       if (infoPreviewMode) {
         this.node$.addClass("preview-mode");
+        this.emit("previewMode", true);
       } else {
         this.node$.removeClass("preview-mode");
+        this.emit("previewMode", false);
       }
       return this.disableMarkAsRead = false;
     };
@@ -69,8 +76,8 @@
       this.archiveInfo = info;
       this.UI.emptyHint$.hide();
       this.UI.loadingHint.hide();
-      this.render();
       this.archiveListController.load(info);
+      this.render();
       return this.emit("load");
     };
 
@@ -93,10 +100,6 @@
       this.UI.containerWrapper.scrollTop = 0;
       this.UI.emptyHint$.show();
       return this.UI.title$.hide();
-    };
-
-    ArchiveList.prototype.onNoMore = function() {
-      return this.UI.emptyHint$.show();
     };
 
     ArchiveList.prototype.onClickMarkAllAsRead = function() {
@@ -161,13 +164,25 @@
       ArchiveListItem.__super__.constructor.call(this, App.templates.sourceView.archiveListItem);
       this.setArchive(archive);
       this.isShown = true;
-      this.node$.find("img").on("load", (function(_this) {
+      if (!App.isMobile) {
+        this.node$.addClass("rich");
+      }
+      this.node.addEventListener("overflowchanged", (function(_this) {
         return function() {
-          _this.sizeDirty = true;
-          return _this.emit("resize");
+          return _this.onResize();
+        };
+      })(this));
+      this.node.addEventListener("scroll", (function(_this) {
+        return function() {
+          return _this.onResize();
         };
       })(this));
     }
+
+    ArchiveListItem.prototype.onResize = function() {
+      this.sizeDirty = true;
+      return this.emit("resize");
+    };
 
     ArchiveListItem.prototype.onClickContent = function() {
       if (this.lockRead) {
@@ -188,16 +203,25 @@
     ArchiveListItem.prototype.onClickHeader = function(e) {
       this.node$.toggleClass("collapse");
       this.resize();
-      return this.markAsRead();
+      this.onResize();
+      this.markAsRead();
+      this.node$.css({
+        height: "auto"
+      });
+      return this.onResize();
     };
 
     ArchiveListItem.prototype.resize = function() {
       this.size = {
         width: this.node$.outerWidth(),
-        height: this.node$.outerHeight()
+        height: this.node.scrollHeight + 2
       };
       this.sizeDirty = false;
-      return this.node.setAttribute("size-info", JSON.stringify(this.size));
+      this.node.setAttribute("size-info", JSON.stringify(this.size));
+      return this.node$.css({
+        overflow: "auto",
+        height: this.size.height
+      });
     };
 
     ArchiveListItem.prototype.setPosition = function(pos) {
@@ -285,15 +309,12 @@
         this.render();
         return;
       }
-      console.debug("mark as unread");
       return this.archive.markAsUnread((function(_this) {
         return function(err) {
           if (err) {
             console.error(err);
             return;
           }
-          console.debug("mark as unread done->render");
-          console.debug(_this.lockRead, _this.archive.hasRead, "is the state");
           return _this.render();
         };
       })(this));
@@ -310,8 +331,8 @@
 
     function ArchiveListController(archiveList) {
       ArchiveListController.__super__.constructor.call(this, App.templates.sourceView.archiveListController);
-      this.archiveList = archiveList;
-      this.formatter = new ArchiveListFormatter(this.archiveList, this);
+      this.context = archiveList;
+      this.formatter = new ArchiveListFormatter(this.context, this);
       this.swipeChecker = new SwipeChecker(this.node);
       this.swipeChecker.on("swipeleft", (function(_this) {
         return function(e) {
@@ -325,17 +346,44 @@
           return _this.node$.removeClass("left-mode");
         };
       })(this));
-      this.archiveList.scrollChecker.listenBy(this, "scroll", (function(_this) {
+      this.context.scrollChecker.listenBy(this, "scroll", (function(_this) {
         return function() {
+          var index, visible;
           _this.formatter.updateFocus();
-          _this.formatter.reflowAfter(_this.formatter.getFirstVisible());
+          visible = _this.formatter.getFirstVisible();
+          if (visible) {
+            index = visible.index || 0;
+          }
+          index -= 20;
+          if (index < 0) {
+            index = 0;
+          }
+          _this.formatter.reflowAfter(index);
           _this.checkLoadMore();
-          if (!_this.archiveList.disableMarkAsRead) {
+          if (!_this.context.disableMarkAsRead) {
             return _this.markAsReadBeforeFocus();
           }
         };
       })(this));
       this.archiveBuffer = new BufferedEndlessArchiveLoader();
+      this.archiveBuffer.on("startLoading", (function(_this) {
+        return function() {
+          console.debug("startLoading");
+          if (!_this.archiveBuffer.isDrain()) {
+            _this.context.UI.loadingHint$.show();
+            return _this.context.UI.emptyHint$.hide();
+          }
+        };
+      })(this));
+      this.archiveBuffer.on("endLoading", (function(_this) {
+        return function() {
+          console.debug("endLoading...");
+          _this.context.UI.loadingHint$.hide();
+          if (_this.archiveBuffer.isDrain()) {
+            return _this.context.UI.emptyHint$.show();
+          }
+        };
+      })(this));
       this.formatter.on("focus", (function(_this) {
         return function(focus) {
           if (focus === _this.currentFocus) {
@@ -356,44 +404,55 @@
     }
 
     ArchiveListController.prototype.load = function(info) {
+      this.context.UI.container$.css({
+        minHeight: "0px"
+      });
       this.isLoading = false;
       this.archiveInfo = info;
       this.archiveBuffer.reset();
+      this.context.UI.emptyHint$.hide();
       this.archiveBuffer.init({
         query: {
           sourceGuids: this.archiveInfo.sourceGuids
         },
-        sort: this.archiveList.sort,
-        viewRead: this.archiveList.viewRead
+        sort: this.context.sort,
+        viewRead: this.context.viewRead
       });
-      this.archiveList.archiveListItems.length = 0;
+      this.context.archiveListItems.length = 0;
       return this.checkLoadMore();
     };
 
     ArchiveListController.prototype.checkLoadMore = function() {
-      var last;
+      var last, renderBufferSize;
       if (this.isLoading) {
         return;
       }
       if (this.archiveBuffer.isDrain()) {
+        this.context.UI.emptyHint$.show();
         return;
       }
       last = this.formatter.getLastVisible();
-      if (last && this.formatter.length() - last.index > 2) {
+      renderBufferSize = 3;
+      if (last && this.formatter.length() - last.index > renderBufferSize) {
         this.formatter.updateFocus();
         return;
       }
       this.isLoading = true;
       return this.archiveBuffer.oneMore((function(_this) {
         return function(err, item) {
-          console.log("one more");
           _this.isLoading = false;
           if (err) {
+            _this.context.UI.loadingHint$.hide();
             console.error(err);
             return;
           }
+          console.debug("checkLoadMoreItem", err, item);
           if (!item) {
-            _this.archiveBuffer.isDrain();
+            console.debug("NO MORE");
+          }
+          if (!item) {
+            _this.context.UI.emptyHint$.show();
+            _this.context.UI.loadingHint$.hide();
             return;
           }
           _this.formatter.appendArchive(item);
@@ -428,20 +487,20 @@
       fixLine = this.formatter.getFixLine();
       padding = 5;
       if (item.size.height > fixLine - top) {
-        return this.archiveList.UI.containerWrapper.scrollTop = item.position - padding;
+        return this.context.UI.containerWrapper.scrollTop = item.position - padding;
       } else {
         console.log("fix");
         fix = (fixLine - top) - item.size.height / 2;
-        return this.archiveList.UI.containerWrapper.scrollTop = item.position - fix - padding;
+        return this.context.UI.containerWrapper.scrollTop = item.position - fix - padding;
       }
     };
 
     ArchiveListController.prototype.scrollTo = function(top) {
-      return this.archiveList.UI.containerWrapper.scrollTop = top;
+      return this.context.UI.containerWrapper.scrollTop = top;
     };
 
     ArchiveListController.prototype.getScrollTop = function() {
-      return this.archiveList.UI.containerWrapper.scrollTop;
+      return this.context.UI.containerWrapper.scrollTop;
     };
 
     ArchiveListController.prototype.onClickExpandOption = function() {
@@ -480,13 +539,15 @@
     ArchiveListController.prototype.onClickNext = function() {
       var next;
       if (this.currentFocus === this.formatter.last()) {
-        this.archiveList.UI.containerWrapper.scrollTop = this.currentFocus.node.offsetTop + this.getFocus().node.offsetHeight;
+        this.context.UI.containerWrapper.scrollTop = this.currentFocus.node.offsetTop + this.getFocus().node.offsetHeight;
         return;
       }
       next = this.formatter.at(this.currentFocus.index + 1);
       if (next) {
         console.log("scroll to", next.index, "from", this.currentFocus.index);
         return this.scrollToItem(next);
+      } else {
+        return App.toast("No more : )");
       }
     };
 
@@ -497,11 +558,11 @@
       }
       this.scrollToItem(this.currentFocus);
       bottom = this.currentFocus.node.offsetTop + this.currentFocus.node.offsetHeight;
-      top = this.archiveList.UI.containerWrapper.scrollTop;
-      height = this.archiveList.UI.containerWrapper$.height();
+      top = this.context.UI.containerWrapper.scrollTop;
+      height = this.context.UI.containerWrapper$.height();
       if (bottom > top + height) {
         forward = bottom - (top + height);
-        return this.archiveList.UI.containerWrapper.scrollTop += forward;
+        return this.context.UI.containerWrapper.scrollTop += forward;
       }
     };
 
@@ -549,6 +610,22 @@
           return child.stopListenBy(_this);
         };
       })(this));
+      this.context.on("previewMode", (function(_this) {
+        return function(preview) {
+          var item, _i, _len, _ref;
+          _ref = _this.context.archiveListItems;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            item = _ref[_i];
+            item.node$.css({
+              height: "auto"
+            });
+            item.sizeDirty = true;
+          }
+          if (_this.context.archiveListItems.length > 0) {
+            return _this.reflowAfter(0);
+          }
+        };
+      })(this));
     }
 
     ArchiveListFormatter.prototype.appendArchive = function(archive) {
@@ -559,7 +636,7 @@
       item.node$.css({
         width: "100%",
         position: "absolute",
-        zIndex: item.index
+        zIndex: item.index / 1000
       });
       prev = this.context.archiveListItems[item.index - 1];
       if (prev) {
@@ -569,6 +646,9 @@
       }
       this.context.archiveListItems.push(item);
       item.resize();
+      this.context.UI.container$.css({
+        minHeight: item.getNextPosition()
+      });
       _ref = this.getViewPort(), top = _ref[0], bottom = _ref[1];
       if (item.getPosition() > bottom) {
         return item.hide();
@@ -633,7 +713,9 @@
       if (this.currentFocus == null) {
         this.currentFocus = this.last();
       }
-      this.emit("focus", this.currentFocus);
+      if (this.currentFocus) {
+        this.emit("focus", this.currentFocus);
+      }
       return this.currentFocus;
     };
 
@@ -656,7 +738,7 @@
     };
 
     ArchiveListFormatter.prototype.reflowAfter = function(item) {
-      var after, bottom, current, dim, firstVisible, height, index, max, prev, top, _i, _ref, _ref1;
+      var after, bottom, current, dim, firstVisible, height, index, lastShow, max, prev, renderBufferSize, top, _i, _ref, _ref1;
       this.saveRelativeLocation();
       firstVisible = null;
       if (item instanceof ArchiveListItem) {
@@ -671,6 +753,7 @@
       }
       _ref = this.getViewPort(), top = _ref[0], bottom = _ref[1];
       height = bottom - top;
+      lastShow = null;
       for (index = _i = after, _ref1 = this.context.archiveListItems.length; after <= _ref1 ? _i < _ref1 : _i > _ref1; index = after <= _ref1 ? ++_i : --_i) {
         prev = this.at(index - 1);
         current = this.at(index);
@@ -689,21 +772,27 @@
           }
         }
         dim = [current.getPosition, current.getPosition() + current.size.height];
+        renderBufferSize = 2;
         if (this.inViewPort(current, {
-          expand: height
+          expand: 600
         })) {
+          lastShow = current.index;
           if (!current.isShown) {
             current.show();
             if (firstVisible == null) {
               firstVisible = current;
             }
           }
+        } else if (typeof lastShow === "number" && current.index - lastShow < renderBufferSize) {
+          if (!current.isShown) {
+            current.show();
+          }
         } else if (current.isShown) {
           current.hide();
         }
       }
       if (this.last()) {
-        max = this.last().size.height + this.last().getPosition() + 200;
+        max = this.last().size.height + this.last().getPosition() + 80;
         this.context.UI.container$.css({
           minHeight: max
         });
@@ -716,6 +805,7 @@
 
     ArchiveListFormatter.prototype.saveRelativeLocation = function() {
       var item, offset;
+      return;
       item = this.updateFocus();
       offset = this.controller.getScrollTop() - item.getPosition();
       return this._relativeLocation = {
@@ -726,6 +816,7 @@
 
     ArchiveListFormatter.prototype.restoreRelativeLocation = function() {
       var dest;
+      return;
       if (!this._relativeLocation) {
         return;
       }
@@ -762,14 +853,14 @@
   SourceUpdateChecker = (function(_super) {
     __extends(SourceUpdateChecker, _super);
 
-    function SourceUpdateChecker(archiveList) {
-      this.archiveList = archiveList;
-      SourceUpdateChecker.__super__.constructor.call(this, this.archiveList.UI.refreshHint);
+    function SourceUpdateChecker(context) {
+      this.context = context;
+      SourceUpdateChecker.__super__.constructor.call(this, this.context.UI.refreshHint);
       this.init();
     }
 
-    SourceUpdateChecker.prototype.onClickRefreshHint = function() {
-      return this.load(this.archiveInfo);
+    SourceUpdateChecker.prototype.onClickNode = function() {
+      return this.context.load(this.context.archiveInfo);
     };
 
     SourceUpdateChecker.prototype.onClickHideRefreshHint = function(e) {
@@ -780,7 +871,7 @@
     };
 
     SourceUpdateChecker.prototype.init = function() {
-      this.archiveList.on("load", (function(_this) {
+      this.context.on("load", (function(_this) {
         return function() {
           return _this.hideUpdateHint();
         };
@@ -788,7 +879,7 @@
       return App.modelSyncManager.on("archive", (function(_this) {
         return function(archive) {
           var _ref;
-          if (_this.archiveList.archiveInfo && (_ref = archive.sourceGuid, __indexOf.call(_this.archiveList.archiveInfo.sourceGuids, _ref) >= 0)) {
+          if (_this.context.archiveInfo && (_ref = archive.sourceGuid, __indexOf.call(_this.context.archiveInfo.sourceGuids, _ref) >= 0)) {
             return _this.showUpdateHint();
           }
         };
@@ -799,7 +890,7 @@
       if (this.refreshHintShowInterval == null) {
         this.refreshHintShowInterval = 1000 * 15;
       }
-      this.archiveList.UI.refreshHint$.addClass("show");
+      this.context.UI.refreshHint$.addClass("show");
       if (this._updateHintTimer) {
         this._updateHintTimer = null;
         clearTimeout(this._updateHintTimer);
