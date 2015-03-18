@@ -2092,16 +2092,20 @@ html * {
   top: 44px;
   left: 0;
   width: 300px;
-  height: autopx;
-  max-height: 0px;
+  height: auto;
   overflow: hidden;
   border-radius: 0 0 5px 0;
-  transform: translateZ(0);
-  transition: max-height 100ms ease;
-  -moz-transition: max-height 100ms ease;
-  -webkit-transition: max-height 100ms ease;
-  -o-transition: max-height 100ms ease;
+  transform: translateX(-200px);
+  opacity: 0;
+  transition: all 300ms ease;
+  -moz-transition: all 300ms ease;
+  -webkit-transition: all 300ms ease;
+  -o-transition: all 300ms ease;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
+}
+.view-switcher .view-selector.show {
+  transform: translateX(0);
+  opacity: 1;
 }
 .view-switcher .view-selector li {
   cursor: pointer;

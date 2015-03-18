@@ -48,6 +48,7 @@
       this.currentView = null;
       this.viewItems = [];
       this.hideListener = this.hideListener.bind(this);
+      this.hide();
     }
 
     ViewSwitcher.prototype.switchTo = function(name) {
@@ -72,7 +73,7 @@
           oldView.onSwitchOff();
         }
         view.show();
-        this.UI.title$.text(name);
+        this.VM.title = name;
         if (view.onSwitchTo) {
           view.onSwitchTo();
         }
@@ -104,21 +105,15 @@
     ViewSwitcher.prototype.show = function() {
       window.addEventListener("click", this.hideListener);
       this.isShow = true;
-      this.UI.viewSelector$.css({
-        "max-height": "" + (this.viewItems.length * 80) + "px"
-      });
-      this.UI.directionIcon$.removeClass("fa-caret-right");
-      return this.UI.directionIcon$.addClass("fa-caret-down");
+      this.VM.showSelector = true;
+      return this.VM.caretClass = "fa-caret-down";
     };
 
     ViewSwitcher.prototype.hide = function() {
       window.removeEventListener("click", this.hideListener);
       this.isShow = false;
-      this.UI.viewSelector$.css({
-        "max-height": 0
-      });
-      this.UI.directionIcon$.addClass("fa-caret-right");
-      return this.UI.directionIcon$.removeClass("fa-caret-down");
+      this.VM.showSelector = false;
+      return this.VM.caretClass = "fa-caret-right";
     };
 
     ViewSwitcher.prototype.syncViews = function() {

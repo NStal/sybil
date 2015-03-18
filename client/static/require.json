@@ -33,7 +33,7 @@
             },
             {
                 "path": "main.js",
-                "hash": "a93433"
+                "hash": "bd81bf"
             },
             {
                 "path": "mobile.js",
@@ -89,7 +89,7 @@
             },
             {
                 "path": "view.js",
-                "hash": "8f84f2"
+                "hash": "9760b8"
             },
             {
                 "path": "viewSwitcher.js",
@@ -247,5 +247,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": ".62"
+    "version": ".80"
 }

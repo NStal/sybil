@@ -24,6 +24,7 @@ class ViewSwitcher extends Leaf.Widget
         @currentView = null
         @viewItems = []
         @hideListener = @hideListener.bind(this)
+        @hide()
     switchTo:(name)->
         has = false
         for view in View.views when view.name is name
@@ -33,11 +34,11 @@ class ViewSwitcher extends Leaf.Widget
                 @currentView.hide()
             oldView = @currentView
             @emit "viewChange",view
-            @currentView = view 
+            @currentView = view
             if oldView and oldView.onSwitchOff
                 oldView.onSwitchOff()
             view.show()
-            @UI.title$.text(name)
+            @VM.title = name
             if view.onSwitchTo
                 view.onSwitchTo()
             return
@@ -61,15 +62,13 @@ class ViewSwitcher extends Leaf.Widget
         @isShow = true
         # actually height is still controlled by css
         # 80px max height per item is generall more than the per item height
-        @UI.viewSelector$.css({"max-height":"#{@viewItems.length * 80}px"});
-        @UI.directionIcon$.removeClass("fa-caret-right")
-        @UI.directionIcon$.addClass("fa-caret-down")
+        @VM.showSelector = true
+        @VM.caretClass = "fa-caret-down"
     hide:()->
         window.removeEventListener "click",@hideListener
         @isShow = false
-        @UI.viewSelector$.css({"max-height":0});
-        @UI.directionIcon$.addClass("fa-caret-right") 
-        @UI.directionIcon$.removeClass("fa-caret-down")
+        @VM.showSelector = false
+        @VM.caretClass = "fa-caret-right"
     syncViews:()->
         # Do a complete sync with View.views an @viewItems
         # They are different data type so sync take some steps

@@ -140,16 +140,9 @@
     console.debug("start tm");
     App.templateManager.on("ready", function(templates) {
       App.templates = templates;
-      App.init();
-      return App.toast("just toast a message");
+      return App.init();
     });
     return require("test");
   });
-
-  window.onclick = (function(_this) {
-    return function() {
-      return App.toast("???????+" + (Math.random()));
-    };
-  })(this);
 
 }).call(this);

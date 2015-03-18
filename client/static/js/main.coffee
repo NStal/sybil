@@ -123,8 +123,4 @@ $ ()->
     App.templateManager.on "ready",(templates)->
         App.templates = templates
         App.init()
-        App.toast "just toast a message"
     require "test"
-
-window.onclick = ()=>
-    App.toast "???????+#{Math.random()}"

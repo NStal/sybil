@@ -70,12 +70,16 @@ html *{
         top:@header-height;
         left:0;
         width:300px;
-        height:autopx;
-        max-height:0px;
+        height:auto;
         overflow:hidden;
         border-radius:0 0 5px 0;
-        transform: translateZ(0);
-        .transition(max-height,100ms); 
+        transform: translateX(-200px);
+        opacity:0;
+        &.show{
+            transform: translateX(0);
+            opacity:1;
+        }
+        .transition(all,300ms);
         .light-shadow;
         li{
             .clickable;
