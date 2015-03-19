@@ -1,10 +1,10 @@
 pathModule = require "path"
 
 global.env = global.env || {}
-global.env.logger = require "../common/logger.coffee"
+global.env.logger = require "../common/logger"
 global.env.logger.setRoot pathModule.resolve __dirname,"../"
-global.env.settings = require "../settings.coffee"
-global.env.httpUtil = require "../common/httpUtil.coffee"
+global.env.settings = require "../settings"
+global.env.httpUtil = require "../common/httpUtil"
 pathModule = require "path"
 root = pathModule.resolve __filename,"../../"
 global.env.root = root

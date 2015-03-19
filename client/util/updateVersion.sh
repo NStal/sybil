@@ -8,7 +8,8 @@ while read type value; do
   esac
 done < version
 
-
+#echo "fail to update version no main specified"
+[ -z "$main" ] && exit 1
 sub=$(( $sub + 1 ))
 echo main $main > version
 echo sub $sub >> version 

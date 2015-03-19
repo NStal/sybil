@@ -95,10 +95,10 @@ class ViewSwitcher extends Leaf.Widget
         viewItem.on "select",()=>
             @switchTo viewItem.name
             @hide()
-    onClickAddSourceButton:()->
-        App.addSourcePopup.show()
-    onClickSettingButton:()->
-        App.settingPanel.show()
+#    onClickAddSourceButton:()->
+#        App.addSourcePopup.show()
+#    onClickSettingButton:()->
+#        App.settingPanel.show()
 
 class ViewSelectItem extends Leaf.Widget
     constructor:(@name)->

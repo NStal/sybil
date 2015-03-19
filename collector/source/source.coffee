@@ -1,10 +1,10 @@
-Initializer = require "./initializer.coffee"
+Initializer = require "./initializer"
 
-Updater = require "./updater.coffee"
-Authorizer = require "./authorizer.coffee"
-Errors = require "./errors.coffee"
+Updater = require "./updater"
+Authorizer = require "./authorizer"
+Errors = require "./errors"
 EventEmitter = (require "events").EventEmitter
-States = sybilRequire "common/states.coffee"
+States = sybilRequire "common/states"
 console = console = env.logger.create __filename
 # Network is complicated and standards are so powerless in the real world.
 # When it comes to a crawler, the difficulty doubles for me to build

@@ -2095,8 +2095,9 @@ html * {
   height: auto;
   overflow: hidden;
   border-radius: 0 0 5px 0;
-  transform: translateX(-200px);
+  transform: translateX(-240px);
   opacity: 0;
+  pointer-events: none;
   transition: all 300ms ease;
   -moz-transition: all 300ms ease;
   -webkit-transition: all 300ms ease;
@@ -2106,6 +2107,7 @@ html * {
 .view-switcher .view-selector.show {
   transform: translateX(0);
   opacity: 1;
+  pointer-events: auto;
 }
 .view-switcher .view-selector li {
   cursor: pointer;

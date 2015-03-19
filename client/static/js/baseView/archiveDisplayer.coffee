@@ -3,9 +3,11 @@ moment = require "/lib/moment"
 App = require "/app"
 Model = require "/model"
 SmartImage = require "/widget/smartImage"
+ContentImage = require "/widget/contentImage"
 tm = require "/templateManager"
 class ArchiveDisplayer extends Leaf.Widget
     constructor:(template)->
+        @include ContentImage
         @include SmartImage
         super template
         @useDisplayContent = true
@@ -86,29 +88,24 @@ class ArchiveDisplayer extends Leaf.Widget
                 return
             # try have resource proxy set.
             forceProxy = App.userConfig.get "enableResourceProxy/#{@archive.sourceGuid}"
-            if App.userConfig.get("enableResourceProxy") or forceProxy
-                if not App.userConfig.get("useResourceProxyByDefault") and not forceProxy
-                    # replace on error
-                    @UI.content$.html (sanitizer.sanitize(toDisplay))
-                    @UI.content$.find("img").each ()->
-                        @useProxy = false
-                        @onerror = ()=>
-                            if @userProxy
-                                return
-                            @useProxy = true
-                            url = @getAttribute "src"
-                            if url.indexOf("/remoteResource")>=0
-                                return
-                            if url.indexOf("file://") >= 0
-                                return
-                            $(this).attr("src","/remoteResource?url=#{encodeURIComponent(url)}&referer=#{originalLink}")
-                else
-                    content = document.createElement("div")
-                    content.innerHTML = (sanitizer.sanitize(toDisplay))
-                    $(content).find("img").each ()->
-                        url = @getAttribute "src"
-                        $(this).attr("src","/remoteResource?url=#{encodeURIComponent(url)}&referer=#{originalLink}")
-                    @UI.content$.html content.innerHTML
+            if (App.userConfig.get("enableResourceProxy") or forceProxy) and App.userConfig.get("useResourceProxyByDefault")
+                content = document.createElement("div")
+                content.innerHTML = (sanitizer.sanitize(toDisplay))
+                $(content).find("img").each ()->
+                    img = this
+                    contentImage = @namespace.createWidgetByElement(elem,"ContentImage")
+                    if contentImage
+                        contentImage.replace(img)
+                        img.removeAttribute("src")
+                        img = contentImage.node
+                    else
+                        console.log @namespace.scope
+                        console.error "no content image"
+
+# setup proxy
+#                    url = @getAttribute "src"
+#                    $(this).attr("src","/remoteResource?url=#{encodeURIComponent(url)}&referer=#{originalLink}")
+                @UI.content$.html content.innerHTML
             else
                 @UI.content$.html(sanitizer.sanitize(toDisplay))
             @UI.content$.find("a").each ()->

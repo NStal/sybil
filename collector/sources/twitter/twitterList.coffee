@@ -1,9 +1,9 @@
 cheerio = require "cheerio"
-Source = require "../../source/source.coffee"
+Source = require "../../source/source"
 urlModule = require "url"
 EventEmitter = (require "events").EventEmitter
 http = require "http"
-twitterUtil = require "./twitterUtil.coffee"
+twitterUtil = require "./twitterUtil"
 ErrorDoc = require "error-doc"
 console = console = env.logger.create __filename
 Errors =  Source.Errors

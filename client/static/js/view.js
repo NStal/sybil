@@ -158,14 +158,6 @@
       })(this));
     };
 
-    ViewSwitcher.prototype.onClickAddSourceButton = function() {
-      return App.addSourcePopup.show();
-    };
-
-    ViewSwitcher.prototype.onClickSettingButton = function() {
-      return App.settingPanel.show();
-    };
-
     return ViewSwitcher;
 
   })(Leaf.Widget);

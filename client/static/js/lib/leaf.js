@@ -1455,9 +1455,9 @@
       return extra.join(",");
     };
 
-    Namespace.prototype.createWidgetByElement = function(elem) {
-      var Constructor, attr, name, param, widget, _i, _j, _len, _len1, _ref, _ref1;
-      name = Util.capitalize(Util.slugToCamel(elem.tagName.toLowerCase()));
+    Namespace.prototype.createWidgetByElement = function(elem, name) {
+      var Constructor, attr, param, widget, _i, _j, _len, _len1, _ref, _ref1;
+      name = Util.capitalize(Util.slugToCamel(name || elem.tagName.toLowerCase()));
       Constructor = this.scope[name];
       if (!Constructor) {
         return null;
@@ -1547,6 +1547,7 @@
           tempNode = document.createElement("div");
           tempNode.innerHTML = template.trim();
           this.node = tempNode.children[0];
+          tempNode.removeChild(this.node);
         }
       } else if (Util.isHTMLNode(template)) {
         this.node = template;
@@ -1626,7 +1627,7 @@
     };
 
     Widget.prototype.initSubWidgets = function() {
-      var attr, elem, elems, name, selector, widget, _i, _j, _len, _len1, _ref, _results;
+      var elem, elems, selector, _i, _len, _results;
       if (this.namespace) {
         selector = this.namespace.getQuerySelector("widget");
       } else {
@@ -1637,30 +1638,33 @@
       _results = [];
       for (_i = 0, _len = elems.length; _i < _len; _i++) {
         elem = elems[_i];
-        name = elem.dataset.widget;
-        widget = (this[name] instanceof Widget) && this[name] || this.namespace.createWidgetByElement(elem);
-        if (!widget) {
-          console.warn("" + elem.tagName + " has name " + name + " but no widget nor no namespace present for it.");
-          continue;
-        }
-        widget.replace(elem);
-        if (this[name] === widget) {
-          _ref = elem.attributes;
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            attr = _ref[_j];
-            widget.node.setAttribute(attr.name, attr.value);
-          }
-        }
-        if ((name != null) && (this[name] == null)) {
-          this[name] = widget;
-        }
-        if (elem.dataset.id) {
-          _results.push(this._bindUI(widget.node, elem.dataset.id));
-        } else {
-          _results.push(void 0);
-        }
+        _results.push(this.initSubWidget(elem));
       }
       return _results;
+    };
+
+    Widget.prototype.initSubWidget = function(elem) {
+      var attr, name, widget, _i, _len, _ref;
+      name = elem.dataset.widget;
+      widget = (this[name] instanceof Widget) && this[name] || this.namespace.createWidgetByElement(elem);
+      if (!widget) {
+        console.warn("" + elem.tagName + " has name " + name + " but no widget nor no namespace present for it.");
+        return;
+      }
+      widget.replace(elem);
+      if (this[name] === widget) {
+        _ref = elem.attributes;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          attr = _ref[_i];
+          widget.node.setAttribute(attr.name, attr.value);
+        }
+      }
+      if ((name != null) && (this[name] == null)) {
+        this[name] = widget;
+      }
+      if (elem.dataset.id) {
+        return this._bindUI(widget.node, elem.dataset.id);
+      }
     };
 
     Widget.prototype.initUI = function() {

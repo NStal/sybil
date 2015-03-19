@@ -89,7 +89,7 @@
             },
             {
                 "path": "view.js",
-                "hash": "9760b8"
+                "hash": "34a913"
             },
             {
                 "path": "viewSwitcher.js",
@@ -97,7 +97,7 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "89ee4a"
+                "hash": "bc3984"
             },
             {
                 "path": "lib/async.js",
@@ -228,6 +228,10 @@
                 "hash": "ed8528"
             },
             {
+                "path": "widget/contentImage.js",
+                "hash": "e44c1e"
+            },
+            {
                 "path": "widget/contextMenu.js",
                 "hash": "6e8766"
             },
@@ -247,5 +251,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": ".80"
+    "version": "0.3.0.416"
 }
