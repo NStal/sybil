@@ -286,7 +286,9 @@ class ArchiveListController extends Leaf.Widget
             @formatter.updateFocus()
             return
         @isLoading = true
+        console.debug "start loading onemore"
         @archiveBuffer.oneMore (err,item)=>
+            console.debug err,item,"ONEMORE"
             @isLoading = false
             if err
                 @context.UI.loadingHint$.hide()

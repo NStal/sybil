@@ -2033,6 +2033,15 @@ html {
   border-radius: initial;
   background-color: none;
 }
+.ghost-scroll ::-webkit-scrollbar {
+  width: 0px;
+}
+.ghost-scroll ::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0);
+}
+.ghost-scroll ::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0);
+}
 .source-view .source-list {
   padding-top: 44px;
   position: absolute;

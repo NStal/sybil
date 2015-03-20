@@ -59,6 +59,9 @@
       start = this.data.cursor;
       this.data.cursor += count;
       archives = this.data.archives.slice(start, start + count);
+      if (this.data.archives.length - this.data.cursor < this.bufferSize) {
+        this._ensureLoadingState();
+      }
       callback(null, archives);
       if (this.isDrain()) {
         return this.emit("drain");
@@ -85,31 +88,25 @@
 
     BufferedEndlessArchiveLoader.prototype._bufferMore = function(callback) {
       var _ref;
+      if (callback == null) {
+        callback = function() {};
+      }
       if (this.data.archives.length - this.data.cursor > this.bufferSize) {
         callback();
         return;
       }
+      if ((_ref = this.state) === "loading" || _ref === "pause" || _ref === "void") {
+        this.emit("startLoading");
+      }
+      this._ensureLoadingState();
       if (this.state === "drain") {
         this.emit("endLoading");
         callback();
         return;
       }
-      if (this.state === "panic") {
-        this.recover();
-        this.setState("loading");
-      }
-      if ((_ref = this.state) === "loading" || _ref === "pause" || _ref === "void") {
-        this.emit("startLoading");
-      }
-      if (this.state === "pause") {
-        this.give("continue");
-      } else if (this.state === "void") {
-        this.setState("loading");
-      } else if (this.state === "loading") {
-        true;
-      }
       return this.once("loadend", (function(_this) {
         return function(err) {
+          console.log("loadend", _this.data.archives);
           if (err instanceof Errors.Drained) {
             callback();
             return;
@@ -118,6 +115,19 @@
           return callback(err);
         };
       })(this));
+    };
+
+    BufferedEndlessArchiveLoader.prototype._ensureLoadingState = function() {
+      if (this.state === "panic") {
+        this.recover();
+        return this.setState("loading");
+      } else if (this.state === "pause") {
+        return this.give("continue");
+      } else if (this.state === "void") {
+        return this.setState("loading");
+      } else if (this.state === "loading") {
+        return true;
+      }
     };
 
     BufferedEndlessArchiveLoader.prototype.atPanic = function() {
@@ -145,7 +155,6 @@
       return Model.Archive.getByCustom(option, (function(_this) {
         return function(err, archives) {
           var archive, _i, _len, _ref;
-          console.debug(archives);
           if (_this.stale(sole)) {
             return;
           }

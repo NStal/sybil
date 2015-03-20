@@ -36,6 +36,8 @@ class BufferedEndlessArchiveLoader extends Leaf.States
         start = @data.cursor
         @data.cursor += count
         archives = @data.archives.slice(start,start+count)
+        if @data.archives.length - @data.cursor < @bufferSize
+            @_ensureLoadingState()
         callback null,archives
         # though user can decide drain by herself.
         if @isDrain()
@@ -51,32 +53,35 @@ class BufferedEndlessArchiveLoader extends Leaf.States
             callback(null,archives[0])
     isDrain:()->
         return @data.drain and @data.cursor >= @data.archives.length
-    _bufferMore:(callback)->
+    _bufferMore:(callback = ()->)->
         if @data.archives.length - @data.cursor >  @bufferSize
             callback()
             return
+        if @state in ["loading","pause","void"]
+            @emit "startLoading"
+        @_ensureLoadingState()
         if @state is "drain"
             @emit "endLoading"
             callback()
             return
+        @once "loadend",(err)=>
+            console.log "loadend",@data.archives
+            if err instanceof Errors.Drained
+                callback()
+                return
+            @emit "endLoading"
+            callback err
+    _ensureLoadingState:()->
         if @state is "panic"
             @recover()
             @setState "loading"
-        if @state in ["loading","pause","void"]
-            @emit "startLoading"
-        if @state is "pause"
+        else if @state is "pause"
             @give "continue"
         else if @state is "void"
             @setState "loading"
         else if @state is "loading"
             # do nothing
             true
-        @once "loadend",(err)=>
-            if err instanceof Errors.Drained
-                callback()
-                return
-            @emit "endLoading"
-            callback err
     atPanic:()->
         if @panicState is "loading"
             @emit "loadend"
@@ -94,7 +99,6 @@ class BufferedEndlessArchiveLoader extends Leaf.States
         for prop of @query or {}
             option[prop] = @query[prop]
         Model.Archive.getByCustom option,(err,archives)=>
-            console.debug archives
             if @stale sole
                 return
             if err

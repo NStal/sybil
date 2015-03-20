@@ -28,6 +28,16 @@
 
   App = require("./app");
 
+  App.lastVersion = window.localStorage.getItem("sybilVersion") || "0.0.0";
+
+  if (App.lastVersion !== window.SybilMainContext.version) {
+    App.requireUpdate = true;
+    App.lastVersion = window.SybilMainContext.version;
+    window.localStorage.setItem("sybilVersion", App.lastVersion || "0.0.0");
+  }
+
+  window.App = App;
+
   require("/enhancement");
 
   App.connect = function() {
@@ -121,7 +131,11 @@
 
   App.templateManager = require("templateManager");
 
+  App.tm = App.templateManager;
+
   App.messageCenter = new (require("util/messageCenter"));
+
+  App.mc = App.messageCenter;
 
   App.connectionManager = new (require("connectionManager"));
 

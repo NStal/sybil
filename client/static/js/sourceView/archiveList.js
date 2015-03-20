@@ -438,8 +438,10 @@
         return;
       }
       this.isLoading = true;
+      console.debug("start loading onemore");
       return this.archiveBuffer.oneMore((function(_this) {
         return function(err, item) {
+          console.debug(err, item, "ONEMORE");
           _this.isLoading = false;
           if (err) {
             _this.context.UI.loadingHint$.hide();

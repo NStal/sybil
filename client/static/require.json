@@ -33,7 +33,7 @@
             },
             {
                 "path": "main.js",
-                "hash": "bd81bf"
+                "hash": "aef095"
             },
             {
                 "path": "mobile.js",
@@ -133,7 +133,7 @@
             },
             {
                 "path": "procedure/bufferedEndlessArchiveLoader.js",
-                "hash": "c98ee0"
+                "hash": "89d1d5"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
@@ -165,7 +165,7 @@
             },
             {
                 "path": "sourceView/archiveList.js",
-                "hash": "1c13de"
+                "hash": "e48321"
             },
             {
                 "path": "sourceView/sourceDetail.js",
@@ -251,5 +251,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.416"
+    "version": "0.3.0.12"
 }

@@ -21,7 +21,13 @@ Toaster = require "/view/toaster"
 
 
 App = require("./app")
+App.lastVersion = window.localStorage.getItem("sybilVersion") or "0.0.0"
+if App.lastVersion isnt window.SybilMainContext.version
+    App.requireUpdate = true
+    App.lastVersion = window.SybilMainContext.version
+    window.localStorage.setItem("sybilVersion",App.lastVersion or "0.0.0")
 
+window.App = App
 
 require "/enhancement"
 
@@ -107,7 +113,9 @@ App.confirm = (str,callback)->
         callback false
 
 App.templateManager = require("templateManager")
+App.tm = App.templateManager
 App.messageCenter = new (require "util/messageCenter")
+App.mc = App.messageCenter
 App.connectionManager = new (require "connectionManager")
 App.persistentDataStoreManager = new (require "persistentDataStore").Manager()
 App.userConfig = new (require "userConfig")
