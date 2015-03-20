@@ -577,15 +577,6 @@ exports.removeFriend = (hash,callback)->
 # end p2p db interface
 exports.close = ()->
     dbConnector.close()
-exports.loadCollectorConfig = (name,callback)->
-    Collections.collectorConfig.findOne {name:name},(err,item)=>
-        callback(err,item)
-exports.saveCollectorConfig = (name,data,callback)->
-    Collections.collectorConfig.update {name:name},data,{safe:true,upsert:true},(err)=>
-        callback(err)
-# models goes here
-#
-
 
 # Archive is almost the same as /collector/collector.coffee::Archive
 # The model in db hold extra user information then the Archive in collector
