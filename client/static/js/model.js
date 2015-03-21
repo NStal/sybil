@@ -37,7 +37,7 @@
       }
       return App.messageCenter.invoke("getSources", {}, (function(_this) {
         return function(err, sources) {
-          var coherency;
+          var source, _i, _len;
           if (sources == null) {
             sources = [];
           }
@@ -46,15 +46,11 @@
             callback(err);
             return;
           }
-          coherency = 10;
-          return async.eachLimit(sources, coherency, (function(source, done) {
+          for (_i = 0, _len = sources.length; _i < _len; _i++) {
+            source = sources[_i];
             _this.add(new Source(source));
-            return setTimeout((function() {
-              return done();
-            }), 0);
-          }), function(err) {
-            return callback(null);
-          });
+          }
+          return callback();
         };
       })(this));
     };

@@ -12,12 +12,16 @@
                 "hash": "ab2bdb"
             },
             {
+                "path": "coreData.js",
+                "hash": "b2217a"
+            },
+            {
                 "path": "enhancement.js",
                 "hash": "7aa698"
             },
             {
                 "path": "errors.js",
-                "hash": "a4d1fa"
+                "hash": "04eca2"
             },
             {
                 "path": "hintStack.js",
@@ -41,7 +45,7 @@
             },
             {
                 "path": "model.js",
-                "hash": "7bc67d"
+                "hash": "a07ff9"
             },
             {
                 "path": "modelSyncManager.js",
@@ -58,10 +62,6 @@
             {
                 "path": "p2pView.js",
                 "hash": "03bad3"
-            },
-            {
-                "path": "persistentConfig.js",
-                "hash": "86e617"
             },
             {
                 "path": "persistentDataStore.js",
@@ -176,8 +176,12 @@
                 "hash": "efdb87"
             },
             {
+                "path": "sourceView/sourceList2.js",
+                "hash": "aa65dc"
+            },
+            {
                 "path": "sourceView/sourceView.js",
-                "hash": "32b92f"
+                "hash": "bb51ce"
             },
             {
                 "path": "util/delayWorker.js",
@@ -251,5 +255,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.12"
+    "version": "0.3.0.634"
 }

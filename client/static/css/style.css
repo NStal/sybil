@@ -2605,6 +2605,7 @@ html * {
 }
 .source-view .source-list .container {
   display: block;
+  position: relative;
   width: 100%;
   height: 100%;
   padding: 2px 2px;
@@ -2613,6 +2614,16 @@ html * {
   -webkit-box-sizing: border-box;
   overflow-x: visible;
   overflow-y: auto;
+}
+.source-view .source-list .source-list-item,
+.source-view .source-list .source-list-folder {
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .source-view .source-list .source-list-item .name,
 .source-view .source-list .source-list-folder .name {
@@ -2634,20 +2645,28 @@ html * {
   display: none;
 }
 .source-view .source-list .item {
+  position: relative;
+  position: absolute;
+  transition: top 100ms, padding 100ms;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   overflow: visible;
   line-height: 28px;
   display: block;
-  position: relative;
   height: 28px;
   width: 100%;
   font-weight: 200;
   padding-right: 0;
 }
+.source-view .source-list .item.indent {
+  padding-left: 20px;
+}
 .source-view .source-list .item .name:hover {
   color: white;
+}
+.source-view .source-list .item.hide {
+  display: none;
 }
 .source-view .source-list .item .error-hint {
   display: none;

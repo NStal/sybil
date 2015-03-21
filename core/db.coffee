@@ -119,6 +119,7 @@ exports.removeTagFromSource = (guid,tagName,callback)->
             callback new Errors.NotFound()
             return
         callback null,item
+
 exports.addTagToSource = (guid,tagName,callback)->
     Collections.source.findAndModify {guid:guid},{},{$push:{tags:tagName}},(err,item)->
         if err
@@ -144,6 +145,7 @@ exports.getSources = (callback)->
             callback err
             return
         callback null,arr
+
 exports.renameSource = (guid,name,callback)->
     Collections.source.findAndModify {guid:guid},{},{$set:{name:name}},{safe:true},(err)->
         callback err

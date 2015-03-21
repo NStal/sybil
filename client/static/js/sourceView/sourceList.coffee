@@ -7,6 +7,9 @@ Model = require "/model"
 async = require "/lib/async"
 tm = require "/templateManager"
 
+
+
+
 class SourceListItemBase extends Leaf.Widget
     constructor:(template)->
         super template

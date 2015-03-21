@@ -16,12 +16,10 @@ class AllSourceCollection extends Leaf.Collection
                 callback err
                 return
             # prevent block
-            coherency = 10
-            async.eachLimit sources,coherency,((source,done)=>
+            for source in sources
                 @add new Source(source)
-                setTimeout (()->done()),0
-            ),(err)=>
-                callback null
+            callback()
+
 class Source extends Model
     @sources = new AllSourceCollection()
     fields:[
@@ -113,7 +111,6 @@ class Source extends Model
             else
                 @confirm()
             callback err
-
 class SourceFolder extends Model
     @loadFolderStore = (callback)->
         App.persistentDataStoreManager.load "sourceFolderConfig",(err,store)->
