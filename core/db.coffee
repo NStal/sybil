@@ -26,7 +26,7 @@ module.exports.Collections = Collections
 dbServer = new mongodb.Server config.dbHost,config.dbPort,config.dbOption
 dbConnector = new mongodb.Db(config.dbName,dbServer,{safe:false})
 
-exports.init = (callback)->
+exports.init = (callback = ()->)->
     dbConnector.open (err,db)->
         if err or not db
             console.error "fail to connect to mongodb"
@@ -42,7 +42,7 @@ exports.init = (callback)->
             exports.isReady = true
             console.log "db ready"
             exports.emit "ready"
-            if callback then callback null
+            callback null
 exports.loadCollections = (collectionNames,callback)->
     async.map collectionNames,((collectionName,done)->
         dbConnector.db.collection collectionName,(err,col)->

@@ -70,7 +70,8 @@ class CollectorController extends EventEmitter
             console.log "done init source"
             if err
                 callback err
-            callback
+                return
+            callback()
         # this one is not important
         # I may move this piece of code to some whereelse.
         @syncUnreadCount (err)=>

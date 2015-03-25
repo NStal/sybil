@@ -2,6 +2,7 @@ tm = require "/templateManager"
 CoreData = require "/coreData"
 DragContext = require "/util/dragContext"
 ContextMenu = require "/widget/contextMenu"
+SourceAuthorizeTerminal = require "/sourceUtil/sourceAuthorizeTerminal"
 Model = require "/model"
 SmartImage = require "/widget/smartImage"
 tm.use "sourceView/sourceList"
@@ -105,6 +106,10 @@ class SourceListManager extends Leaf.States
             folder = name
         else
             folder = new Model.SourceFolder({name:name.toString(),collapse:true,type:"folder",children:[]})
+        for item in @data.flatStructures
+            if item.type is "folder" and item.name is folder.name
+                console.error "can't create duplicate folder"
+                return
         info = {
             type:"folder"
             model:folder
@@ -147,8 +152,9 @@ class SourceListManager extends Leaf.States
                 target = index
             else if item.parent is pack
                 item.parent = null
-        if target
+        if typeof target is "number"
             @data.flatStructures.splice(target,1)
+        console.debug "remove folder",pack,@data.flatStructures
         @updatePackDimension()
     _move:(pack,position)->
         if not position?
@@ -313,7 +319,7 @@ class SourceList extends Leaf.Widget
             else
                 item.show()
             item.indent(item.pack.indent or 0)
-            item.node$.css {top:item.pack.position * @itemHeight,zIndex:item.pack.position + 1}
+            item.node$.css {transform:"translateY(#{item.pack.position * @itemHeight}px)",zIndex:item.pack.position + 1}
             if item.pack.expand
                 item.node$.css {height:item.pack.expand * @itemHeight}
             else
@@ -446,6 +452,11 @@ class SourceListItem extends SourceListItemBase
         console.debug "hehe"
         e.capture()
         @active()
+        if @source.requireLocalAuth
+            if @source.authorizeTerminal
+                @source.authorizeTerminal.hide()
+            @source.authorizeTerminal = new SourceAuthorizeTerminal(@source)
+
         @context.emit "select",{
             type:"source"
             sourceGuids:[@source.guid]
@@ -501,8 +512,8 @@ class SourceListFolder extends SourceListItemBase
             name:@model.name
         }
     removeFolder:()->
-        @context.manager.removeFolder(@pack)
         @context.children.removeItem this
+        @context.manager.removeFolder(@pack)
         @context.reflow()
     render:()->
         unreadCount = 0

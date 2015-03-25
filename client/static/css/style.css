@@ -2596,24 +2596,16 @@ html * {
 .source-view .source-list .actions .add-source-button {
   border-right: 1px solid #3a3a3a;
 }
-.source-view .source-list .cursor {
-  height: 0px;
-  border-bottom: 1px dashed grey;
-  margin: 0px;
-  width: 100%;
-  display: none;
-}
 .source-view .source-list .container {
   display: block;
   position: relative;
   width: 100%;
   height: 100%;
-  padding: 2px 2px;
+  overflow: auto;
+  transform: translateX(0);
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
-  overflow-x: visible;
-  overflow-y: auto;
 }
 .source-view .source-list .source-list-item,
 .source-view .source-list .source-list-folder {
@@ -2645,9 +2637,8 @@ html * {
   display: none;
 }
 .source-view .source-list .item {
-  position: relative;
   position: absolute;
-  transition: top 100ms, padding 100ms;
+  transition: transform 150ms, padding 150ms;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -2657,7 +2648,8 @@ html * {
   height: 28px;
   width: 100%;
   font-weight: 200;
-  padding-right: 0;
+  padding-right: 2px;
+  padding-left: 2px;
 }
 .source-view .source-list .item.indent {
   padding-left: 20px;

@@ -33,23 +33,14 @@
             }
             
         }
-        .cursor{
-            height:0px;
-            border-bottom:1px dashed grey;
-            margin:0px;
-            width:100%;
-            display:none;
-            
-        }
         .container{
             display:block;
             position:relative;
             width:100%;
             height:100%;
-            padding:2px 2px;
+            overflow:auto;
+            transform:translateX(0);
             .box-sizing;
-            overflow-x:visible;
-            overflow-y:auto;
         }
         .source-list-item,.source-list-folder{
             .clickable;
@@ -75,10 +66,9 @@
             &.indent{
                 padding-left:20px;
             }
-            position:relative;
             position:absolute;
-            @time:100ms;
-            transition:top @time,padding @time;
+            @time:150ms;
+            transition:transform @time,padding @time;
             .box-sizing;
             @item-height:28px; 
             overflow:visible;
@@ -87,7 +77,8 @@
             height:@item-height;
             width:100%;
             font-weight:200;
-            padding-right:0;
+            padding-right:2px;
+            padding-left:2px;
             .name:hover{
                 color:white;
                 

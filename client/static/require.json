@@ -177,7 +177,7 @@
             },
             {
                 "path": "sourceView/sourceList2.js",
-                "hash": "aa65dc"
+                "hash": "a55bd8"
             },
             {
                 "path": "sourceView/sourceView.js",
@@ -255,5 +255,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.634"
+    "version": "0.3.0.641"
 }
