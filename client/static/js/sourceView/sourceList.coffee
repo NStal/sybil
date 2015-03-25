@@ -1,237 +1,407 @@
-ContextMenu = require "/widget/contextMenu"
-SmartImage = require "/widget/smartImage"
-DragContext = require "/util/dragContext"
-SourceAuthorizeTerminal = require "/sourceUtil/sourceAuthorizeTerminal"
-App = require "/app"
-Model = require "/model"
-async = require "/lib/async"
 tm = require "/templateManager"
+CoreData = require "/coreData"
+DragContext = require "/util/dragContext"
+ContextMenu = require "/widget/contextMenu"
+SourceAuthorizeTerminal = require "/sourceUtil/sourceAuthorizeTerminal"
+Model = require "/model"
+SmartImage = require "/widget/smartImage"
+tm.use "sourceView/sourceList"
 
+class SourceListManager extends Leaf.States
+    constructor:(@context)->
+        super()
+        @debug()
+        @folderCoreData = new CoreData("sourceFolderConfig")
+        @reset()
+    reset:()->
+        @data.structures = []
+        @data.flatStructures = []
+    init:()->
+        if @state is not "void"
+            return
+        @setState "prepareCoreData"
+    save:()->
+        clearTimeout @timer
+        @timer = setTimeout @_save.bind(this),500
 
+    _save:()->
+        folders = []
+        for item in @data.flatStructures
+            if item.type is "folder"
+                folders.push {
+                    name:item.model.name
+                    type:"folder"
+                    children:[]
+                    collapse:item.model.collapse
+                }
+            else if item.type is "source"
+                if item.parent
+                    for p in folders
+                        if p.name is item.parent.model.name
+                            p.children.push {
+                                name:item.model.name
+                                guid:item.model.guid
+                                type:"source"
+                            }
+                            break
+                else
+                    folders.push {
+                        name:item.model.name
+                        guid:item.model.guid
+                        type:"source"
+                    }
+        @folderCoreData.set "folders",folders
+    packAt:(index)->
+        return @data.flatStructures[index]
+    logicPackAfter:(index)->
+        item = @packAt(index)
+        if not item
+            return null
+        if item.type is "source" and not item.parent
+            return @packAt(index+1)
+        else if item.type is "source" and item.parent
+            while true
+                index++
+                next = @packAt(index)
+                if not next
+                    return null
+                if next.parent is item.parent
+                    continue
+                return next
+        else if item.type is "folder"
+            while true
+                index++
+                next = @packAt(index)
+                if not next
+                    return null
+                if next.parent is item
+                    continue
+                return next
+        return null
+    updatePackDimension:()->
+        posIndex = 0
+        for item,index in @data.flatStructures
+            item.flatIndex = index
+            hidden = false
+            if item.parent
+                if not item.parent.model.collapse
+                    hidden = true
+                    item.hide = true
+                else
+                    hidden = false
+                    item.hide = false
+                item.indent = 1
+            else
+                item.indent = 0
+            item.position = posIndex
+            if item.type is "folder" and item.model.collapse
+                item.expand = item.model.children.length + 1
+            else
+                item.expand = null
+            if not hidden
+                posIndex += 1
+        @save()
+    addFolder:(name)->
+        if name instanceof Model.SourceFolder
+            folder = name
+        else
+            folder = new Model.SourceFolder({name:name.toString(),collapse:true,type:"folder",children:[]})
+        for item in @data.flatStructures
+            if item.type is "folder" and item.name is folder.name
+                console.error "can't create duplicate folder"
+                return
+        info = {
+            type:"folder"
+            model:folder
+            name:name
+            parent:null
+        }
+        @data.flatStructures.unshift(info)
+        @updatePackDimension()
+        @context.children.push new SourceListFolder info,@context
+        return
+    addSource:(source)->
+        info = {
+            type:"source"
+            model:source
+            name:name
+            parent:null
+        }
+        @data.flatStructures.unshift(info)
+        @updatePackDimension()
+        @context.children.push new SourceListItem info,@context
+        return
+    removeSource:(pack)->
+        if pack.type isnt "source"
+            return
+        for item,index in @data.flatStructures
+            if item is pack
+                if pack.parent
+                    for child,cindex in pack.parent.model.children
+                        if child is pack.model
+                            pack.parent.model.children.splice(cindex,1)
+                            break
+                @data.flatStructures.splice(index,1)
+                break
+        @updatePackDimension()
+    removeFolder:(pack)->
+        if pack.type isnt "folder"
+            return
+        for item,index in @data.flatStructures
+            if item is pack
+                target = index
+            else if item.parent is pack
+                item.parent = null
+        if typeof target is "number"
+            @data.flatStructures.splice(target,1)
+        console.debug "remove folder",pack,@data.flatStructures
+        @updatePackDimension()
+    _move:(pack,position)->
+        if not position?
+            # +1 than the last one
+            position = @data.flatStructures.length
+        # only move flat structure
+        # no parent relation ensured
+        #
+        # we only allow move item to item/folder position
+        # and allow move folder to folder/orphanItem position
+        target = @data.flatStructures[position]
+        # not allowed to move folder into a folder
+        if target and target.parent and pack.type is "folder"
+            return
+        # not allowed to folder into it's self
+        if target and pack is target.parent
+            return
+        if pack.type is "folder"
+            count = pack.model.children.length + 1
+        else
+            count = 1
+        insertion = @data.flatStructures.splice(pack.flatIndex,count) or []
+        if pack.flatIndex < position
+            position -= count
+        if position < 0
+            position = 0
+        if position < @data.flatStructures.length
+            @data.flatStructures.splice(position,0,insertion...)
+        else
+            @data.flatStructures.push insertion...
+        @updatePackDimension()
+    _setParent:(pack,parentPack)->
+        # only set parent
+        # no flat structure reflow
+        # caller should make sure that
+        if pack.parent is parentPack
+            return
+        if pack.parent
+            folder = pack.parent.model
+            folder.children = folder.children.filter (item)->item isnt pack.model
+            pack.parent = null
+        if parentPack
+            pack.parent = parentPack
+            parentPack.model.children.push pack.model
+#        for item,index in @data.flatStructures
+#            if item is pack
+#                @data.flatStructures.splice index,1
+#                break
+#        for item,index in @data.flatStructures
+#            if item is parentPack
+#                @data.flatStructures.splice index+1,0,pack
+#                break
+    atPrepareCoreData:(sole)->
+        @folderCoreData.load (err)=>
+            if @stale sole
+                return
+            if err
+                @error err
+                return
+            @setState "syncSources"
+    atSyncSources:(sole)->
+        Model.Source.sources.sync ()=>
+            @setState "buildStructure"
 
+    atBuildStructure:()->
+        @data.structures = []
+        contains = []
+        items = (@folderCoreData.get "folders") or []
+        for item in items
+            if item.type is "folder"
+                folder = new Model.SourceFolder({name:item.name,type:"folder",collapse:item.collapse})
+                folder.children ?= []
+                for child in (item.children or [])
+                    if child.guid in contains
+                        continue
+                    source = Model.Source.sources.findOne {guid:child.guid}
+                    contains.push child.guid
+                    if source
+                        folder.children.push source
+                @data.structures.push folder
+            else if item.type is "source"
+                if item.guid in contains
+                    continue
+                source = Model.Source.sources.findOne {guid:item.guid}
+                contains.push source.guid
+                if source
+                    @data.structures.push source
+        for source in Model.Source.sources.models
+            if source.guid not in contains
+                @data.structures.push source
+        @setState "buildFlatStructures"
+    atBuildFlatStructures:()->
+        for item in @data.structures
+            if item instanceof Model.SourceFolder
+                pindex = @data.flatStructures.length
+                folder = {
+                    name:item.name
+                    type:"folder"
+                    parent:null
+                    flatIndex:pindex
+                    model:item
+                }
+                @data.flatStructures.push folder
+                for source,childIndex in item.children
+                    cindex = @data.flatStructures.length
+                    @data.flatStructures.push {
+                        name:source.name
+                        type:"source"
+                        parent:folder
+                        flatIndex:cindex
+                        model:source
+                    }
+            else
+                index = @data.flatStructures.length
+                @data.flatStructures.push {
+                    name:item.name
+                    type:"source"
+                    parent:null
+                    flatIndex:index
+                    model:item
+                }
+        @updatePackDimension()
+        @setState "fillSourceList"
+    atFillSourceList:()->
+        @context.children.length = 0
+        for item in @data.flatStructures
+            if item.type is "folder"
+                child = new SourceListFolder(item,@context)
+            else if item.type is "source"
+                child = new SourceListItem(item,@context)
+            else
+                continue
+            @context.children.push child
+        @context.reflow()
+        @setState "wait"
+    atWait:()->
+        App.modelSyncManager.listenBy this,"source",(source)=>
+            @addSource source
+            return
+        return
+class SourceList extends Leaf.Widget
+    constructor:()->
+        super App.templates.sourceView.sourceList
+        @children = Leaf.Widget.makeList @UI.container
+        @relations = []
+        @manager = new SourceListManager this
+        @dragController = new SourceListDragController(this)
+        App.afterInitialLoad ()=>
+            @manager.init()
+    updateItemHeight:()->
+        for item in @children
+            if item.pack.type is "source" and not item.isHide
+                @itemHeight = item.node$.height()
+                return
+        @itemHeight = 36
 
+    reflow:()->
+        @updateItemHeight()
+        for item in @children
+            if item.pack.hide
+                item.hide()
+            else
+                item.show()
+            item.indent(item.pack.indent or 0)
+            item.node$.css {transform:"translateY(#{item.pack.position * @itemHeight}px)",zIndex:item.pack.position + 1}
+            if item.pack.expand
+                item.node$.css {height:item.pack.expand * @itemHeight}
+            else
+                item.node$.css {height:"auto"}
+    onClickAddSourceButton:()->
+        App.addSourcePopup.show()
+    onClickAddFolderButton:()->
+        name = (prompt("name","untitled") or "").trim()
+        if not name
+            return
+        @manager.addFolder name
+        @reflow()
 class SourceListItemBase extends Leaf.Widget
-    constructor:(template)->
+    constructor:(template,pack)->
         super template
     active:()->
-        if @node
-            @node.classList.add "active"
+        if @context
+            for item in @context.children
+                item.deactive()
+        @node.classList.add "active"
         @isActive = true
     deactive:()->
-        if @node
-            @node.classList.remove "active"
+        @node.classList.remove "active"
         @isActive = false
-class SourceListFolderContextMenu extends ContextMenu
-    constructor:(@folder)->
-        @selections = [
-                {
-                    name:"remove folder"
-                    ,callback:@delete.bind(this)
-                },{
-                    name:"unsubscribe all"
-                    ,callback:@unsubscribeAll.bind(this)
-                },{
-                    name:"rename folder"
-                    ,callback:@rename.bind(this)
-                }
-            ];
-        super(@selections)
-    rename:()->
-        name = prompt("folder name",@folder.model.name)
-        if name and name.trim()
-            @folder.rename name
+    indent:(level)->
+        if @indentLevel is level
+            return
+        if level is 0
+            @node$.removeClass "indent"
         else
+            @node$.addClass "indent"
+        @indentLevel = level
+    hide:()->
+        if @isHide
             return
-    unsubscribeAll:()->
-        if not confirm("unsubscribe all in this folder #{@folder.model.name}?")
+        @isHide = true
+        @node$.addClass "hide"
+    show:()->
+        if not @isHide
             return
-        @folder.unsubscribeAll()
-    delete:()->
-        if not confirm("remove this folder #{@folder.model.name}?")
-            return
-        @folder.delete()
-
-# Events
-# change:  some children add/remove or other general change
-# child/add (child):  a child was added
-# child/remove (child): a child was removed
-# select (child or folder): a child was selected or the folder it's self is selected.
-# remove:  I want to remove my self who ever is my parent just remove me and pull all my children out
-tm.use "sourceView/sourceListFolder"
-class SourceListFolder extends SourceListItemBase
-    constructor:(model = "untitled folder")->
-        super App.templates.sourceView.sourceListFolder
-        # setup initial model
-        if typeof model is "string"
-            @model = new Model.SourceFolder({name:string})
-        else if model instanceof Model
-            @model = model
-        else
-            throw new Error "invalid source list folder parameter"
-        @model.defaults {collapse:true,children:[]}
-
-        # setup list and children
-        @children = Leaf.Widget.makeList @UI.container
-        @children.on "child/add",(child)=>
-            @_attachChild child
-        @children.on "child/remove",(child)=>
-            @_detachChild child
-
-        @_initChildren @model.children
-        # bubble child/add&remove so sourceList can listen"
-        # attach drag/drop event at one place
-        @bubble @children,"child/add"
-        @bubble @children,"child/remove"
-        @bubble @model,"change"
-        @bubble @model,"change/name"
-        @bubble @model,"change/collapse"
-
-        #rerender on change
-        @model.listenBy this,"change",@render
-
-        # setup context menu
-        @UI.title.oncontextmenu = (e)=>
-            e.preventDefault()
-            e.stopImmediatePropagation()
-            if not @contextMenu
-                @contextMenu = new SourceListFolderContextMenu this
-            @contextMenu.show(e)
-        @render()
-
-    _attachChild:(child)->
-        @bubble child,"select"
-        child.listenBy this,"destroy",()=>
-            @updateModel()
-            @emit "child/destroy"
-        child.listenBy this,"remove",()=>
-            @removeChild child
-        child.folder = this
-        # watch for unread count of child and render the total count
-        child.listenBy this,"change",@render
-    _detachChild:(child)->
-        @stopBubble child
-        if child.folder is this
-            child.folder = null
-    _initChildren:(sources)->
-        @children.length = 0
-        for source in sources or []
-            child = new SourceListItem(source)
-            @children.push child
-
-    addChild:(child,index = @children.length )->
-        @children.splice index,0,child
-        @updateModel()
-    removeChild:(child)->
-        @children.removeItem child
-        @updateModel()
-    # force an update on children (since it's an array).
-    updateModel:()->
-        @model.set "children",(child.source for child in @children)
-        return @model
-    unsubscribeAll:()->
-        for item in @children
-            item.unsubscribe()
-    rename:(name)->
-        @model.name = name
-    delete:()->
-        # oh my parent list please remove me.
-        @emit "remove",this
-    delayRender:()->
-        if @_delayRenderTimer
-            clearTimeout @_delayRenderTimer
-        @_delayRenderTimer = setTimeout @render.bind(this),10
-    render:()->
-        unreadCount = 0
-        (unreadCount += child.source.unreadCount or 0 for child in @children)
-        @VM.name = @model.name
-        @VM.unreadCount = unreadCount
-
-        style = "no-update"
-        if parseInt(unreadCount) > 0
-            style = "has-update"
-        if parseInt(unreadCount) >= 20
-            style = "many-update"
-        @VM.statusStyle = style
-
-        if not @model.collapse
-            @VM.collapseClass = ""
-            @VM.iconClass = "fa-folder"
-        else
-            @VM.collapseClass = "collapse"
-            @VM.iconClass = "fa-folder-open"
-    onClickTitle:()->
-        @emit "select",this
-    onClickFolderIcon:(e)->
-        e.stopPropagation()
-        @toggleCollapse()
-    toggleCollapse:(e)->
-        @model.collapse = not @model.collapse
-    toJSON:()->
-        json = @model.toJSON()
-        json.type = "folder"
-        return json
-class SourceListItemContextMenu extends ContextMenu
-    constructor:(@item)->
-        @selections = [
-            {
-                name:"source detail"
-                ,callback:@showSourceDetail.bind(this)
-            }
-            ,{
-                name:"unsubscribe"
-                ,callback:@unsubscribe.bind(this)
-            }
-        ]
-        super @selections
-
-    ,showSourceDetail:()->
-        @item.showSourceDetail()
-
-    ,unsubscribe:()->
-        if not confirm("unsubscribe item #{@item.source.name}?")
-            return
-        @item.unsubscribe()
-
-# Events
-# change: I have changed maybe name, maybe unreadCount
-# remove: I'm done if you are my parent just remove me.
-# select: I'm selected.
-#
+        @isHide = false
+        @node$.removeClass "hide"
 tm.use "sourceView/sourceListItem"
 class SourceListItem extends SourceListItemBase
-    constructor:(source)->
+    class SourceListItemContextMenu extends ContextMenu
+        constructor:(@item)->
+            @selections = [
+                {
+                    name:"source detail"
+                    ,callback:@showSourceDetail.bind(this)
+                }
+                ,{
+                    name:"unsubscribe"
+                    ,callback:@unsubscribe.bind(this)
+                }
+            ]
+            super @selections
+
+        ,showSourceDetail:()->
+            @item.showSourceDetail()
+
+        ,unsubscribe:()->
+            if not confirm("unsubscribe item #{@item.source.name}?")
+                return
+            @item.unsubscribe()
+
+    constructor:(@pack,@context)->
         @include SmartImage
         super App.templates.sourceView.sourceListItem
-        if source not instanceof Model.Source
-            throw new Error "invalid source"
-        @source = source
-        @UI.sourceIcon.on "state",(state)->
-            if state is "success"
-                @UI.sourceIcon.style.display = "inline"
+        @source = @pack.model
+        @source.on "change",@render.bind(this)
         @node.oncontextmenu = (e)=>
             e.preventDefault()
             e.stopImmediatePropagation()
             if not @contextMenu
                 @contextMenu  = new SourceListItemContextMenu(this)
             @contextMenu.show(e)
-        # unsubscribe will destroy the source model
-        # then destroy the source list item
-        # then force Widget.List to remove the item
-        @source.listenBy this,"destroy",@destroy
-        @source.listenBy this,"change",@render
-        @bubble @source,"change"
-        @bubble @source,"change/name"
         @render()
-    showSourceDetail:()->
-        App.sourceView.sourceDetail.setSource @source
-        App.sourceView.sourceDetail.show()
-    unsubscribe:(callback = ()=>true)->
-        @source.unsubscribe callback
     render:()->
         @VM.name = @source.name
         @VM.guid = @source.guid
         @VM.unreadCount = (parseInt(@source.unreadCount) >= 0) and parseInt(@source.unreadCount).toString() or "?"
-
         style = "no-update"
         if parseInt(@source.unreadCount) > 0
             style = "has-update"
@@ -267,211 +437,111 @@ class SourceListItem extends SourceListItemBase
 
         if @source.requireLocalAuth
             @VM.state = "error"
-
         @UI.sourceIcon.loadingSrc = "/image/favicon-default.png"
         @UI.sourceIcon.errorSrc = "/image/favicon-default.png"
         @UI.sourceIcon.src = "plugins/iconProxy?url=#{encodeURIComponent @source.uri}"
+    unsubscribe:(callback)->
+#        @source.unsubscribe ()=>
+        @context.children.removeItem this
+        @context.manager.removeSource @pack
+        @context.reflow()
+    showSourceDetail:()->
+        App.sourceView.sourceDetail.setSource @source
+        App.sourceView.sourceDetail.show()
     onClickNode:(e)->
+        console.debug "hehe"
         e.capture()
-        @select()
-    delete:()->
-        @emit "remove",this
-    select:()->
+        @active()
         if @source.requireLocalAuth
-
             if @source.authorizeTerminal
                 @source.authorizeTerminal.hide()
             @source.authorizeTerminal = new SourceAuthorizeTerminal(@source)
-        @emit "select",this
-    destroy:()->
-        # parent please remove me! I'm about to destroy!
-        @emit "remove"
-    toJSON:()->
-        json = @source.toJSON({fields:["name","guid","uri","type"]})
-        json.type = "source"
-        return json
-tm.use "sourceView/sourceList"
-class SourceList extends Leaf.Widget
-    constructor:()->
-        super App.templates.sourceView.sourceList
-        @children = Leaf.Widget.makeList(@UI.container)
-        @dragController = new SourceListDragController(this)
-        @children.on "child/add",@_attach.bind(this)
-        @children.on "child/remove",@_detach.bind(this)
-        @initialLoader =  new SourceListInitializer(this)
-        @syncManager = new SourceListSyncManager(this)
-    loadFolder:(callback = ()->true )->
-        if @folderStore
-            @folderStore.load (err)=>
-                if err
-                    callback err
-                    return
-                @buildFolderData @folderStore.get("folders") or []
-                callback()
-            return
-        Model.SourceFolder.loadFolderStore (err,store)=>
-            if err
-                callback err
-                return
-            @folderStore = store
-            # try load folder again
-            @loadFolder callback
-        return
-    mergeFolder:(folderModel)->
-        # remove children source that in the folder
-        # and finally push the folder to the end of the list
-        folderModel.children = folderModel.children.map (source)->
-            if source instanceof Model.Source
-                return source
-            else
-                return Model.Source.sources.findOne({guid:source.guid})
-        folderModel.children = folderModel.children.filter (item)->item
-        folder = new SourceListFolder(folderModel)
-        guids = folder.children.map (item)->item.source.guid
-        index = 0
-#        console.debug "merge folder",guids
-        while index < @children.length
-            child = @children[index]
-            if child instanceof SourceListItem
-                if child.source.guid in guids
-                    @children.removeItem(child)
-                    console.log "remove item",@children.length
-                    continue
-            else if child instanceof SourceListFolder
-                _index = 0
-                while _index < child.children.length
-                    item = child.children[_index]
-                    if item.source.guid in guids
-                        console.debug "conflict source in folder",child.model.name,"and",folder.model.name,item.source.name
-                        child.children.delete(item)
-                        child.updateModel()
-                        continue
-                    _index++
-            index++
-        @children.push folder
-        console.log "finally",@children.length,"!!"
-    mergeSource:(sourceModel,top)->
-        for item in @children
-            if item instanceof SourceListItem
-                if item.source.guid is sourceModel.guid
-                    # use the old source list item
-                    # but push to the end/unshift to begin
-                    @children.removeItem(item)
-                    if top
-                        @children.unshift item
-                    else
-                        @children.push item
-                    return
-                # logic next to continue is for folder
-                continue
-            for child in item.children
-                if child.source.guid is sourceModel.guid
-                    return
-        if top
-            @children.unshift new SourceListItem(sourceModel)
-        else
-            @children.push new SourceListItem(sourceModel)
-    buildFolderData:(folders)->
-        @currentFolderData = folders
-        coherency = 100
-        async.eachLimit folders,coherency,((item,done)=>
-            setTimeout ( ()=>done() ),0
-            if item.type is "folder"
-                folder = new Model.SourceFolder(item)
-                @mergeFolder folder
-            else if item.type is "source"
-                source = new Model.Source(item)
-                @mergeSource source
-        ),(err)=>
-            if err
-                console.error err
-            return
-    _attach:(item)->
-        if item.hasAttach
-            throw new Error "Programmer Error"
-        item.hasAttach = true
-        item.list = this
 
-        item.listenBy this,"select",@select
-        # unsubscribe will cause destroy on item and child/destroy on folder
-        # either means a folder change need to save
-        # duplicate save call are SAFE
-        item.listenBy this,"change/collapse",@save
-        item.listenBy this,"change/name",@save
-        item.listenBy this,"destroy",@save
-        item.listenBy this,"child/destroy",@save
-        item.listenBy this,"remove",()=>
-            if item instanceof SourceListFolder
-                sources = item.children.toArray()
-            else
-                sources = []
-            index = @children.indexOf item
-            if index < 0
+        @context.emit "select",{
+            type:"source"
+            sourceGuids:[@source.guid]
+            name:@source.name
+        }
+
+tm.use "sourceView/sourceListFolder"
+class SourceListFolder extends SourceListItemBase
+    class SourceListFolderContextMenu extends ContextMenu
+        constructor:(@folder)->
+            @selections = [
+                    {
+                        name:"remove folder"
+                        ,callback:@delete.bind(this)
+                    },{
+                        name:"rename folder"
+                        ,callback:@rename.bind(this)
+                    }
+                ];
+            super(@selections)
+        rename:()->
+            name = prompt("folder name",@folder.model.name)
+            if name and name.trim()
+                @folder.model.name = name
+                @folder.pack.name = name
+                @folder.context.manager.save()
+        delete:()->
+            if not confirm("remove this folder #{@folder.model.name}(source will be kept)?")
                 return
-            args = [].concat index,1,sources
-            @children.splice.apply @children,args
-            @save()
-        # about drag
-        @dragController.add item
-        childrenHandler = (child)=>
-            # also add/remove the child of the item(folder)
-            # to the drag context
-            @dragController.add child
-            child.listenBy this,"remove",()=>
-                @dragController.remove child
-        item.listenBy this,"child",childrenHandler
-        if item.children
-            for child in item.children
-                childrenHandler(child)
-    _detach:(item)->
-        item.hasAttach = false
-        item.stopListenBy this
-        if item.list is this
-            item.list = null
-        @dragController.delete item
-    save:(callback = ()->true)->
-        clearTimeout @_saveTimer
-        _save = ()=>
-            folders = (child.toJSON() for child in @children)
-            if Leaf.Util.compare folders,@currentFolderData
-                console.debug "no need to save"
-                return
-            console.debug "save folders",folders,JSON.stringify(folders).length
-            if @folderStore
-                @folderStore.set "folders",folders
-            @currentFolderData = folders
-        @_saveTimer = setTimeout _save.bind(this),@_saveDelay or 100
-    select:(who)->
-        if @currentItem
-            @currentItem.deactive()
-        @currentItem = who
-        who.active()
-        info = {}
-        if who instanceof SourceListFolder
-            if who.children.length is 0
-                return
-            info.type = "folder"
-            info.sourceGuids = (child.source.guid for child in who.children)
-            info.name = who.model.name
+            @folder.removeFolder()
+
+    constructor:(@pack,@context)->
+        super App.templates.sourceView.sourceListFolder
+        @model = @pack.model
+        @model.listenBy this,"change",@render.bind(this)
+        @node.oncontextmenu = (e)=>
+            e.preventDefault()
+            e.stopImmediatePropagation()
+            if not @contextMenu
+                @contextMenu = new SourceListFolderContextMenu this
+            @contextMenu.show(e)
+
+        @render()
+    onClickFolderIcon:(e)->
+        e.capture()
+        @model.collapse = not @model.collapse
+        @render()
+    onClickNode:()->
+        @active()
+        @context.emit "select",{
+            type:"folder"
+            sourceGuids:(child.guid for child in @model.children)
+            name:@model.name
+        }
+    removeFolder:()->
+        @context.children.removeItem this
+        @context.manager.removeFolder(@pack)
+        @context.reflow()
+    render:()->
+        unreadCount = 0
+        for item in @model.children
+            if typeof item.unreadCount is "number"
+                unreadCount += item.unreadCount
+        @VM.name = @model.name
+        @VM.unreadCount = unreadCount
+        if @VM.collapse isnt @model.collapse
+            @VM.collapse = @model.collapse
+            @context.manager.updatePackDimension()
+            @context.reflow()
+        style = "no-update"
+        if parseInt(unreadCount) > 0
+            style = "has-update"
+        if parseInt(unreadCount) >= 20
+            style = "many-update"
+        @VM.statusStyle = style
+
+        if not @model.collapse
+            @VM.iconClass = "fa-folder"
         else
-            info.type = "source"
-            info.sourceGuids = [who.source.guid]
-            info.name = who.source.name
-        @emit "select",info
-    onClickAddSourceButton:()->
-        App.addSourcePopup.show()
-    onClickAddFolderButton:()->
-        name = (prompt("name","untitled") or "").trim()
-        if not name
-            return
-        child = new SourceListFolder(new Model.SourceFolder({name:name,children:[]}))
-        @children.unshift child
-        @save()
+            @VM.iconClass = "fa-folder-open"
+    toggleCollapse:(e)->
+        @model.collapse = not @model.collapse
 class SourceListDragController extends Leaf.EventEmitter
-    constructor:(list)->
-        @list = list
+    constructor:(@context)->
         @dragContext = new DragContext()
-        @cursor$ = $('<div data-id="cursor" class="cursor">')
         @dragContext.on "start",(e)=>
             # maybe a more beautiful shadow in future
             shadow = document.createElement("span")
@@ -480,142 +550,80 @@ class SourceListDragController extends Leaf.EventEmitter
             shadow.innerHTML = e.draggable.innerText.trim().substring(0,30)
             @dragContext.addDraggingShadow(shadow)
         @dragContext.on "drop",(e)=>
-            @move(e.draggable.widget,e.droppable.widget,e)
-            @list.save()
-            @cursor$.hide()
+            @drop(e.draggable.widget,e.droppable.widget,e)
         @dragContext.on "hover",(e)=>
-            @hint(e.draggable.widget,e.droppable.widget,e)
-        @dragContext.on "release",(e)=>
-            @cursor$.hide()
-        @dragContext.on "move",(e)=>
-            if not e.dragHover
-                @cursor$.hide()
-    add:(item)->
+            @drop(e.draggable.widget,e.droppable.widget,e)
+        @context.children.on "child/add",@addToContext.bind(this)
+        @context.children.on "child/remove",@removeFromContext.bind(this)
+    addToContext:(item)->
         if item instanceof SourceListItem
             @dragContext.addContext item.node
         else if item instanceof SourceListFolder
             @dragContext.addContext item.UI.title
         else
             throw new Error "add invalid drag item"
-    delete:(item)->
+    removeFromContext:(item)->
         if item instanceof SourceListItem
             @dragContext.addContext item.node
         else if item instanceof SourceListFolder
             @dragContext.addContext item.UI.title
-    # apply what getMovePosition returns
-    move:(from,to,event)->
-        console.debug "moveing at",from,to,event
-        move = @getMovePosition(from,to,event)
-        if move.position is "inside"
-            if @hintFolder
-                if @hintFolder isnt @list.currentItem
-                    @hintFolder.deactive()
-                @hintFolder = null
-            console.assert from instanceof SourceListItem
-            from.delete()
-            move.target.children.splice(0,0,from)
-            move.target.updateModel()
-            @list.save()
-            @cursor$.hide()
+    getDropType:(from,to,e)->
+        e = e.offsetY
+        if to.pack.type is "folder"
+            height = to.UI.title$.height()
+        else
+            height = to.node$.height()
+        if e > height/2
+            return "after"
+        else
+            return "before"
+    drop:(from,to,e)->
+        if from is to
             return
-        if move.position is "after"
-            offset = 1
-        else
-            offset = 0
-
-        parent = move.target.folder or move.target.list
-        if not parent
-            console.debug move.target
-            throw new Error "can move to orphan item"
-        from.delete()
-        console.assert not from.list
-        console.assert not from.folder
-        index = parent.children.indexOf move.target
-        parent.children.splice(index+offset,0,from)
-        # for folder we need to sync UI with models
-        if parent.updateModel
-            parent.updateModel()
-        @list.save()
-        @cursor$.hide()
-    # show hint from the data of getMovePosition
-    hint:(from,to,event)->
-        move = @getMovePosition(from,to,event)
-        @cursor$.show()
-        if @hintFolder
-            @hintFolder.deactive()
-            @hintFolder = null
-        if move.position is "inside"
-            console.assert move.target instanceof SourceListFolder,"can only move inside folders"
-            @hintFolder = move.target
-            @hintFolder.active()
-
-        if move.position is "after"
-            @cursor$.insertAfter(move.target.node)
-        else if move.position is "before"
-            @cursor$.insertBefore(move.target.node)
-        else
-            @cursor$.remove()
-    # get what the current drop should act
-    getMovePosition:(from,to,e)->
-        # Note: move may change the "to"
-        # from which widget is dragged?
-        # to which widget is dropped?
-        # e where the event happens
-        if from instanceof SourceListFolder and to instanceof SourceListItem
-            # drag a folder to an item
-            if not (to.folder instanceof SourceListFolder)
-                # item is an element without parent folder
-                # so judge by position
-                if e.offsetY > to.node$.height()/2
-                    return {target:to,position:"after"}
+        dropType = @getDropType(from,to,e)
+        fromPack = from.pack
+        toPack = to.pack
+        if fromPack.type is "folder" and toPack.parent
+            next = @context.manager.packAt toPack.flatIndex + 1
+            # not allow move folder to parent item
+            # but only after the last item of a folder.
+            # In this case we just move it after the item parent
+            if next and next.parent isnt toPack.parent
+                @context.manager._move fromPack,next.flatIndex
+            # still not allow to move parented item
+        else if fromPack.type is "folder" and toPack.type is "folder"
+            if dropType is "before"
+                @context.manager._move fromPack,toPack.flatIndex
+            else
+                next = @context.manager.logicPackAfter(toPack.flatIndex)
+                if not next
+                    @context.manager._move fromPack,null
                 else
-                    return {target:to,position:"before"}
+                    @context.manager._move fromPack,next.flatIndex
+        else if fromPack.type is "folder" and toPack.type is "source" and not toPack.parent
+            if dropType is "before"
+                @context.manager._move fromPack,toPack.flatIndex
             else
-                # item is a item in side a folder
-                # we don't allow nexted list
-                # just move next to the folder
-                return {target:to.folder,position:"after"}
-        # if the to folder is not collapsed
-        # this judgement will likely to make it judge like it's an element
-        # if the to folder is collapsed
-        # thie judgement will always likely to make it at before
-        if from instanceof SourceListFolder and to instanceof SourceListFolder
-            if e.offsetY > to.node$.height()/2
-                return {target:to,position:"after"}
+                @context.manager._move fromPack,toPack.flatIndex + 1
+
+        else if fromPack.type is "source" and toPack.type is "source"
+            if toPack.parent
+                @context.manager._setParent fromPack,toPack.parent
             else
-                return {target:to,position:"before"}
-        # to an folder(title)
-        if to instanceof SourceListFolder and from instanceof SourceListItem
-            if (to.node$.height()*3/4)  > e.offsetY and e.offsetY  > (to.node$.height()/3)
-                return {target:to,position:"inside"}
-        if e.offsetY > to.node$.height()/2
-            return {target:to,position:"after"}
-        else
-            return {target:to,position:"before"}
-
-# do the initial load at first connection
-class SourceListInitializer extends Leaf.EventEmitter
-    constructor:(@list)->
-        super()
-        App.afterInitialLoad ()=>
-            @loadSources ()=>
-                @loadFolder()
-    loadSources:(callback = ()->true )->
-        Model.Source.sources.sync ()=>
-#            console.debug "merge source"
-            for source in Model.Source.sources.models
-                @list.mergeSource source
-            callback()
-    loadFolder:()->
-        @list.loadFolder ()=>
-            @emit "done"
-
-# handle server pushed events
-class SourceListSyncManager extends Leaf.EventEmitter
-    constructor:(@list)->
-        super()
-        App.afterInitialLoad ()=>
-            # new source: add to list if not exists
-            App.modelSyncManager.on "source",(sourceModel)=>
-                @list.mergeSource sourceModel,true
+                @context.manager._setParent fromPack,null
+            if dropType is "before"
+                @context.manager._move fromPack,toPack.flatIndex
+            else if dropType is "after"
+                @context.manager._move fromPack,toPack.flatIndex+1
+        else if fromPack.type is "source" and toPack.type is "folder"
+            if dropType is "before"
+                @context.manager._setParent fromPack,null
+                @context.manager._move fromPack,toPack.flatIndex
+            else
+                @context.manager._setParent fromPack,toPack
+                @context.manager._move fromPack,toPack.flatIndex + 1
+        if not fromPack.parent or fromPack.parent and fromPack.parent.model.collapse
+            fromPack.hide = false
+        @context.reflow()
+    # apply what getMovePosition returns
 module.exports = SourceList

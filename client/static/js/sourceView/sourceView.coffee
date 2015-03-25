@@ -1,5 +1,5 @@
 SwipeChecker = require("/util/swipeChecker")
-SourceList = require("sourceList2")
+SourceList = require("sourceList")
 ArchiveList = require("archiveList")
 SourceDetail = require("sourceDetail")
 
