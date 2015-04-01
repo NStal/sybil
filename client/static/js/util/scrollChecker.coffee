@@ -14,7 +14,8 @@ class ScrollChecker extends Leaf.EventEmitter
         if @eventDriven
             @node.addEventListener "scroll",@fire
             return
-        @timer = setInterval @check.bind(this),300
+        else
+            @timer = setInterval @check.bind(this),300
         @lastValue = @node.scrollTop
     fire:()->
         @emit "scroll"
@@ -28,16 +29,19 @@ class ScrollChecker extends Leaf.EventEmitter
         if not @node
             return
         value = @node.scrollTop
+        # prevent throw and @lastValue not saved
+        # so we repeat emit scroll event
+        lastValue = @lastValue
+        @lastValue = value
         if @lastValue isnt null
-            if value isnt @lastValue
-                if value > @lastValue
+            if value isnt lastValue
+                if value > lastValue
                     @emit "scrollDown"
-                else if value < @lastValue
+                else if value < lastValue
                     @emit "scrollUp"
                 @emit "scroll"
                 if @node.offsetHeight + @node.scrollTop >= @node.scrollHeight
                     @emit "scrollBottom"
                 if @node.scrollTop is 0
                     @emit "scrollTop"
-        @lastValue = value
 module.exports = ScrollChecker

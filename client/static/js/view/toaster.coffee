@@ -9,6 +9,7 @@ class Toaster extends Leaf.Widget
         @content = content
         @UI.content$.text content
         @node$.addClass "show"
+        @node$.css {zIndex:99999}
         clearTimeout @hideTimer
         @hideTimer = setTimeout ()=>
             @hide()

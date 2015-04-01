@@ -6,6 +6,7 @@ async = require "/lib/async"
 BufferedEndlessArchiveLoader = require "/procedure/bufferedEndlessArchiveLoader"
 CubeLoadingHint = require "/widget/cubeLoadingHint"
 ArchiveDisplayer = require "/baseView/archiveDisplayer"
+EndlessListRenderer = require "/util/endlessListRenderer"
 Flag = require "/util/flag"
 tm = require "/templateManager"
 tm.use "sourceView/archiveList"
@@ -21,7 +22,6 @@ class ArchiveList extends Leaf.Widget
 
         # mark reads on scroll
         @scrollChecker = new ScrollChecker @UI.containerWrapper
-        @archiveListItems = Leaf.Widget.makeList @UI.container
 
         @archiveListController = new ArchiveListController(this)
         @sourceUpdateChecker = new SourceUpdateChecker(this)
@@ -50,7 +50,6 @@ class ArchiveList extends Leaf.Widget
         @disableMarkAsRead = false
 
     load:(info)->
-        @clear()
         @archiveInfo = info
         @UI.emptyHint$.hide()
         @UI.loadingHint.hide()
@@ -65,14 +64,6 @@ class ArchiveList extends Leaf.Widget
             @UI.toggleViewAll$.text("view unread")
         else
             @UI.toggleViewAll$.text("view all")
-    clear:()->
-        if @archiveLoader
-            @archiveLoader.stopListenBy this
-        @archiveLoader = null
-        @UI.containerWrapper.scrollTop = 0
-        @UI.emptyHint$.show()
-        @UI.title$.hide()
-
     onClickMarkAllAsRead:()->
         async.eachLimit @archiveInfo.sourceGuids,3,((guid,done)=>
             source = Model.Source.sources.get(guid)
@@ -118,9 +109,6 @@ class ArchiveListItem extends ArchiveDisplayer
         @node.addEventListener "scroll",()=>
             @onResize()
 #        @node$.find("img").on "load",@onResize.bind(this)
-    onResize:()->
-        @sizeDirty = true
-        @emit "resize"
     onClickContent:()->
         if @lockRead
             return
@@ -139,33 +127,6 @@ class ArchiveListItem extends ArchiveDisplayer
         @markAsRead()
         @node$.css {height:"auto"}
         @onResize()
-    resize:()->
-        @size = {
-            width:@node$.outerWidth()
-            height:@node.scrollHeight + 2
-        }
-        @sizeDirty = false
-        @node.setAttribute "size-info",JSON.stringify(@size)
-        @node$.css {overflow:"auto",height:@size.height}
-    setPosition:(pos)->
-        @position = pos
-        @node$.css {top:pos}
-    getPosition:()->
-        return @position
-    getNextPosition:()->
-        @size ?= {}
-        return @position + (@size.height or 0)
-    show:()->
-        if @isShown
-            return
-        @isShown = true
-        @node$.show()
-    hide:()->
-        if not @isShown
-            return
-        @isShown = false
-        @node$.hide()
-
     markAsRead:()->
         if @lockRead
             return
@@ -213,11 +174,12 @@ class ArchiveListItem extends ArchiveDisplayer
 # should have something to do with the scroller.
 tm.use "sourceView/archiveListController"
 class ArchiveListController extends Leaf.Widget
-    constructor:(archiveList)->
+    constructor:(@context)->
         super  App.templates.sourceView.archiveListController
-        @context = archiveList
-        @formatter = new ArchiveListFormatter(@context,this)
-
+        @scrollable = @context.UI.containerWrapper
+        @renderer = new EndlessListRenderer @scrollable,(archive)=>
+            return new ArchiveListItem(archive)
+        @archiveBuffer = new BufferedEndlessArchiveLoader()
         @swipeChecker = new SwipeChecker(@node)
         @swipeChecker.on "swipeleft",(e)=>
             @node$.addClass "left-mode"
@@ -225,44 +187,48 @@ class ArchiveListController extends Leaf.Widget
             e.preventDefault()
             e.stopImmediatePropagation()
             @node$.removeClass "left-mode"
-        @context.scrollChecker.listenBy this,"scroll",()=>
-            @formatter.updateFocus()
-            visible = @formatter.getFirstVisible()
-            if visible
-                index = visible.index or 0
-
-            index -= 20
-            if index < 0
-                index = 0
-            @formatter.reflowAfter(index)
-
-            @checkLoadMore()
+        @renderer.listenBy this,"reflow",()=>
+            @updateFocusItem()
+            return
             if not @context.disableMarkAsRead
-                @markAsReadBeforeFocus()
-        @archiveBuffer = new BufferedEndlessArchiveLoader()
+                # mark all as read before focus
+                if not @currentFocus
+                    return
+                current = @renderer.indexOf(@currentFocus)
+                for archive,index in @renderer.datas
+                    if index > current
+                        return
+                    if not archive.hasRead
+                        return
+                    archive.markAsRead()
+        @renderer.listenBy this,"requireMore",()=>
+            @loadMore()
         @archiveBuffer.on "startLoading",()=>
-            console.debug "startLoading"
             if not @archiveBuffer.isDrain()
+                @renderer.setHint @context.UI.hint
                 @context.UI.loadingHint$.show()
                 @context.UI.emptyHint$.hide()
         @archiveBuffer.on "endLoading",()=>
-            console.debug "endLoading..."
             @context.UI.loadingHint$.hide()
             if @archiveBuffer.isDrain()
                 @context.UI.emptyHint$.show()
-        @formatter.on "focus",(focus)=>
-            if focus is @currentFocus
-                return
-            if @currentFocus
-                @currentFocus.blur()
-                @currentFocus.stopListenBy this
-            @currentFocus = focus
-            @currentFocus.listenBy this,"change",()=>
-                @render()
-            @currentFocus.focus()
+    updateFocusItem:()->
+        height = @getFocusHeight()
+        pack = @renderer.getPackByHeight(height)
+        if not pack.isRealized
+            return
+        if @currentFocus is pack.widget
+            return
+        if @currentFocus
+            @currentFocus.blur()
+            @currentFocus.stopListenBy this
+        @currentFocus = pack.widget
+        @currentFocus.listenBy this,"change",()=>
             @render()
+        @currentFocus.focus()
+        @render()
     load:(info)->
-        @context.UI.container$.css {minHeight:"0px"}
+        @renderer.reset()
         @isLoading = false
         @archiveInfo = info
         @archiveBuffer.reset()
@@ -272,58 +238,49 @@ class ArchiveListController extends Leaf.Widget
             sort:@context.sort
             viewRead:@context.viewRead
         })
-        @context.archiveListItems.length = 0
-        @checkLoadMore()
-    checkLoadMore:()->
+        @loadMore()
+
+    loadMore:()->
         if @isLoading
             return
         if @archiveBuffer.isDrain()
             @context.UI.emptyHint$.show()
             return
-        last = @formatter.getLastVisible()
-        renderBufferSize = 3
-        if last and @formatter.length() - last.index > renderBufferSize
-            @formatter.updateFocus()
-            return
+
         @isLoading = true
-        console.debug "start loading onemore"
         @archiveBuffer.oneMore (err,item)=>
-            console.debug err,item,"ONEMORE"
             @isLoading = false
             if err
                 @context.UI.loadingHint$.hide()
                 console.error err
                 return
-            console.debug "checkLoadMoreItem",err,item
             if not item
                 console.debug "NO MORE"
             if not item
                 @context.UI.emptyHint$.show()
                 @context.UI.loadingHint$.hide()
                 return
-            @formatter.appendArchive item
-            @checkLoadMore()
-    markAsReadBeforeFocus:()->
-        if not @currentFocus
-            return
-        for index in [0..@currentFocus.index]
-            item = @formatter.at index
-            if item and not item.archive.hasRead
-                item.markAsRead()
+            @renderer.add item
+    getFocusHeight:()->
+
+        # At beginning we will focus on the top item in the view port.
+        # When scroll more, we are more like to focus on the center item in the view port.
+        # This algo make sure we eventually focus on center item,
+        # but won't jump the first item and won't skip any item.
+        # Because fix = top*0.7 is continuous from (0~half viewport).
+        # This is what fixline do.
+        # algorithem to calculate the best position for the list item
+        {top,height,bottom} = @renderer.getViewPort()
+        half = height/2
+        fix = top * 0.7
+        fixMax = half - 100
+        return (top + Math.min(fixMax,fix))
     scrollToItem:(item)->
+        # scroll item to the focus position
         if not item
             return
-        [top,bottom] = @formatter.getViewPort()
-        fixLine = @formatter.getFixLine()
+        index = @renderer.indexOf(item)
         padding = 5
-        if item.size.height > fixLine - top
-            @context.UI.containerWrapper.scrollTop = item.position - padding
-        else
-            console.log "fix"
-            fix = (fixLine - top) - item.size.height/2
-            @context.UI.containerWrapper.scrollTop = item.position - fix - padding
-    scrollTo:(top)->
-        @context.UI.containerWrapper.scrollTop = top
     getScrollTop:()->
         return @context.UI.containerWrapper.scrollTop
     onClickExpandOption:()->
@@ -337,38 +294,8 @@ class ArchiveListController extends Leaf.Widget
         @Data.liked = archive.like
         @Data.shared = archive.share
     onClickPrevious:()->
-        # try scroll to top of the current item
-        # only scroll to previous item when beginning of the
-        # current item is visible
-        focus = @currentFocus
-        adjust = 5
-        [top,bottom] = @formatter.getViewPort()
-        if focus.getPosition() > top
-            target = @formatter.at focus.index - 1
-        else
-            target = focus
-        if target
-            @scrollToItem target
     onClickNext:()->
-        if @currentFocus is @formatter.last()
-            @context.UI.containerWrapper.scrollTop = @currentFocus.node.offsetTop + @getFocus().node.offsetHeight
-            return
-        next = @formatter.at @currentFocus.index + 1
-        if next
-            console.log "scroll to",next.index,"from",@currentFocus.index
-            @scrollToItem next
-        else
-            App.toast "No more : )"
     onClickGoBottom:()->
-        if not @currentFocus
-            return
-        @scrollToItem @currentFocus
-        bottom = @currentFocus.node.offsetTop + @currentFocus.node.offsetHeight
-        top = @context.UI.containerWrapper.scrollTop
-        height = @context.UI.containerWrapper$.height()
-        if bottom > top + height
-            forward = bottom - (top + height)
-            @context.UI.containerWrapper.scrollTop += forward
     onClickLike:()->
         if @currentFocus
             @currentFocus.onClickLike()
@@ -378,184 +305,6 @@ class ArchiveListController extends Leaf.Widget
     onClickKeepUnread:()->
         if @currentFocus
             @currentFocus.onClickKeepUnread()
-
-class ArchiveListFormatter extends Leaf.EventEmitter
-    constructor:(@context,@controller)->
-        super()
-        @context.archiveListItems.listenBy this,"child/add",(child)=>
-            child.listenBy this,"resize",()=>
-                if child.isShown
-                    child.resize()
-                    @reflowAfter child.index - 1
-        @context.archiveListItems.listenBy this,"child/remove",(child)=>
-            child.stopListenBy this
-        @context.on "previewMode",(preview)=>
-            for item in @context.archiveListItems
-                item.node$.css {height:"auto"}
-                item.sizeDirty = true
-            if @context.archiveListItems.length > 0
-                @reflowAfter(0)
-    appendArchive:(archive)->
-        item = new ArchiveListItem archive
-        viewPort = @getViewPort()
-        item.index = @context.archiveListItems.length
-        item.node$.css {width:"100%",position:"absolute",zIndex:item.index/1000}
-        prev = @context.archiveListItems[item.index - 1]
-        if prev
-            item.setPosition(prev.getNextPosition())
-        else
-            item.setPosition(0)
-        @context.archiveListItems.push item
-        item.resize()
-        @context.UI.container$.css {minHeight:item.getNextPosition()}
-        [top,bottom] = @getViewPort()
-        if item.getPosition() > bottom
-            item.hide()
-    length:()->
-        return @context.archiveListItems.length
-    at:(index)->
-        return  @context.archiveListItems[index] or null
-    last:()->
-        return @context.archiveListItems[@context.archiveListItems.length - 1] or null
-    getFirstVisible:()->
-        [top,bottom] = @getViewPort()
-        for item in @context.archiveListItems
-            if item.getPosition() + item.size.height > top
-                return item
-        return null
-    getLastVisible:()->
-        [top,bottom] = @getViewPort()
-        hasVisible = false
-        for item in @context.archiveListItems
-            if item.getPosition() < bottom
-                visible = item
-                hasVisible = true
-            else if hasVisible
-                return item
-        return null
-    updateFocus:()->
-        @currentFocus = null
-        for item,index in @context.archiveListItems
-            head = item.getPosition()
-            foot = head + item.size.height
-            # At beginning we will focus on the top item in the view port.
-            # When scroll more, we are more like to focus on the center item in the view port.
-            # This algo make sure we eventually focus on center item,
-            # but won't jump the first item and won't skip any item.
-            # Because fix = top*0.7 is continuous from (0~half viewport).
-            # This is what fixline do.
-            if foot > @getFixLine()
-                @currentFocus = item
-                break
-        @currentFocus ?= @last()
-        if @currentFocus
-            @emit "focus",@currentFocus
-        return @currentFocus
-    getFixLine:()->
-        [top,bottom] = @getViewPort()
-        half = (bottom - top)/2
-        top = @controller.getScrollTop()
-        fix = top * 0.7
-        fixMax = half - 100
-        return (top + Math.min(fixMax,fix))
-    getPreviousItem:()->
-        return @at @currentFocus.index - 1
-    getNextItem:()->
-        return @at @currentFocus.index + 1
-
-    reflowAfter:(item)->
-        # calculate relative scrollTop/focusItem and restore it after reflow
-        @saveRelativeLocation()
-        firstVisible = null
-        if item instanceof ArchiveListItem
-            after = item.index
-        else if typeof item is "number"
-            after = item
-        else
-            after = 0
-        if after < 0
-            after = 0
-        [top,bottom] = @getViewPort()
-        height = bottom - top
-        lastShow = null
-        for index in [after...@context.archiveListItems.length]
-#            if index is after
-#                continue
-            prev = @at index - 1
-            current = @at index
-#            if not current
-#                console.log "index",index,"???"
-            if prev
-                current.setPosition prev.getNextPosition()
-            else
-                current.setPosition(0)
-            if current.sizeDirty
-                if current.isShown
-                    current.resize()
-                else
-                    current.show()
-                    current.resize()
-                    current.hide()
-            dim = [current.getPosition,current.getPosition() + current.size.height]
-
-            renderBufferSize = 2
-            # for long archive renderBufferSize may works well
-            # for short archive expand:600 may works well
-            if @inViewPort(current,{expand:600})
-                lastShow = current.index
-                if not current.isShown
-                    current.show()
-                    firstVisible ?= current
-            else if typeof lastShow is "number" and current.index - lastShow < renderBufferSize
-                if not current.isShown
-                    current.show()
-            else if current.isShown
-                current.hide()
-        if @last()
-            max = @last().size.height + @last().getPosition() + 80
-            @context.UI.container$.css {minHeight:max}
-        @restoreRelativeLocation()
-        if firstVisible
-            @reflowAfter firstVisible
-#    applyHintPosition:()->
-#        last = @last()
-#        if last
-#            top = last.getNextPosition()
-#        else
-#            top = 0
-#        @context.UI.emptyHint$.css {position:absolute,left:0,top:top}
-#        @context.UI.loadingHint$.css {position:absolute,left:0,top:top}
-
-    saveRelativeLocation:()->
-        return
-        item = @updateFocus()
-        offset = @controller.getScrollTop() - item.getPosition()
-        @_relativeLocation = {
-            offset,item
-        }
-    restoreRelativeLocation:()->
-        return
-        if not @_relativeLocation
-            return
-        dest = @_relativeLocation.item.getPosition() + @_relativeLocation.offset
-        @controller.scrollTo dest
-    getViewPort:()->
-        height = @context.UI.containerWrapper$.height()
-        top = @context.UI.containerWrapper.scrollTop
-        return [top,top+height]
-    inViewPort:(item,option = {})->
-        [head,foot] = [item.getPosition(),item.getPosition() + item.size.height]
-        [top,bottom] = @getViewPort()
-        if option.expand > 0
-            expand = option.expand
-            top -= expand
-            bottom += expand
-
-#        console.log "view port hehe",head,foot,top,bottom,item.index
-        return head < bottom and foot > top
-
-
-
 
 class SourceUpdateChecker extends Leaf.Widget
     constructor:(@context)->

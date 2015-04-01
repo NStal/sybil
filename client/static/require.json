@@ -165,6 +165,10 @@
             },
             {
                 "path": "sourceView/archiveList.js",
+                "hash": "c82eae"
+            },
+            {
+                "path": "sourceView/archiveList2.js",
                 "hash": "e48321"
             },
             {
@@ -173,7 +177,7 @@
             },
             {
                 "path": "sourceView/sourceList.js",
-                "hash": "efdb87"
+                "hash": "a55bd8"
             },
             {
                 "path": "sourceView/sourceList2.js",
@@ -181,7 +185,7 @@
             },
             {
                 "path": "sourceView/sourceView.js",
-                "hash": "bb51ce"
+                "hash": "32b92f"
             },
             {
                 "path": "util/delayWorker.js",
@@ -190,6 +194,10 @@
             {
                 "path": "util/dragContext.js",
                 "hash": "06711f"
+            },
+            {
+                "path": "util/endlessListRenderer.js",
+                "hash": "28ba18"
             },
             {
                 "path": "util/flag.js",
@@ -209,7 +217,7 @@
             },
             {
                 "path": "util/scrollChecker.js",
-                "hash": "fed1ad"
+                "hash": "080584"
             },
             {
                 "path": "util/serverConnection.js",
@@ -217,7 +225,7 @@
             },
             {
                 "path": "util/swipeChecker.js",
-                "hash": "79a50e"
+                "hash": "6bdac1"
             },
             {
                 "path": "util/task.js",
@@ -229,7 +237,7 @@
             },
             {
                 "path": "view/toaster.js",
-                "hash": "ed8528"
+                "hash": "8124e5"
             },
             {
                 "path": "widget/contentImage.js",
@@ -255,5 +263,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.641"
+    "version": "0.3.0.192"
 }

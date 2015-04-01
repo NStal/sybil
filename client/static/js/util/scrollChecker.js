@@ -27,8 +27,9 @@
       if (this.eventDriven) {
         this.node.addEventListener("scroll", this.fire);
         return;
+      } else {
+        this.timer = setInterval(this.check.bind(this), 300);
       }
-      this.timer = setInterval(this.check.bind(this), 300);
       return this.lastValue = this.node.scrollTop;
     };
 
@@ -46,16 +47,18 @@
     };
 
     ScrollChecker.prototype.check = function() {
-      var value;
+      var lastValue, value;
       if (!this.node) {
         return;
       }
       value = this.node.scrollTop;
+      lastValue = this.lastValue;
+      this.lastValue = value;
       if (this.lastValue !== null) {
-        if (value !== this.lastValue) {
-          if (value > this.lastValue) {
+        if (value !== lastValue) {
+          if (value > lastValue) {
             this.emit("scrollDown");
-          } else if (value < this.lastValue) {
+          } else if (value < lastValue) {
             this.emit("scrollUp");
           }
           this.emit("scroll");
@@ -63,11 +66,10 @@
             this.emit("scrollBottom");
           }
           if (this.node.scrollTop === 0) {
-            this.emit("scrollTop");
+            return this.emit("scrollTop");
           }
         }
       }
-      return this.lastValue = value;
     };
 
     return ScrollChecker;

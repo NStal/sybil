@@ -37,11 +37,11 @@
       if (!this.endPoint) {
         return;
       }
-      swipeFloor = this.swipeFloor || 60;
+      swipeFloor = this.swipeFloor || 80;
       if (e.touches.length === 0) {
         endDate = Date.now();
         interval = endDate - this.startDate;
-        if (interval < (this.maxSwipeTime || 1000) && interval > (this.minSwipeTime || 100)) {
+        if (interval < (this.maxSwipeTime || 500) && interval > (this.minSwipeTime || 20)) {
           if (this.startPoint[0] - this.endPoint[0] > swipeFloor) {
             this.emit("swipeleft", e);
           } else if (this.startPoint[0] - this.endPoint[0] < -swipeFloor) {

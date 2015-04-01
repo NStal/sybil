@@ -22,6 +22,9 @@
       this.content = content;
       this.UI.content$.text(content);
       this.node$.addClass("show");
+      this.node$.css({
+        zIndex: 99999
+      });
       clearTimeout(this.hideTimer);
       return this.hideTimer = setTimeout((function(_this) {
         return function() {
