@@ -5,6 +5,16 @@
 # 3.5 (app ready)
 # 4. Sync the required data like source/list/nodes
 
+App = require("./app")
+App.lastVersion = window.localStorage.getItem("sybilVersion") or "0.0.0"
+if App.lastVersion isnt window.SybilMainContext.version
+    App.requireUpdate = true
+    App.lastVersion = window.SybilMainContext.version
+    window.localStorage.setItem("sybilVersion",App.lastVersion or "0.0.0")
+
+window.App = App
+
+
 ImageLoader = require "/util/imageLoader"
 SmartImage = require "/widget/smartImage"
 
@@ -20,14 +30,6 @@ HintStack = require "hintStack"
 Toaster = require "/view/toaster"
 
 
-App = require("./app")
-App.lastVersion = window.localStorage.getItem("sybilVersion") or "0.0.0"
-if App.lastVersion isnt window.SybilMainContext.version
-    App.requireUpdate = true
-    App.lastVersion = window.SybilMainContext.version
-    window.localStorage.setItem("sybilVersion",App.lastVersion or "0.0.0")
-
-window.App = App
 
 require "/enhancement"
 

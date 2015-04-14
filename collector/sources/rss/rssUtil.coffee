@@ -2,7 +2,7 @@ urlModule = require "url"
 errorDoc = require "error-doc"
 Iconv = (require "iconv").Iconv
 FeedParser = require "feedparser"
-httpUtil = require "../../../common/httpUtil.coffee"
+httpUtil = require "../../../common/httpUtil"
 console = env.logger.create(__filename)
 
 cheerio = require "cheerio"

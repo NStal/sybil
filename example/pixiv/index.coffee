@@ -1,4 +1,4 @@
-Source = sybilRequire "collector/source/source.coffee"
+Source = sybilRequire "collector/source/source"
 tough = require "tough-cookie"
 urlModule = require "url"
 httpUtil = global.env.httpUtil

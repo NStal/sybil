@@ -1,4 +1,4 @@
-httpUtil = require "../../common/httpUtil.coffee"
+httpUtil = require "../../common/httpUtil"
 urlModule = require "url"
 pathModule = require "path"
 
@@ -10,7 +10,7 @@ exports.register = (dep,callback)->
     if not dep.webApi
         callback "need webApi to implement"
         return
-    settings = require("../../settings.coffee")
+    settings = require("../../settings")
     server = dep.webApi.app
     server.get "/remoteResource",(req,res)->
         url = req.param("url","").trim()

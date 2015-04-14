@@ -1,10 +1,10 @@
 http = require("https")
-httpUtil = require("../common/httpUtil.coffee")
+httpUtil = require("../common/httpUtil")
 theOldReaderHost = "theoldreader.com"
 getAuthToken = (email,password,callback)->
     data = "client=SybilReader&accountType=HOSTED_OR_GOOGLE&service=reader&Email=#{email}&Passwd=#{password}"
     data = new Buffer(data)
-    
+
     req = http.request {method:"POST",host:theOldReaderHost,path:"/accounts/ClientLogin",headers:{"Content-Length":data.length,"Content-Type":"application/x-www-form-urlencoded"}},(res)->
         buffers = []
         res.on "data",(data)->
@@ -52,7 +52,7 @@ getFeed = (token,route,callback)->
         callback null,json
 getArchive = (token,id,callback)->
     data = "i=#{id}"
-    data = new Buffer(data)    
+    data = new Buffer(data)
     req = http.request {method:"POST",host:theOldReaderHost,path:"/reader/api/0/stream/items/contents?output=json",headers:{"Content-Length":data.length,"Content-Type":"application/x-www-form-urlencoded","Authorization":"GoogleLogin auth=#{token}"}},(res)->
         buffers = []
         res.on "data",(data)->
@@ -71,5 +71,3 @@ getAuthToken "nstalmail@gmail.com","lenFriedBK201",(err,token)->
             getFeed token,feeds[20].id,(err,result)->
                 getArchive token,result.items[0].id,(err,archive)->
                     console.log "!!!",archive.items[0].summary.content
-
-        

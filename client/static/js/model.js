@@ -269,7 +269,7 @@
 
     function Archive(data) {
       Archive.__super__.constructor.call(this);
-      this.declare(["name", "originalLink", "content", "displayContent", "title", "hasRead", "star", "guid", "createDate", "sourceGuid", "sourceName", "like", "share", "listName", "meta", "author"]);
+      this.declare(["name", "originalLink", "content", "displayContent", "title", "hasRead", "star", "guid", "createDate", "sourceGuid", "sourceName", "like", "share", "listName", "meta", "author", "lockRead"]);
       this.sets(data);
       this.data.meta = this.data.meta || {};
     }
@@ -310,6 +310,10 @@
     };
 
     Archive.prototype.markAsRead = function(callback) {
+      if (this.lockRead) {
+        callback(new Error("already locked read"));
+        return;
+      }
       return App.messageCenter.invoke("markArchiveAsRead", this.guid, (function(_this) {
         return function(err) {
           if (!err) {

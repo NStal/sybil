@@ -37,6 +37,7 @@ class SourceView extends require("/view")
     onSwitchTo:()->
         @km.active()
         @isActive = true
+        @sourceList.reflow()
     onSwitchOff:()->
         @km.deactive()
         @isActive = false

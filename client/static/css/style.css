@@ -2249,7 +2249,7 @@ html * {
   color: #777;
 }
 .archive-list .place-holder {
-  height: 70%;
+  height: 180px;
 }
 .archive-list .container-wrapper {
   width: 100%;
@@ -2287,10 +2287,10 @@ html * {
   position: relative;
   box-shadow: inset -4px 0 0 0 #aaaaaa, inset 4px 0 0 0 #aaaaaa;
 }
-.archive-list .archive-list-item.rich .extra {
-  display: inline;
+.archive-list .archive-list-item.rich .rich-information {
+  display: block;
 }
-.archive-list .archive-list-item .extra {
+.archive-list .archive-list-item .rich-information {
   display: none;
 }
 .archive-list .archive-list-item .header {
@@ -2298,6 +2298,30 @@ html * {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+}
+.archive-list .archive-list-item .headline {
+  height: 32px;
+  width: 100%;
+  overflow: hidden;
+  word-wrap: nowrap;
+  white-space: nowrap;
+  padding: 2px 0 4px;
+  box-sizing: content-box;
+  margin-bottom: 5px;
+}
+.archive-list .archive-list-item .avatar {
+  display: none;
+  height: 32px;
+  width: 32px;
+  overflow: hidden;
+  float: left;
+  border-radius: 100px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  vertical-align: sub;
+  margin-right: 8px;
+}
+.archive-list .archive-list-item .avatar.show {
+  display: block;
 }
 .archive-list .archive-list-item .title {
   cursor: pointer;
@@ -2317,21 +2341,8 @@ html * {
   line-height: 32px;
   color: #444444;
   text-decoration: none;
-}
-.archive-list .archive-list-item .avatar {
-  display: none;
-  max-height: 32px;
-  max-width: 32px;
-  overflow: hidden;
-  border-radius: 100px;
-  border: 1px solid #aaa;
-  vertical-align: sub;
-  _position: absolute;
-  _left: 10px;
-  _top: 20px;
-}
-.archive-list .archive-list-item .avatar.show {
-  display: inline-block;
+  float: left;
+  display: block;
 }
 .archive-list .archive-list-item .date,
 .archive-list .archive-list-item .source-name,
@@ -2986,10 +2997,10 @@ html * {
   -webkit-box-sizing: border-box;
   position: relative;
 }
-.search-view .archive-displayer .wrapper.rich .extra {
-  display: inline;
+.search-view .archive-displayer .wrapper.rich .rich-information {
+  display: block;
 }
-.search-view .archive-displayer .wrapper .extra {
+.search-view .archive-displayer .wrapper .rich-information {
   display: none;
 }
 .search-view .archive-displayer .wrapper .header {
@@ -2997,6 +3008,30 @@ html * {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+}
+.search-view .archive-displayer .wrapper .headline {
+  height: 32px;
+  width: 100%;
+  overflow: hidden;
+  word-wrap: nowrap;
+  white-space: nowrap;
+  padding: 2px 0 4px;
+  box-sizing: content-box;
+  margin-bottom: 5px;
+}
+.search-view .archive-displayer .wrapper .avatar {
+  display: none;
+  height: 32px;
+  width: 32px;
+  overflow: hidden;
+  float: left;
+  border-radius: 100px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  vertical-align: sub;
+  margin-right: 8px;
+}
+.search-view .archive-displayer .wrapper .avatar.show {
+  display: block;
 }
 .search-view .archive-displayer .wrapper .title {
   cursor: pointer;
@@ -3016,21 +3051,8 @@ html * {
   line-height: 32px;
   color: #444444;
   text-decoration: none;
-}
-.search-view .archive-displayer .wrapper .avatar {
-  display: none;
-  max-height: 32px;
-  max-width: 32px;
-  overflow: hidden;
-  border-radius: 100px;
-  border: 1px solid #aaa;
-  vertical-align: sub;
-  _position: absolute;
-  _left: 10px;
-  _top: 20px;
-}
-.search-view .archive-displayer .wrapper .avatar.show {
-  display: inline-block;
+  float: left;
+  display: block;
 }
 .search-view .archive-displayer .wrapper .date,
 .search-view .archive-displayer .wrapper .source-name,
@@ -3312,10 +3334,10 @@ html * {
   overflow: auto;
   background-color: #ddd;
 }
-.list-view .archive-displayer .wrapper.rich .extra {
-  display: inline;
+.list-view .archive-displayer .wrapper.rich .rich-information {
+  display: block;
 }
-.list-view .archive-displayer .wrapper .extra {
+.list-view .archive-displayer .wrapper .rich-information {
   display: none;
 }
 .list-view .archive-displayer .wrapper .header {
@@ -3323,6 +3345,30 @@ html * {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+}
+.list-view .archive-displayer .wrapper .headline {
+  height: 32px;
+  width: 100%;
+  overflow: hidden;
+  word-wrap: nowrap;
+  white-space: nowrap;
+  padding: 2px 0 4px;
+  box-sizing: content-box;
+  margin-bottom: 5px;
+}
+.list-view .archive-displayer .wrapper .avatar {
+  display: none;
+  height: 32px;
+  width: 32px;
+  overflow: hidden;
+  float: left;
+  border-radius: 100px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  vertical-align: sub;
+  margin-right: 8px;
+}
+.list-view .archive-displayer .wrapper .avatar.show {
+  display: block;
 }
 .list-view .archive-displayer .wrapper .title {
   cursor: pointer;
@@ -3342,21 +3388,8 @@ html * {
   line-height: 32px;
   color: #444444;
   text-decoration: none;
-}
-.list-view .archive-displayer .wrapper .avatar {
-  display: none;
-  max-height: 32px;
-  max-width: 32px;
-  overflow: hidden;
-  border-radius: 100px;
-  border: 1px solid #aaa;
-  vertical-align: sub;
-  _position: absolute;
-  _left: 10px;
-  _top: 20px;
-}
-.list-view .archive-displayer .wrapper .avatar.show {
-  display: inline-block;
+  float: left;
+  display: block;
 }
 .list-view .archive-displayer .wrapper .date,
 .list-view .archive-displayer .wrapper .source-name,
@@ -3833,10 +3866,10 @@ html * {
 .archive {
   position: relative;
 }
-.archive.rich .extra {
-  display: inline;
+.archive.rich .rich-information {
+  display: block;
 }
-.archive .extra {
+.archive .rich-information {
   display: none;
 }
 .archive .header {
@@ -3844,6 +3877,30 @@ html * {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+}
+.archive .headline {
+  height: 32px;
+  width: 100%;
+  overflow: hidden;
+  word-wrap: nowrap;
+  white-space: nowrap;
+  padding: 2px 0 4px;
+  box-sizing: content-box;
+  margin-bottom: 5px;
+}
+.archive .avatar {
+  display: none;
+  height: 32px;
+  width: 32px;
+  overflow: hidden;
+  float: left;
+  border-radius: 100px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  vertical-align: sub;
+  margin-right: 8px;
+}
+.archive .avatar.show {
+  display: block;
 }
 .archive .title {
   cursor: pointer;
@@ -3863,21 +3920,8 @@ html * {
   line-height: 32px;
   color: #444444;
   text-decoration: none;
-}
-.archive .avatar {
-  display: none;
-  max-height: 32px;
-  max-width: 32px;
-  overflow: hidden;
-  border-radius: 100px;
-  border: 1px solid #aaa;
-  vertical-align: sub;
-  _position: absolute;
-  _left: 10px;
-  _top: 20px;
-}
-.archive .avatar.show {
-  display: inline-block;
+  float: left;
+  display: block;
 }
 .archive .date,
 .archive .source-name,

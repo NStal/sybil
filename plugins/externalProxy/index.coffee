@@ -1,6 +1,6 @@
 MessageCenter = require("message-center").MessageCenter
 ws = require "ws"
-httpUtil = require "../../common/httpUtil.coffee"
+httpUtil = require "../../common/httpUtil"
 WebSocket = ws
 MC = new MessageCenter();
 host = "puff"
@@ -12,7 +12,7 @@ sybilHttpPort = 3006
 
 exports.requires = ["webApi"]
 exports.register = (_,callback)->
-    sybil = require("../../core/sybil.coffee")
+    sybil = require("../../core/sybil")
     sybilHttpPort = sybil.settings.webApiPort or 3107
     connection = new CenterServerConnection()
     connection.connect()

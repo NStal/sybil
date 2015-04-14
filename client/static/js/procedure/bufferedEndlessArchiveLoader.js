@@ -106,7 +106,6 @@
       }
       return this.once("loadend", (function(_this) {
         return function(err) {
-          console.log("loadend", _this.data.archives);
           if (err instanceof Errors.Drained) {
             callback();
             return;

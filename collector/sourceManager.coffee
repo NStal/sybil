@@ -1,7 +1,7 @@
 console = global.env.logger.create(__filename)
 EventEmitter = (require "events").EventEmitter
 console = env.logger.create __filename
-Errors = require "./source/errors.coffee"
+Errors = require "./source/errors"
 # SourceManager keeps all sources that are already initialized.
 # SourceManager should report archive when source emits any.
 # SourceManager should emits "source/modify" when any source get modified.

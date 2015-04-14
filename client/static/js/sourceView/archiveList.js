@@ -157,16 +157,6 @@
       if (!App.isMobile) {
         this.node$.addClass("rich");
       }
-      this.node.addEventListener("overflowchanged", (function(_this) {
-        return function() {
-          return _this.onResize();
-        };
-      })(this));
-      this.node.addEventListener("scroll", (function(_this) {
-        return function() {
-          return _this.onResize();
-        };
-      })(this));
     }
 
     ArchiveListItem.prototype.onClickContent = function() {
@@ -187,8 +177,6 @@
 
     ArchiveListItem.prototype.onClickHeader = function(e) {
       this.node$.toggleClass("collapse");
-      this.resize();
-      this.onResize();
       this.markAsRead();
       this.node$.css({
         height: "auto"
@@ -242,6 +230,7 @@
 
     ArchiveListItem.prototype.onClickMarkAsUnread = function() {
       this.lockRead = true;
+      this.archive.lockRead = true;
       this.emit("change");
       if (this.archive.hasRead === false) {
         this.render();
@@ -256,6 +245,11 @@
           return _this.render();
         };
       })(this));
+    };
+
+    ArchiveListItem.prototype.destroy = function() {
+      ArchiveListItem.__super__.destroy.call(this);
+      return this.unsetArchive();
     };
 
     return ArchiveListItem;
@@ -291,10 +285,19 @@
         };
       })(this));
       this.renderer.listenBy(this, "reflow", (function(_this) {
+        return function(start, end) {
+          return _this.updateFocusItem();
+        };
+      })(this));
+      this.renderer.listenBy(this, "resize", (function(_this) {
+        return function(start, end) {
+          return _this.updateFocusItem();
+        };
+      })(this));
+      this.renderer.listenBy(this, "viewPortChange", (function(_this) {
         return function() {
           var archive, current, index, _i, _len, _ref;
           _this.updateFocusItem();
-          return;
           if (!_this.context.disableMarkAsRead) {
             if (!_this.currentFocus) {
               return;
@@ -303,13 +306,20 @@
             _ref = _this.renderer.datas;
             for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
               archive = _ref[index];
+              console.debug(_this.renderer.datas.length);
               if (index > current) {
                 return;
               }
-              if (!archive.hasRead) {
-                return;
+              if (archive.hasRead) {
+                console.debug(_this.renderer.datas);
+                continue;
               }
-              archive.markAsRead();
+              if (archive.lockRead) {
+                continue;
+              }
+              archive.markAsRead(function() {
+                return console.debug("");
+              });
             }
           }
         };
@@ -339,7 +349,15 @@
     }
 
     ArchiveListController.prototype.updateFocusItem = function() {
-      var height, pack;
+      var height, last, minInterval, pack;
+      if (this.lastUpdateFocus) {
+        last = this.lastUpdateFocus;
+        this.lastUpdateFocus = Date.now();
+        minInterval = 10;
+        if (Date.now() - last < minInterval) {
+          return;
+        }
+      }
       height = this.getFocusHeight();
       pack = this.renderer.getPackByHeight(height);
       if (!pack.isRealized) {
@@ -359,6 +377,7 @@
         };
       })(this));
       this.currentFocus.focus();
+      console.debug("focus", this.currentFocus.pack.index, this.currentFocus);
       return this.render();
     };
 
@@ -409,25 +428,70 @@
     };
 
     ArchiveListController.prototype.getFocusHeight = function() {
-      var bottom, fix, fixMax, half, height, top, _ref;
+      var bottom, fix, fixMax, height, top, _ref;
       _ref = this.renderer.getViewPort(), top = _ref.top, height = _ref.height, bottom = _ref.bottom;
-      half = height / 2;
       fix = top * 0.7;
-      fixMax = half - 100;
+      fixMax = height / 3;
       return top + Math.min(fixMax, fix);
     };
 
-    ArchiveListController.prototype.scrollToItem = function(item) {
-      var index, padding;
-      if (!item) {
-        return;
-      }
-      index = this.renderer.indexOf(item);
-      return padding = 5;
+    ArchiveListController.prototype.getFocusHeightFix = function() {
+      var bottom, fix, fixMax, height, top, _ref;
+      _ref = this.renderer.getViewPort(), top = _ref.top, height = _ref.height, bottom = _ref.bottom;
+      fix = top * 0.7;
+      fixMax = height / 3;
+      return Math.min(fixMax, fix);
     };
 
     ArchiveListController.prototype.getScrollTop = function() {
       return this.context.UI.containerWrapper.scrollTop;
+    };
+
+    ArchiveListController.prototype.scrollItemToFocus = function(item) {
+      var fix, index, pack, padding, scrollTop, vp;
+      console.debug("hahahaah");
+      if (typeof item === "number") {
+        index = item;
+      } else {
+        index = this.renderer.indexOf(item);
+      }
+      pack = this.renderer.packs[index];
+      if (!pack || !pack.size) {
+        return;
+      }
+      padding = 0;
+      scrollTop = pack.top;
+      vp = this.renderer.getViewPort();
+      if (vp.height / 2 > pack.size.height) {
+        fix = this.getFocusHeightFix();
+        console.debug("scroll fix", fix, "??");
+        scrollTop -= fix - padding - pack.size.height / 2;
+      }
+      return this.renderer.scrollable.scrollTop = scrollTop;
+    };
+
+    ArchiveListController.prototype.scrollItemBottomToFocus = function(item) {
+      var index, pack, scrollTop, scrollTopEx, vp;
+      if (typeof item === "number") {
+        index = item;
+      } else {
+        index = this.renderer.indexOf(item);
+      }
+      pack = this.renderer.packs[index];
+      if (!pack || !pack.size) {
+        return;
+      }
+      scrollTop = pack.top;
+      vp = this.renderer.getViewPort();
+      if (vp.height > pack.size.height) {
+        this.scrollItemToFocus(item);
+        return;
+      }
+      scrollTopEx = item.size.height - vp.height;
+      if (scrollTopEx < scrollTop) {
+        scrollTop = scrollTopEx;
+      }
+      return this.renderer.scrollable.scrollTop = scrollTop;
     };
 
     ArchiveListController.prototype.onClickExpandOption = function() {
@@ -448,11 +512,35 @@
       return this.Data.shared = archive.share;
     };
 
-    ArchiveListController.prototype.onClickPrevious = function() {};
+    ArchiveListController.prototype.onClickPrevious = function() {
+      var index;
+      if (!this.currentFocus) {
+        return;
+      }
+      index = this.renderer.indexOf(this.currentFocus);
+      if (index <= 0) {
+        index = 1;
+      }
+      return this.scrollItemToFocus(index - 1);
+    };
 
-    ArchiveListController.prototype.onClickNext = function() {};
+    ArchiveListController.prototype.onClickNext = function() {
+      var index;
+      if (!this.currentFocus) {
+        return;
+      }
+      index = this.renderer.indexOf(this.currentFocus);
+      return this.scrollItemToFocus(index + 1);
+    };
 
-    ArchiveListController.prototype.onClickGoBottom = function() {};
+    ArchiveListController.prototype.onClickGoBottom = function() {
+      var index;
+      if (!this.currentFocus) {
+        return;
+      }
+      index = this.renderer.indexOf(this.currentFocus);
+      return this.scrollItemBottomToFocus(index);
+    };
 
     ArchiveListController.prototype.onClickLike = function() {
       if (this.currentFocus) {

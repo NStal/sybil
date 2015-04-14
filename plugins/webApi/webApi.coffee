@@ -5,7 +5,7 @@ ws = require "ws"
 WebSocket = ws
 http = require "http"
 
-console = require("../../common/logger.coffee").create("web-api")
+console = require("../../common/logger").create("web-api")
 #sortArchive = (archives,what)->
 #    console.log "sort called!"
 #    archives.forEach (archive)->
@@ -58,8 +58,12 @@ class WebApiServer extends EventEmitter
         @messageCenters = @messageCenters.filter (item)->item isnt mc
         return true
     setupWebsocketApi:()->
-        @websocketServer = new ws.Server({server:@httpServer})
+        @websocketServer = new ws.Server({server:@httpServer,perMessageDeflate:true})
         @websocketServer.on "connection",(connection)=>
+            __send = connection.send
+            # always compress sending data
+            connection.send = (data,compress = true,callback)->
+                __send.call connection,compress,callback
             console.log "webApi get connection"
             mc = @createMessageCenter()
             mc.setConnection(connection)

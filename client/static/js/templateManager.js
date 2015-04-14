@@ -14,8 +14,6 @@
     tm.enableCache = true;
   }
 
-  if (App.requireUpdate) {
-    tm.clearCache();
-  }
+  tm.clearCache();
 
 }).call(this);

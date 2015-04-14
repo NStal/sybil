@@ -8,7 +8,7 @@ rl = readline.createInterface({
   output: process.stdout
 });
 userSettings = {}
-settings = require("../settings.coffee")
+settings = require("../settings")
 exit = (code)->
     console.log "good bye"
     process.exit(code or 0)
@@ -94,7 +94,7 @@ genRSA = ()->
             if answer is "n"
                 complete()
             else
-                RSA = require("../common/rsa.coffee")
+                RSA = require("../common/rsa")
                 RSA.generatePrivateKey (err,key)->
                     if err
                         console.error "fail to generate rsa key"

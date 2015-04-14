@@ -1,5 +1,5 @@
-Source = require "../../source/source.coffee"
-rssUtil = require "./rssUtil.coffee"
+Source = require "../../source/source"
+rssUtil = require "./rssUtil"
 Tasks = require "node-tasks"
 urlModule = require "url"
 global.env.settings

@@ -104,11 +104,6 @@ class ArchiveListItem extends ArchiveDisplayer
         @isShown = true
         if not App.isMobile
             @node$.addClass "rich"
-        @node.addEventListener "overflowchanged",()=>
-            @onResize()
-        @node.addEventListener "scroll",()=>
-            @onResize()
-#        @node$.find("img").on "load",@onResize.bind(this)
     onClickContent:()->
         if @lockRead
             return
@@ -122,8 +117,6 @@ class ArchiveListItem extends ArchiveDisplayer
         return false
     onClickHeader:(e)->
         @node$.toggleClass("collapse")
-        @resize()
-        @onResize()
         @markAsRead()
         @node$.css {height:"auto"}
         @onResize()
@@ -160,6 +153,7 @@ class ArchiveListItem extends ArchiveDisplayer
         # just lock it to prevent read don't actually update it
         # if I do so, the unread count will just inc 1
         @lockRead = true
+        @archive.lockRead = true
         @emit "change"
         if @archive.hasRead is false
             @render()
@@ -169,7 +163,9 @@ class ArchiveListItem extends ArchiveDisplayer
                 console.error err
                 return
             @render()
-
+    destroy:()->
+        super()
+        @unsetArchive()
 # Control list level behavior, most of them
 # should have something to do with the scroller.
 tm.use "sourceView/archiveListController"
@@ -187,20 +183,27 @@ class ArchiveListController extends Leaf.Widget
             e.preventDefault()
             e.stopImmediatePropagation()
             @node$.removeClass "left-mode"
-        @renderer.listenBy this,"reflow",()=>
+        @renderer.listenBy this,"reflow",(start,end)=>
             @updateFocusItem()
-            return
+        @renderer.listenBy this,"resize",(start,end)=>
+            @updateFocusItem()
+        @renderer.listenBy this,"viewPortChange",()=>
+            @updateFocusItem()
             if not @context.disableMarkAsRead
-                # mark all as read before focus
                 if not @currentFocus
                     return
                 current = @renderer.indexOf(@currentFocus)
                 for archive,index in @renderer.datas
+                    console.debug @renderer.datas.length
                     if index > current
                         return
-                    if not archive.hasRead
-                        return
-                    archive.markAsRead()
+                    if archive.hasRead
+                        console.debug @renderer.datas
+                        continue
+                    if archive.lockRead
+                        continue
+                    archive.markAsRead ()->
+                        console.debug ""
         @renderer.listenBy this,"requireMore",()=>
             @loadMore()
         @archiveBuffer.on "startLoading",()=>
@@ -213,6 +216,14 @@ class ArchiveListController extends Leaf.Widget
             if @archiveBuffer.isDrain()
                 @context.UI.emptyHint$.show()
     updateFocusItem:()->
+        if @lastUpdateFocus
+            last = @lastUpdateFocus
+            @lastUpdateFocus = Date.now()
+            minInterval = 10
+            if Date.now() - last < minInterval
+                return
+
+
         height = @getFocusHeight()
         pack = @renderer.getPackByHeight(height)
         if not pack.isRealized
@@ -226,6 +237,7 @@ class ArchiveListController extends Leaf.Widget
         @currentFocus.listenBy this,"change",()=>
             @render()
         @currentFocus.focus()
+        console.debug "focus",@currentFocus.pack.index,@currentFocus
         @render()
     load:(info)->
         @renderer.reset()
@@ -271,18 +283,52 @@ class ArchiveListController extends Leaf.Widget
         # This is what fixline do.
         # algorithem to calculate the best position for the list item
         {top,height,bottom} = @renderer.getViewPort()
-        half = height/2
         fix = top * 0.7
-        fixMax = half - 100
+        fixMax = height/3
         return (top + Math.min(fixMax,fix))
-    scrollToItem:(item)->
-        # scroll item to the focus position
-        if not item
-            return
-        index = @renderer.indexOf(item)
-        padding = 5
+    getFocusHeightFix:()->
+        {top,height,bottom} = @renderer.getViewPort()
+        fix = top * 0.7
+        fixMax = height/3
+        return Math.min(fixMax,fix)
     getScrollTop:()->
         return @context.UI.containerWrapper.scrollTop
+    scrollItemToFocus:(item)->
+        # scroll item to the focus position
+        console.debug "hahahaah"
+        if typeof item is "number"
+            index = item
+        else
+            index = @renderer.indexOf(item)
+        pack = @renderer.packs[index]
+        if not pack or not pack.size
+            return
+        padding = 0
+        scrollTop = pack.top
+        vp = @renderer.getViewPort()
+        if vp.height/2 > pack.size.height
+            fix = @getFocusHeightFix()
+            console.debug "scroll fix",fix,"??"
+            scrollTop -= fix - padding - pack.size.height/2
+        @renderer.scrollable.scrollTop = scrollTop
+    scrollItemBottomToFocus:(item)->
+        if typeof item is "number"
+            index = item
+        else
+            index = @renderer.indexOf(item)
+        pack = @renderer.packs[index]
+        if not pack or not pack.size
+            return
+
+        scrollTop = pack.top
+        vp = @renderer.getViewPort()
+        if vp.height > pack.size.height
+            @scrollItemToFocus(item)
+            return
+        scrollTopEx = item.size.height - vp.height
+        if scrollTopEx < scrollTop
+            scrollTop = scrollTopEx
+        @renderer.scrollable.scrollTop = scrollTop
     onClickExpandOption:()->
         @showOptionFlag ?= new Flag().attach(@VM,"showOption").unset()
         @showOptionFlag.toggle()
@@ -294,8 +340,22 @@ class ArchiveListController extends Leaf.Widget
         @Data.liked = archive.like
         @Data.shared = archive.share
     onClickPrevious:()->
+        if not @currentFocus
+            return
+        index = @renderer.indexOf(@currentFocus)
+        if index <= 0
+            index = 1
+        @scrollItemToFocus index - 1
     onClickNext:()->
+        if not @currentFocus
+            return
+        index = @renderer.indexOf(@currentFocus)
+        @scrollItemToFocus index + 1
     onClickGoBottom:()->
+        if not @currentFocus
+            return
+        index = @renderer.indexOf(@currentFocus)
+        @scrollItemBottomToFocus index
     onClickLike:()->
         if @currentFocus
             @currentFocus.onClickLike()

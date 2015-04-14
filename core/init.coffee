@@ -1,1 +1,1 @@
-require("./sybil.coffee")
+require("./sybil")

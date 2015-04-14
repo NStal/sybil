@@ -4,7 +4,7 @@ EventEmitter = require("events").EventEmitter;
 async = require("async")
 pathModule = require "path"
 fs = require "fs"
-console = require("../common/logger.coffee").create("PluginCenter")
+console = require("../common/logger").create("PluginCenter")
 class PluginCenter extends EventEmitter
     constructor:(sybil)->
         @sybil = sybil
@@ -111,7 +111,7 @@ class PluginCenter extends EventEmitter
                         callback err,me
     _assignGlobalModel:(map)->
         map.sybil = @sybil
-        map.database = require("./db.coffee")
+        map.database = require("./db")
 
 
 class Plugin

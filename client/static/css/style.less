@@ -409,16 +409,40 @@ html *{
 }
 .archive{
     position:relative;
-    &.rich .extra{
-        display:inline;
+    &.rich .rich-information{
+        display:block;
     }
-    .extra{
+    .rich-information{
         display:none;
     }
     .header{
 	padding:0px 20px;
         .box-sizing;
         
+    }
+    .headline{
+        height:32px;
+        width:100%;
+        overflow:hidden;
+        word-wrap:nowrap;
+        white-space:nowrap;
+        padding:2px 0 4px;
+        box-sizing:content-box;
+        margin-bottom:5px;
+    }
+    .avatar{
+        &.show{
+            display:block;
+        }
+        display:none;
+        height:32px;
+        width:32px;
+        overflow:hidden;
+        float:left;
+        border-radius:100px;
+        box-shadow:0 0 0 1px rgba(0,0,0,0.3);
+        vertical-align:sub;
+        margin-right:8px;
     }
     .title{
         .clickable;
@@ -427,21 +451,8 @@ html *{
 	line-height:32px;
 	color:@comfortable-black;
 	text-decoration:none;
-    }
-    .avatar{
-        &.show{
-            display:inline-block;
-        }
-        display:none;
-        max-height:32px;
-        max-width:32px;
-        overflow:hidden;
-        border-radius:100px;
-        border:1px solid #aaa;
-        vertical-align:sub;
-        _position:absolute;
-        _left:10px;
-        _top:20px;
+        float:left;
+        display:block;
     }
     .date,.source-name,.action-button,.share-info{
 	color:@clear-grey;

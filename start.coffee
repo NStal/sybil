@@ -6,9 +6,9 @@ http = require "http"
 http.globalAgent.maxSockets = 100 * 100;
 https = require "https"
 https.globalAgent.maxSockets = 100* 100;
-settings = require("./settings.coffee")
+settings = require("./settings")
 pathModule = require "path"
-logger = require("./common/logger.coffee")
+logger = require("./common/logger")
 try
     settings.parseConfig("./settings.user.json")
 catch e
@@ -30,7 +30,7 @@ try
 catch
     console.error "fail to change dir to",dirname
 # do we have any clone running (and murder it :( )
-pm = require("./common/processManager.coffee")
+pm = require("./common/processManager")
 pidPath = settings.pidPath or "./pid"
 if fs.existsSync(pidPath)
     pid = parseInt(fs.readFileSync(pidPath))
@@ -56,4 +56,4 @@ if settings.tempFolder
 fs.writeFileSync(pidPath,process.pid)
 
 # finally, start it!
-require("./core/sybil.coffee")
+require("./core/sybil")

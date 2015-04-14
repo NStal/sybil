@@ -1,6 +1,6 @@
 EventEmitter = require("events").EventEmitter
 Gateway = require "node-http-gateway"
-settings = require("../settings.coffee")
+settings = require("../settings")
 console = global.env.logger.create __filename
 exports.requires = ["webApi"]
 exports.register = (dep,callback)->
@@ -36,8 +36,8 @@ getExternalIp = ()->
 #ws = require "ws"
 #WebSocket = ws
 #express = require("express")
-#settings = require("../settings.coffee")
-#httpUtil = require("../common/httpUtil.coffee")
+#settings = require("../settings")
+#httpUtil = require("../common/httpUtil")
 #
 #exports.requires = ["webApi"]
 #exports.register = (dep,callback)->

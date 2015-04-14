@@ -1,4 +1,4 @@
-States = sybilRequire "common/states.coffee"
+States = sybilRequire "common/states"
 createError = require "create-error"
 # Overview:
 #

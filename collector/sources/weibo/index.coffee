@@ -1,9 +1,9 @@
-Source = require "../../source/source.coffee"
+Source = require "../../source/source"
 urlModule = require "url"
 EventEmitter = (require "events").EventEmitter
 http = require "http"
 httpUtil = global.env.httpUtil
-weiboUtil = require "./weiboUtil.coffee"
+weiboUtil = require "./weiboUtil"
 console = env.logger.create __filename
 class Weibo extends Source
     @detectStream = (uri)->

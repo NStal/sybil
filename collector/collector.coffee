@@ -1,7 +1,7 @@
 EventEmitter = (require "events").EventEmitter
-SourceManager = require "./sourceManager.coffee"
-SourceSubscribeManager = require "./sourceSubscribeManager.coffee"
-SourceList = (require "./sourceList.coffee")
+SourceManager = require "./sourceManager"
+SourceSubscribeManager = require "./sourceSubscribeManager"
+SourceList = (require "./sourceList")
 # All event emit from this module should be json serializable
 # Consider this module are sort of edge interface of the
 # collector system.
@@ -49,7 +49,7 @@ class Collector extends EventEmitter
                 return source
         return null
     debug:()->
-        Source = require("./source/source.coffee")
+        Source = require("./source/source")
         Source::_isDebugging = true
         Source::Authorizer::_isDebugging = true
         Source::Updater::_isDebugging = true

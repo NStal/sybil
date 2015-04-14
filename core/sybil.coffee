@@ -1,5 +1,5 @@
 # this is the entry of sybil
-console = require("../common/logger.coffee").create(__filename)
+console = require("../common/logger").create(__filename)
 pathModule = require "path"
 fs = require("fs")
 
@@ -7,19 +7,19 @@ fs = require("fs")
 # which is hard to manipulate, but also be careful don't
 # introduce too many of them.
 # setup global environments
-require "./env.coffee"
+require "./env"
 
-CollectorController = require "./collectorController.coffee"
-Collector = require "../collector/collector.coffee"
+CollectorController = require "./collectorController"
+Collector = require "../collector/collector"
 class Sybil extends (require "events").EventEmitter
-    Database = require("./db.coffee")
+    Database = require("./db")
     constructor:()->
-        @sourceList = require "../collector/sourceList.coffee"
+        @sourceList = require "../collector/sourceList"
         @collector = new Collector()
         @collector.setCustomSourceFolder pathModule.join global.env.root,"customSources"
         @collectorController = new CollectorController(@collector)
-        @pluginCenter = new (require "./pluginCenter.coffee").PluginCenter(this)
-        @pluginSettingManager = new (require("./settingManager.coffee")).SettingManager()
+        @pluginCenter = new (require "./pluginCenter").PluginCenter(this)
+        @pluginSettingManager = new (require("./settingManager")).SettingManager()
         @archiveProcessQueue = (require "async").queue(@handleArchive.bind(this),1)
         @collectorController.on "archive",(archive)=>
             @archiveProcessQueue.push archive

@@ -19,6 +19,10 @@ class ArchiveDisplayer extends Leaf.Widget
         @bubble @archive,"change"
         @archive.listenBy this,"change",@render
         @render()
+    unsetArchive:()->
+        if @archive
+            @archive.stopListenBy this
+        @archive = null
     focus:()->
         @node$.addClass "focus"
     blur:()->

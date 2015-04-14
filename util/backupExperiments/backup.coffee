@@ -1,6 +1,6 @@
-settings = require("../../settings.coffee")
+settings = require("../../settings")
 settings.parseConfig()
-db = require("../../core/db.coffee")
+db = require("../../core/db")
 fs = require "fs"
 sourceStream = fs.createWriteStream("./backup.source.json")
 archiveStream = fs.createWriteStream("./backup.archive.json")
@@ -21,6 +21,3 @@ db.ready ()->
             stream.on "close",()->
                 archiveStream.end()
                 process.exit(0)
-            
-            
-

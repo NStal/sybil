@@ -293,6 +293,7 @@ class SourceListManager extends Leaf.States
     atWait:()->
         App.modelSyncManager.listenBy this,"source",(source)=>
             @addSource source
+            @context.reflow()
             return
         return
 class SourceList extends Leaf.Widget

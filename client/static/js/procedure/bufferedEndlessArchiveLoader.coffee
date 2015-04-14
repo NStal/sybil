@@ -65,7 +65,7 @@ class BufferedEndlessArchiveLoader extends Leaf.States
             callback()
             return
         @once "loadend",(err)=>
-            console.log "loadend",@data.archives
+#            console.log "loadend",@data.archives
             if err instanceof Errors.Drained
                 callback()
                 return

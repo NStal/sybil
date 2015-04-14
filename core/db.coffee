@@ -3,7 +3,7 @@ EventEmitter = (require "events").EventEmitter
 async = require "async"
 ObjectID = (require "mongodb").ObjectID
 ErrorDoc = require("error-doc")
-config = require("../settings.coffee")
+config = require("../settings")
 console = global.env.logger.create(__filename)
 module.exports = new EventEmitter()
 exports = module.exports
@@ -580,7 +580,7 @@ exports.removeFriend = (hash,callback)->
 exports.close = ()->
     dbConnector.close()
 
-# Archive is almost the same as /collector/collector.coffee::Archive
+# Archive is almost the same as /collector/collector::Archive
 # The model in db hold extra user information then the Archive in collector
 # such as like hasread tags or list info
 class Archive

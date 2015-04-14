@@ -444,6 +444,7 @@
       App.modelSyncManager.listenBy(this, "source", (function(_this) {
         return function(source) {
           _this.addSource(source);
+          _this.context.reflow();
         };
       })(this));
     };

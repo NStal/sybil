@@ -37,7 +37,7 @@
             },
             {
                 "path": "main.js",
-                "hash": "aef095"
+                "hash": "797a6e"
             },
             {
                 "path": "mobile.js",
@@ -45,7 +45,7 @@
             },
             {
                 "path": "model.js",
-                "hash": "a07ff9"
+                "hash": "ad7c89"
             },
             {
                 "path": "modelSyncManager.js",
@@ -77,11 +77,11 @@
             },
             {
                 "path": "templateManager.js",
-                "hash": "58d609"
+                "hash": "dd5eca"
             },
             {
                 "path": "test.js",
-                "hash": "fd13ca"
+                "hash": "944ec3"
             },
             {
                 "path": "userConfig.js",
@@ -97,7 +97,7 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "bc3984"
+                "hash": "61a220"
             },
             {
                 "path": "lib/async.js",
@@ -133,7 +133,7 @@
             },
             {
                 "path": "procedure/bufferedEndlessArchiveLoader.js",
-                "hash": "89d1d5"
+                "hash": "abc2f0"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
@@ -165,7 +165,7 @@
             },
             {
                 "path": "sourceView/archiveList.js",
-                "hash": "c82eae"
+                "hash": "61c59d"
             },
             {
                 "path": "sourceView/archiveList2.js",
@@ -177,7 +177,7 @@
             },
             {
                 "path": "sourceView/sourceList.js",
-                "hash": "a55bd8"
+                "hash": "836f64"
             },
             {
                 "path": "sourceView/sourceList2.js",
@@ -185,7 +185,7 @@
             },
             {
                 "path": "sourceView/sourceView.js",
-                "hash": "32b92f"
+                "hash": "9c4c5a"
             },
             {
                 "path": "util/delayWorker.js",
@@ -197,7 +197,7 @@
             },
             {
                 "path": "util/endlessListRenderer.js",
-                "hash": "28ba18"
+                "hash": "525d82"
             },
             {
                 "path": "util/flag.js",
@@ -263,5 +263,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.192"
+    "version": "0.3.0.39"
 }

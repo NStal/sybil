@@ -16,7 +16,7 @@ class HookCenter extends (require "events").EventEmitter
                 @loadHookFile (require "path").join(@hooksFolder,filename),done
                 ),(err)->
                     callback err
-            
+
     loadHookFile:(filepath,callback)->
         try
             (require "./"+filepath).register(this)
@@ -30,4 +30,3 @@ class HookCenter extends (require "events").EventEmitter
         @on "hook/#{name}",callback
 
 exports.HookCenter = HookCenter
-    

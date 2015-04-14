@@ -2,6 +2,18 @@
 (function() {
   var AddSourcePopup, App, HintStack, ImageLoader, ListView, OfflineHinter, SearchView, SettingPanel, SmartImage, SourceView, Toaster, View, ViewSwitcher;
 
+  App = require("./app");
+
+  App.lastVersion = window.localStorage.getItem("sybilVersion") || "0.0.0";
+
+  if (App.lastVersion !== window.SybilMainContext.version) {
+    App.requireUpdate = true;
+    App.lastVersion = window.SybilMainContext.version;
+    window.localStorage.setItem("sybilVersion", App.lastVersion || "0.0.0");
+  }
+
+  window.App = App;
+
   ImageLoader = require("/util/imageLoader");
 
   SmartImage = require("/widget/smartImage");
@@ -25,18 +37,6 @@
   HintStack = require("hintStack");
 
   Toaster = require("/view/toaster");
-
-  App = require("./app");
-
-  App.lastVersion = window.localStorage.getItem("sybilVersion") || "0.0.0";
-
-  if (App.lastVersion !== window.SybilMainContext.version) {
-    App.requireUpdate = true;
-    App.lastVersion = window.SybilMainContext.version;
-    window.localStorage.setItem("sybilVersion", App.lastVersion || "0.0.0");
-  }
-
-  window.App = App;
 
   require("/enhancement");
 

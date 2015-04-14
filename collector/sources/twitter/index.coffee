@@ -1,7 +1,7 @@
-Source = require "../../source/source.coffee"
+Source = require "../../source/source"
 Errors =  Source.Errors
-Twitter = require "./twitter.coffee"
-TwitterList = require "./twitterList.coffee"
+Twitter = require "./twitter"
+TwitterList = require "./twitterList"
 cheerio = require "cheerio"
 console = console = env.logger.create __filename
 Sources = [TwitterList,Twitter]

@@ -1,5 +1,5 @@
 child_process = require "child_process"
-settings = require("../settings.coffee")
+settings = require("../settings")
 exports.restart = (option)->
     args = process.argv.slice(2)
     args = args.filter (item)->item not in (option.paramFilter or [])

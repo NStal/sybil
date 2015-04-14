@@ -68,7 +68,8 @@
 
     SourceView.prototype.onSwitchTo = function() {
       this.km.active();
-      return this.isActive = true;
+      this.isActive = true;
+      return this.sourceList.reflow();
     };
 
     SourceView.prototype.onSwitchOff = function() {

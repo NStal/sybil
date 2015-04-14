@@ -1,6 +1,6 @@
-require "../../core/env.coffee"
+require "../../core/env"
 SourceBasicTester = sybilRequire("test/lib/sourceTester").SourceBasicTester
-Pixiv = require("./index.coffee")
+Pixiv = require("./index")
 tester = new SourceBasicTester({Source:Pixiv})
 hasRequire = false
 tester.on "requireLocalAuth",(handler)->

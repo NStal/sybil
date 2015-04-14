@@ -1,6 +1,6 @@
 EventEmitter = (require "events").EventEmitter
-Errors = require "./errors.coffee"
-Database = require "./db.coffee"
+Errors = require "./errors"
+Database = require "./db"
 async = require "async"
 console = global.env.logger.create(__filename)
 # save source info to db

@@ -1,6 +1,6 @@
-States = sybilRequire "common/states.coffee"
+States = sybilRequire "common/states"
 createError = require "create-error"
-Errors = require "./errors.coffee"
+Errors = require "./errors"
 console = console = env.logger.create __filename
 
 # Authorizer are responsible for authenticate the source if required.

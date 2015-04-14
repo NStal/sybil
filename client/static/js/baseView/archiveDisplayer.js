@@ -39,6 +39,13 @@
       return this.render();
     };
 
+    ArchiveDisplayer.prototype.unsetArchive = function() {
+      if (this.archive) {
+        this.archive.stopListenBy(this);
+      }
+      return this.archive = null;
+    };
+
     ArchiveDisplayer.prototype.focus = function() {
       return this.node$.addClass("focus");
     };

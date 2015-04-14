@@ -6,7 +6,7 @@
 # pinReady: pin code image is downloaded and
 # posted: login posted, check success or retcode to do the correct things
 
-Source = require "../../source/source.coffee"
+Source = require "../../source/source"
 EventEmitter = (require "events").EventEmitter
 querystring = require "querystring"
 createError = require "create-error"

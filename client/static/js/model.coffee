@@ -141,7 +141,7 @@ class Archive extends Model
 
     constructor:(data)->
         super()
-        @declare ["name","originalLink","content","displayContent","title","hasRead","star","guid","createDate","sourceGuid","sourceName","like","share","listName","meta","author"]
+        @declare ["name","originalLink","content","displayContent","title","hasRead","star","guid","createDate","sourceGuid","sourceName","like","share","listName","meta","author","lockRead"]
         @sets data
         @data.meta = @data.meta or {}
     changeList:(name,callback)->
@@ -160,6 +160,9 @@ class Archive extends Model
                 @share = false
             callback err
     markAsRead:(callback)->
+        if @lockRead
+            callback new Error "already locked read"
+            return
         App.messageCenter.invoke "markArchiveAsRead",@guid,(err)=>
             if not err
                 if not @hasRead

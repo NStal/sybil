@@ -1,5 +1,5 @@
-States = sybilRequire "common/states.coffee"
-Errors = require "./errors.coffee"
+States = sybilRequire "common/states"
+Errors = require "./errors"
 console = global.env.logger.create(__filename)
 # Events
 #
