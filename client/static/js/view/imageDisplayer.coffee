@@ -10,7 +10,6 @@ class ImageDisplayer extends Popup
         @include CubeLoadingHint
         super App.templates.imageDisplayer
         @UI.image.on "state",(state)=>
-            console.debug "stae",state,"..."
             if state is "loading"
                 @VM.imageState = "loading"
             else

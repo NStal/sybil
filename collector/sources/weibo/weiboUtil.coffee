@@ -35,7 +35,7 @@ exports.fetch = (info = {},callback)->
                 callback new Errors.AuthorizationFailed "fetch recieve redirect, likely due to session outdated.",{via:err}
                 return
             else
-                callback new Errors.NetworkError "fail to weibo fetch content"
+                callback new Errors.NetworkError "fail to fetch weibo content"
                 return
             return
 
@@ -60,7 +60,7 @@ exports.renderDisplayContent = (raw)=>
         $text(this).attr("href",urlModule.resolve("http://weibo.com/",href))
     pics = raw.pic_ids or []
     pics.forEach (id)->
-        $text(".tweet").append "<img src='http://ww1.sinaimg.cn/mw1024/#{id}' data-raw-src='http://ww1.sinaimg.cn/large/#{id}' data-thumbnail-src='http://ww2.sinaimg.cn/thumbnail/#{id}'/>"
+        $text(".tweet").append "<img src='http://ww1.sinaimg.cn/large/#{id}' data-medium-src='http://ww1.sinaimg.cn/mw1024/#{id}' data-raw-src='http://ww1.sinaimg.cn/large/#{id}' data-thumbnail-src='http://ww2.sinaimg.cn/thumbnail/#{id}'/>"
     if raw.retweeted_status
         retweet = exports.renderDisplayContent raw.retweeted_status
         $text(".tweet").append retweet

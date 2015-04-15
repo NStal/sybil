@@ -84,6 +84,10 @@
 
   App.init = function() {
     var view, _i, _len, _ref;
+    App.history = new History({
+      debug: true
+    });
+    App.backButton = new BackButtonChecker(App.history);
     App.viewSwitcher = new ViewSwitcher();
     App.imageLoader = new ImageLoader();
     SmartImage.setLoader(App.imageLoader);

@@ -119,7 +119,6 @@ class ArchiveListItem extends ArchiveDisplayer
         @node$.toggleClass("collapse")
         @markAsRead()
         @node$.css {height:"auto"}
-        @onResize()
     markAsRead:()->
         if @lockRead
             return

@@ -153,7 +153,7 @@ class EndlessListRenderer extends Leaf.EventEmitter
         start ?= -1
         end ?= -1
         # force more item than just fit within the view port
-        fix = 2
+        fix = 1
         if start isnt -1
             start -= fix
         if end isnt -1

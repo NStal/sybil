@@ -58,16 +58,19 @@ App.afterInitialLoad = (callback)->
         @once "connect",callback
 App.init = ()->
     # public components
+    App.history = new History({debug:true})
+    App.backButton = new BackButtonChecker(App.history)
+
     App.viewSwitcher = new ViewSwitcher()
     App.imageLoader = new ImageLoader()
     SmartImage.setLoader App.imageLoader
     App.imageDisplayer = new ImageDisplayer()
+
     # views
     App.addSourcePopup = new AddSourcePopup()
     App.addSourcePopup.appendTo document.body
     App.offlineHinter = new OfflineHinter()
 #    App.settingPanel = new SettingPanel()
-
     App.sourceView = new SourceView()
     App.listView = new ListView()
     App.searchView = new SearchView()

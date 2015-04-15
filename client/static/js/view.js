@@ -51,8 +51,11 @@
       this.hide();
     }
 
-    ViewSwitcher.prototype.switchTo = function(name) {
-      var has, oldView, view, _i, _len, _ref;
+    ViewSwitcher.prototype.switchTo = function(name, option) {
+      var has, oldName, oldView, view, _i, _len, _ref;
+      if (option == null) {
+        option = {};
+      }
       has = false;
       _ref = View.views;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -76,6 +79,16 @@
         this.VM.title = name;
         if (view.onSwitchTo) {
           view.onSwitchTo();
+        }
+        if (!option.noHistory) {
+          oldName = oldView.name;
+          App.history.push(this, (function(_this) {
+            return function() {
+              return _this.switchTo(oldName, {
+                noHistory: true
+              });
+            };
+          })(this));
         }
         return;
       }

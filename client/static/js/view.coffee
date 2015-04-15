@@ -25,7 +25,7 @@ class ViewSwitcher extends Leaf.Widget
         @viewItems = []
         @hideListener = @hideListener.bind(this)
         @hide()
-    switchTo:(name)->
+    switchTo:(name,option = {})->
         has = false
         for view in View.views when view.name is name
             if @currentView and @currentView.name is name
@@ -41,6 +41,10 @@ class ViewSwitcher extends Leaf.Widget
             @VM.title = name
             if view.onSwitchTo
                 view.onSwitchTo()
+            if not option.noHistory
+                oldName = oldView.name
+                App.history.push this,()=>
+                    @switchTo oldName,{noHistory:true}
             return
         if not has
             throw new Error "view #{name} not found"

@@ -50,7 +50,7 @@ exports.renderDisplayContent = (data)->
             images.push media.media_url
     $content = cheerio.load "<div class='tweet'>#{data.archive.text}</div>"
     for image in images
-        $content(".tweet").append "<img src='#{image}:large'/>"
+        $content(".tweet").append "<img src='#{image}:orig' data-raw-src='#{image}:orig' data-thumbnail-src='#{image}:thumb' data-medium-src='#{image}:large'/>"
     return $content.html()
 # states
 # void

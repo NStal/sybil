@@ -25,7 +25,6 @@
       ImageDisplayer.__super__.constructor.call(this, App.templates.imageDisplayer);
       this.UI.image.on("state", (function(_this) {
         return function(state) {
-          console.debug("stae", state, "...");
           if (state === "loading") {
             return _this.VM.imageState = "loading";
           } else {

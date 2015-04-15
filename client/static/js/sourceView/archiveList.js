@@ -178,10 +178,9 @@
     ArchiveListItem.prototype.onClickHeader = function(e) {
       this.node$.toggleClass("collapse");
       this.markAsRead();
-      this.node$.css({
+      return this.node$.css({
         height: "auto"
       });
-      return this.onResize();
     };
 
     ArchiveListItem.prototype.markAsRead = function() {

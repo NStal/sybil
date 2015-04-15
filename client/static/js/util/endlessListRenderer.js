@@ -241,7 +241,7 @@
       if (end == null) {
         end = -1;
       }
-      fix = 2;
+      fix = 1;
       if (start !== -1) {
         start -= fix;
       }
