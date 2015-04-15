@@ -1,3 +1,4 @@
+Errors = require "../errors"
 class ImageLoader extends Leaf.EventEmitter
     class ImageLoaderWorker extends Leaf.States
         constructor:()->
@@ -15,6 +16,9 @@ class ImageLoader extends Leaf.EventEmitter
         reset:()->
             if @data.img
                 @data.img.removeAttribute "src"
+            if @isWaitingFor "giveup"
+                @stopWaiting "giveup"
+            clearTimeout @data.timer
             @removeAllListeners()
             super()
         atLoading:()->
@@ -44,7 +48,6 @@ class ImageLoader extends Leaf.EventEmitter
                     @setState "abort"
                 @emit "pending"
             ,@timeout
-
             img.addEventListener "load",onload
             img.addEventListener "error",onerror
             @data.img = img
@@ -179,5 +182,24 @@ class ImageLoader extends Leaf.EventEmitter
         for item in @queue
             item.callback new Error "clear"
         @queue = []
+    stop:(srcs...)->
+        err = new Errors.Abort("manually abort image loading")
+        aborts = []
+        for item,index in @queue
+            if item.src in srcs
+                @queue[index] = null
+                aborts.push item
+        @queue = @queue.filter (item)->item
+        idleWorker = []
+        for worker in @workers
+            if worker.info.src in srcs
+                aborts.push worker.info
+                worker.reset()
+                idleWorker.push worker
+        for item in aborts
+            item.callback err
+        for worker in idleWorker
+            @_onWorkerIdle worker
+
 
 module.exports = ImageLoader

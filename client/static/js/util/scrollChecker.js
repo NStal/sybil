@@ -28,7 +28,7 @@
         this.node.addEventListener("scroll", this.fire);
         return;
       } else {
-        this.timer = setInterval(this.check.bind(this), 300);
+        this.timer = setInterval(this.check.bind(this), 100);
       }
       return this.lastValue = this.node.scrollTop;
     };

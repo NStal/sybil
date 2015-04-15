@@ -14,8 +14,8 @@
       this.scrollable = scrollable;
       this.createMethod = createMethod;
       EndlessListRenderer.__super__.constructor.call(this);
-      this.renderCompromiseFix = 300;
-      this.bottomPadding = 200;
+      this.renderCompromiseFix = 10;
+      this.bottomPadding = 300;
       this.packs = [];
       this.datas = [];
       this.wrapper = document.createElement("div");
@@ -34,21 +34,21 @@
       this.reset();
       this.scrollChecker = new ScrollChecker(this.scrollable);
       this.scrollChecker.eventDriven = true;
+      this.lastScroll = 0;
       this.scrollChecker.on("scroll", (function(_this) {
         return function() {
+          _this.viewPortBuffer = null;
           _this.adjustBufferList();
-          return _this.emit("viewPortChange");
+          _this.emit("viewPortChange");
+          return _this.saveTrace();
         };
       })(this));
       this.scrollable.appendChild(this.wrapper);
-      this.buffer.addEventListener("overflowchanged", (function(_this) {
-        return function() {
-          return _this.adjustBufferList();
-        };
-      })(this));
       this.resizeChecker = new ResizeChecker(this.buffer);
       this.resizeChecker.on("resize", (function(_this) {
         return function() {
+          _this.reflow(_this.start || 0);
+          _this.restoreTrace();
           return _this.emit("resize");
         };
       })(this));
@@ -70,7 +70,6 @@
             if (pack.isRealized) {
               continue;
             }
-            console.debug("destroy before", this.start - bufferRange - _count);
             pack.destroy();
             counter += 1;
             if (counter > maxDestroyATime) {
@@ -88,7 +87,6 @@
         if (pack && pack.widget && pack.isRealized) {
           continue;
         }
-        console.debug("destroy after", this.end + count + bufferRange);
         pack.destroy();
         counter += 1;
         if (counter > maxDestroyATime) {
@@ -111,6 +109,38 @@
       return -1;
     };
 
+    EndlessListRenderer.prototype.trace = function(item) {
+      var index;
+      index = this.indexOf(item);
+      if (index < 0) {
+        return false;
+      }
+      this.tracingPack = this.packs[index];
+      return this.saveTrace();
+    };
+
+    EndlessListRenderer.prototype.saveTrace = function() {
+      var scrollTop, top;
+      if (!this.tracingPack) {
+        return;
+      }
+      scrollTop = this.scrollable.scrollTop;
+      top = this.tracingPack.top;
+      return this.traceHistory = {
+        top: top,
+        scrollTop: scrollTop
+      };
+    };
+
+    EndlessListRenderer.prototype.restoreTrace = function() {
+      var scrollTop;
+      if (!this.traceHistory || !this.tracingPack || typeof this.tracingPack.top !== "number") {
+        return;
+      }
+      scrollTop = pack.top + this.traceHistory.scrollTop - this.traceHistory.top;
+      return this.scrollable.scrollTop = scrollTop;
+    };
+
     EndlessListRenderer.prototype.reset = function() {
       var pack, _i, _len, _ref;
       this.start = -1;
@@ -118,6 +148,8 @@
       this.wrapper.style.minHeight = "0";
       this.bufferList.length = 0;
       this.top = 0;
+      this.tracingPack = null;
+      this.traceHistory = null;
       this.datas.length = 0;
       _ref = this.packs;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -157,6 +189,9 @@
 
     EndlessListRenderer.prototype.getPackByHeight = function(height) {
       var index, item, _i, _ref;
+      if (this.packs.length === 0) {
+        return null;
+      }
       for (index = _i = _ref = this.packs.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; index = _ref <= 0 ? ++_i : --_i) {
         item = this.packs[index];
         if (item.bottom > height && item.top < height) {
@@ -277,7 +312,6 @@
         });
       }
       bufferViewPort = this.getBufferViewPort();
-      console.debug(bufferViewPort);
       _ref4 = this.packs.slice(this.end + 1, this.packs.length);
       for (index = _n = 0, _len4 = _ref4.length; _n < _len4; index = ++_n) {
         pack = _ref4[index];
@@ -313,7 +347,6 @@
       }
       this.buffer.isLocked = true;
       height = this.buffer.scrollHeight + 2;
-      console.debug("lock container to", height);
       return this.buffer$.css({
         height: height,
         overflow: "auto"
@@ -326,11 +359,10 @@
         return;
       }
       this.buffer.isLocked = false;
-      this.buffer$.css({
+      return this.buffer$.css({
         height: "auto",
         overflow: "hidden"
       });
-      return console.debug("unlockend");
     };
 
     EndlessListRenderer.prototype.setHint = function(node) {
@@ -403,9 +435,20 @@
       if (fix == null) {
         fix = 0;
       }
-      top = this.scrollable.scrollTop;
-      height = $(this.scrollable).height();
-      bottom = top + height;
+      if (this.viewPortBuffer) {
+        top = this.viewPortBuffer.top;
+        height = this.viewPortBuffer.height;
+        bottom = top + height;
+      } else {
+        top = this.scrollable.scrollTop;
+        height = $(this.scrollable).height();
+        bottom = top + height;
+        this.viewPortBuffer = {
+          top: top,
+          height: height,
+          bottom: bottom
+        };
+      }
       top -= fix;
       bottom += fix;
       if (top < 0) {
@@ -513,11 +556,10 @@
         return;
       }
       rect = this.widget.node.getBoundingClientRect();
-      this.size = {
+      return this.size = {
         height: rect.height,
         width: rect.width
       };
-      return this.widget.node.setAttribute("size", JSON.stringify([this.size]));
     };
 
     return Pack;

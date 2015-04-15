@@ -7,7 +7,7 @@
   Popup = (function(_super) {
     __extends(Popup, _super);
 
-    Popup.zIndex = 1000000;
+    Popup.zIndex = 500;
 
     function Popup(template) {
       Popup.__super__.constructor.call(this, template);
@@ -21,7 +21,7 @@
         width: "100%",
         top: 0,
         left: "0",
-        "background-color": "rgba(0,0,0,0.3)"
+        "background-color": "rgba(0,0,0,0.6)"
       });
       this.mask.onclick = (function(_this) {
         return function() {

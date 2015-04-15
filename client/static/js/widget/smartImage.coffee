@@ -1,7 +1,7 @@
 App = require "/app"
 tm = require "/templateManager"
 tm.use "widget/smartImage"
-
+Errors = require "/errors"
 class SmartImage extends Leaf.Widget
     @setLoader = (loader)->
         @loader = loader
@@ -12,10 +12,11 @@ class SmartImage extends Leaf.Widget
         @expose "errorSrc"
         @expose "fallbackSrcs"
         @expose "on"
+        @expose "state"
         @node.state = "void"
         @fallbacks = []
-        for prop of @params
-            @node[prop] = @params[prop]
+        for prop of params
+            @node[prop] = params[prop]
     onSetFallbackSrcs:(fallbacks = [])->
         if typeof fallbacks is "string"
             fallbacks = fallbacks.split(",")
@@ -46,8 +47,13 @@ class SmartImage extends Leaf.Widget
         if @loadingSrc
             @UI.image.src = @loadingSrc
         @node.state = "loading"
+        @currentLoadingSrc = src
         SmartImage.loader.cache src,(error)=>
+            @currentLoadingSrc = null
             if error
+                if error instanceof Errors.Abort
+                    console.debug "manually abort smart image loading",src
+                    return
                 if @fallbacks.length > 0
                     @node.state = "fallback"
                     @trySrc @fallbacks.shift()
@@ -58,5 +64,9 @@ class SmartImage extends Leaf.Widget
                 return
             @node.state = "succuess"
             @UI.image.src = src
-
+    destroy:()->
+        @isDestroyed = true
+        if @currentLoadingSrc
+            SmartImage.loader.stop @currentLoadingSrc
+            @currentLoadingSrc = null
 module.exports = SmartImage

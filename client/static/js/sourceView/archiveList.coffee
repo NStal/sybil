@@ -187,6 +187,7 @@ class ArchiveListController extends Leaf.Widget
             @updateFocusItem()
         @renderer.listenBy this,"resize",(start,end)=>
             @updateFocusItem()
+        @context.disableMarkAsRead = true
         @renderer.listenBy this,"viewPortChange",()=>
             @updateFocusItem()
             if not @context.disableMarkAsRead
@@ -194,16 +195,13 @@ class ArchiveListController extends Leaf.Widget
                     return
                 current = @renderer.indexOf(@currentFocus)
                 for archive,index in @renderer.datas
-                    console.debug @renderer.datas.length
                     if index > current
                         return
                     if archive.hasRead
-                        console.debug @renderer.datas
                         continue
                     if archive.lockRead
                         continue
                     archive.markAsRead ()->
-                        console.debug ""
         @renderer.listenBy this,"requireMore",()=>
             @loadMore()
         @archiveBuffer.on "startLoading",()=>
@@ -226,7 +224,7 @@ class ArchiveListController extends Leaf.Widget
 
         height = @getFocusHeight()
         pack = @renderer.getPackByHeight(height)
-        if not pack.isRealized
+        if not pack?.isRealized
             return
         if @currentFocus is pack.widget
             return
@@ -237,7 +235,7 @@ class ArchiveListController extends Leaf.Widget
         @currentFocus.listenBy this,"change",()=>
             @render()
         @currentFocus.focus()
-        console.debug "focus",@currentFocus.pack.index,@currentFocus
+        @renderer.trace pack
         @render()
     load:(info)->
         @renderer.reset()
@@ -295,7 +293,6 @@ class ArchiveListController extends Leaf.Widget
         return @context.UI.containerWrapper.scrollTop
     scrollItemToFocus:(item)->
         # scroll item to the focus position
-        console.debug "hahahaah"
         if typeof item is "number"
             index = item
         else
@@ -308,9 +305,9 @@ class ArchiveListController extends Leaf.Widget
         vp = @renderer.getViewPort()
         if vp.height/2 > pack.size.height
             fix = @getFocusHeightFix()
-            console.debug "scroll fix",fix,"??"
             scrollTop -= fix - padding - pack.size.height/2
         @renderer.scrollable.scrollTop = scrollTop
+        @renderer.saveTrace()
     scrollItemBottomToFocus:(item)->
         if typeof item is "number"
             index = item
@@ -325,10 +322,16 @@ class ArchiveListController extends Leaf.Widget
         if vp.height > pack.size.height
             @scrollItemToFocus(item)
             return
-        scrollTopEx = item.size.height - vp.height
-        if scrollTopEx < scrollTop
-            scrollTop = scrollTopEx
+        if not pack.size
+            console.debug item,"??"
+        scrollTopEx = pack.size.height - vp.height
+        scrollTop += scrollTopEx
+#        if scrollTopEx < scrollTop
+#            scrollTop = scrollTopEx
+
+
         @renderer.scrollable.scrollTop = scrollTop
+        @renderer.saveTrace()
     onClickExpandOption:()->
         @showOptionFlag ?= new Flag().attach(@VM,"showOption").unset()
         @showOptionFlag.toggle()

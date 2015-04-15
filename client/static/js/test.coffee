@@ -36,19 +36,9 @@ if window.location.toString().indexOf("debug") > 0
 #                    break
     true
     App.on "connect",()->
-
-        class Item extends Leaf.Widget
-            @index = 10
-            constructor:()->
-                super(document.createElement("span"))
-                @index = Item.index++
-                @node$.text @index
-        window.testList = Leaf.Widget.makeList document.createElement "div"
-        results = []
-        for item in [0..10]
-            results.push new Item()
-        console.debug(results)
-        window.testList.splice(0,0,results...)
+        img = document.createElement "img"
+        img.src = "/image/author-avatar-default.png---"
+        img.removeAttribute "src"
 #        console.debug "show?"
 #        App.offlineHinter.show()
 #        App.sourceView.archiveList.UI.loadingHint.show()

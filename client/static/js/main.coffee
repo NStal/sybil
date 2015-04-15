@@ -28,7 +28,7 @@ OfflineHinter = require "offlineHinter"
 SettingPanel = require "settingPanel"
 HintStack = require "hintStack"
 Toaster = require "/view/toaster"
-
+ImageDisplayer = require "/view/imageDisplayer"
 
 
 require "/enhancement"
@@ -61,7 +61,7 @@ App.init = ()->
     App.viewSwitcher = new ViewSwitcher()
     App.imageLoader = new ImageLoader()
     SmartImage.setLoader App.imageLoader
-
+    App.imageDisplayer = new ImageDisplayer()
     # views
     App.addSourcePopup = new AddSourcePopup()
     App.addSourcePopup.appendTo document.body

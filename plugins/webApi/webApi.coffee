@@ -61,10 +61,11 @@ class WebApiServer extends EventEmitter
         @websocketServer = new ws.Server({server:@httpServer,perMessageDeflate:true})
         @websocketServer.on "connection",(connection)=>
             __send = connection.send
-            # always compress sending data
-            connection.send = (data,compress = true,callback)->
-                __send.call connection,compress,callback
-            console.log "webApi get connection"
+#            # always compress sending data
+            connection.send = (data,option = {compress:true},callback)->
+                console.debug "custom sent"
+                __send.call connection,data,option,callback
+            console.log "webApi get connection custom"
             mc = @createMessageCenter()
             mc.setConnection(connection)
             connection.on "close",()=>

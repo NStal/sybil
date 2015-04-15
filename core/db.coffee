@@ -200,7 +200,7 @@ exports.updateUnreadCount = (query = {},callback)->
         if err
             callback err
             return
-        (require "async").eachLimit arr,4,((source,done)->
+        (require "async").eachLimit arr,1,((source,done)->
             Collections.archive.find({sourceGuid:source.guid,hasRead:false}).count (err,count)->
 
                 Collections.source.update {_id:source._id},{$set:{unreadCount:count}},{safe:true},(err)->
@@ -502,13 +502,11 @@ exports.getCustomArchives = (query,callback)->
         # But make count +1
         cursor.toArray (err,arr)->
             # remove splitter
-            console.log query.count,"and actually",
             if query.splitter
                 for item,index in arr
                     if item.guid is query.splitter
                         arr.splice(index,1)
                         break
-            console.log finalQuery,err,arr and arr.length or null,"???"
             callback err,arr
 exports.getConfig = (name,callback)->
     Collections.clientConfig.findOne {name:name},(err,config)->

@@ -2,8 +2,8 @@ ScrollChecker = require "/util/scrollChecker"
 class EndlessListRenderer extends Leaf.EventEmitter
     constructor:(@scrollable,@createMethod)->
         super()
-        @renderCompromiseFix = 300
-        @bottomPadding = 200
+        @renderCompromiseFix = 10
+        @bottomPadding = 300
         @packs = []
         @datas = []
         @wrapper = document.createElement "div"
@@ -21,18 +21,20 @@ class EndlessListRenderer extends Leaf.EventEmitter
         @reset()
         @scrollChecker = new ScrollChecker @scrollable
         @scrollChecker.eventDriven = true
+        @lastScroll = 0
         @scrollChecker.on "scroll",()=>
+            @viewPortBuffer = null
             @adjustBufferList()
             @emit "viewPortChange"
+            @saveTrace()
         @scrollable.appendChild @wrapper
-        @buffer.addEventListener "overflowchanged",()=>
-            @adjustBufferList()
         @resizeChecker = new ResizeChecker(@buffer)
         @resizeChecker.on "resize",()=>
+            @reflow(@start or 0)
+            @restoreTrace()
             @emit "resize"
         @resizeChecker.start()
         @destroyInterval = 200
-
     destroyStale:()->
         bufferRange = 3
         count = 5
@@ -45,7 +47,6 @@ class EndlessListRenderer extends Leaf.EventEmitter
                 if pack and pack.widget
                     if pack.isRealized
                         continue
-                    console.debug "destroy before",@start - bufferRange - _count
                     pack.destroy()
 
                     counter += 1
@@ -59,7 +60,6 @@ class EndlessListRenderer extends Leaf.EventEmitter
             pack = @packs[@end + count + bufferRange]
             if pack and pack.widget and pack.isRealized
                 continue
-            console.debug "destroy after",@end + count + bufferRange
             pack.destroy()
             counter += 1
             if counter > maxDestroyATime
@@ -74,12 +74,33 @@ class EndlessListRenderer extends Leaf.EventEmitter
         if typeof item.__index is "number"
             return item.__index
         return -1
+    trace:(item)->
+        index = @indexOf(item)
+        if index < 0
+            return false
+        @tracingPack = @packs[index]
+        @saveTrace()
+    saveTrace:()->
+        if not @tracingPack
+            return
+        scrollTop = @scrollable.scrollTop
+        top = @tracingPack.top
+        @traceHistory = {
+            top,scrollTop
+        }
+    restoreTrace:()->
+        if not @traceHistory or not @tracingPack or typeof @tracingPack.top isnt "number"
+            return
+        scrollTop = pack.top + @traceHistory.scrollTop - @traceHistory.top
+        @scrollable.scrollTop = scrollTop
     reset:()->
         @start = -1
         @end = -1
         @wrapper.style.minHeight = "0";
         @bufferList.length = 0
         @top = 0
+        @tracingPack = null
+        @traceHistory = null
         @datas.length = 0
         for pack in @packs
             pack.destroy()
@@ -96,6 +117,8 @@ class EndlessListRenderer extends Leaf.EventEmitter
         @datas.push datas...
         @addPack packs...
     getPackByHeight:(height)->
+        if @packs.length is 0
+            return null
         for index in [@packs.length - 1 .. 0]
             item = @packs[index]
             if item.bottom > height and item.top < height
@@ -190,7 +213,6 @@ class EndlessListRenderer extends Leaf.EventEmitter
 
 
         bufferViewPort = @getBufferViewPort()
-        console.debug bufferViewPort
         # Try to add some pack in packs that are no considered
         # before, because they are not added before, they don't have size.
         # Let me add them now.
@@ -223,7 +245,6 @@ class EndlessListRenderer extends Leaf.EventEmitter
             return
         @buffer.isLocked = true
         height = @buffer.scrollHeight + 2
-        console.debug "lock container to",height
         @buffer$.css {
             height:height
             overflow:"auto"
@@ -237,7 +258,6 @@ class EndlessListRenderer extends Leaf.EventEmitter
             height:"auto"
             overflow:"hidden"
         }
-        console.debug "unlockend"
     setHint:(node)->
         if @_hint and @buffer.contains(@_hint) and @_hint isnt node
             @buffer.removeChild @_hint
@@ -276,9 +296,17 @@ class EndlessListRenderer extends Leaf.EventEmitter
         bottom = @top + height
         return {top,bottom,height}
     getViewPort:(fix = 0)->
-        top = @scrollable.scrollTop
-        height = $(@scrollable).height()
-        bottom = top + height
+        if @viewPortBuffer
+            top = @viewPortBuffer.top
+            height = @viewPortBuffer.height
+            bottom = top + height
+        else
+            top = @scrollable.scrollTop
+            height = $(@scrollable).height()
+            bottom = top + height
+            @viewPortBuffer = {
+                top,height,bottom
+            }
         top -= fix
         bottom += fix
         if top < 0
@@ -339,7 +367,7 @@ class Pack extends Leaf.EventEmitter
             return
         rect = @widget.node.getBoundingClientRect()
         @size = {height:rect.height,width:rect.width}
-        @widget.node.setAttribute "size",JSON.stringify [@size]
+#        @widget.node.setAttribute "size",JSON.stringify [@size]
 
 class ResizeChecker extends Leaf.EventEmitter
     constructor:(@node)->

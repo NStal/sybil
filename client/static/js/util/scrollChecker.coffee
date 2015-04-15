@@ -15,7 +15,7 @@ class ScrollChecker extends Leaf.EventEmitter
             @node.addEventListener "scroll",@fire
             return
         else
-            @timer = setInterval @check.bind(this),300
+            @timer = setInterval @check.bind(this),100
         @lastValue = @node.scrollTop
     fire:()->
         @emit "scroll"

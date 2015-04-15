@@ -13,11 +13,29 @@
   ContentImage = (function(_super) {
     __extends(ContentImage, _super);
 
+    ContentImage.getSize = function() {
+      if ($(window).width() < 746) {
+        return "thumb";
+      }
+      return "medium";
+    };
+
     function ContentImage(el, params) {
+      var prop;
+      ContentImage.__super__.constructor.call(this, el, params);
       this.expose("originalSrc");
       this.expose("thumbSrc");
-      ContentImage.__super__.constructor.call(this, el, params);
+      this.expose("mediumSrc");
+      this.expose("size");
+      for (prop in params) {
+        this.node[prop] = params[prop];
+      }
     }
+
+    ContentImage.prototype.onSetMediumSrc = function(src) {
+      this.mediumSrc = src;
+      return this.updateDisplay();
+    };
 
     ContentImage.prototype.onClickNode = function() {
       return App.emit("originalImage", this.originalSrc || this.src);
@@ -28,22 +46,37 @@
       return this.updateDisplay();
     };
 
+    ContentImage.prototype.onSetMediumSrc = function(src) {
+      this.mediumSrc = src;
+      return this.updateDisplay();
+    };
+
     ContentImage.prototype.onSetThumbSrc = function(src) {
       this.thumbSrc = src;
       return this.updateDisplay();
     };
 
     ContentImage.prototype.updateDisplay = function() {
-      if (ContentImage.size == null) {
-        ContentImage.size = ContentImage.getSize();
+      if (this.isDestroyed) {
+        return;
       }
-      if (ContentImage.size === "thumb") {
-        return this.node.src = this.thumbSrc || this.originalSrc || this.src;
+      if (this.size == null) {
+        this.size = ContentImage.size != null ? ContentImage.size : ContentImage.size = ContentImage.getSize();
+      }
+      if (this.size === "thumb") {
+        return this.node.src = this.thumbSrc || this.mediumSrc || this.originalSrc || this.src;
       } else if (ContentImage.size === "original") {
-        return this.node.src = this.originalSrc || this.thumbSrc || this.src;
+        return this.node.src = this.originalSrc || this.mediumSrc || this.thumbSrc || this.src;
+      } else if (ContentImage.size === "medium") {
+        return this.node.src = this.mediumSrc || this.originalSrc || this.thumbSrc || this.src;
       } else {
-        return this.node.src = this.thumbSrc || this.originalSrc || this.src;
+        return this.node.src = this.mediumSrc || this.thumbSrc || this.originalSrc || this.src;
       }
+    };
+
+    ContentImage.prototype.onClickNode = function() {
+      App.imageDisplayer.setSrc(this.originalSrc || this.src || this.mediumSrc || this.thumbSrc);
+      return App.imageDisplayer.show();
     };
 
     return ContentImage;

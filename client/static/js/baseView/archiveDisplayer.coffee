@@ -18,10 +18,15 @@ class ArchiveDisplayer extends Leaf.Widget
         @archive = archive
         @bubble @archive,"change"
         @archive.listenBy this,"change",@render
+        if @richContent
+            @richContent.destroy()
+        @richContent = new RichContent @archive
         @render()
     unsetArchive:()->
         if @archive
             @archive.stopListenBy this
+        @richContent?.destroy()
+        @richContent = null
         @archive = null
     focus:()->
         @node$.addClass "focus"
@@ -47,8 +52,8 @@ class ArchiveDisplayer extends Leaf.Widget
         if @UI.avatar and @archive.author and @archive.author.avatar
             @UI.avatar$.addClass "show"
             @UI.avatar.src = @archive.author.avatar
-            @UI.avatar.errorSrc = "/image/author-avatar-default.png"
-            @UI.avatar.loadingSrc = "/image/author-avatar-default.png"
+#            @UI.avatar.errorSrc = "/image/author-avatar-default.png"
+#            @UI.avatar.loadingSrc = "/image/author-avatar-default.png"
         else
             @UI.avatar$.removeClass "show"
         if @archive.originalLink
@@ -85,36 +90,9 @@ class ArchiveDisplayer extends Leaf.Widget
 
         else
             toDisplay = @archive.content
-        if @currentContent isnt toDisplay
-            @currentContent = toDisplay
-            if !@currentContent
-                @UI.content$.text("")
-                return
-            # try have resource proxy set.
-            forceProxy = App.userConfig.get "enableResourceProxy/#{@archive.sourceGuid}"
-            if (App.userConfig.get("enableResourceProxy") or forceProxy) and App.userConfig.get("useResourceProxyByDefault")
-                content = document.createElement("div")
-                content.innerHTML = (sanitizer.sanitize(toDisplay))
-                $(content).find("img").each ()->
-                    img = this
-                    contentImage = @namespace.createWidgetByElement(elem,"ContentImage")
-                    if contentImage
-                        contentImage.replace(img)
-                        img.removeAttribute("src")
-                        img = contentImage.node
-                    else
-                        console.log @namespace.scope
-                        console.error "no content image"
-
-# setup proxy
-#                    url = @getAttribute "src"
-#                    $(this).attr("src","/remoteResource?url=#{encodeURIComponent(url)}&referer=#{originalLink}")
-                @UI.content$.html content.innerHTML
-            else
-                @UI.content$.html(sanitizer.sanitize(toDisplay))
-            @UI.content$.find("a").each ()->
-                this.setAttribute "target","_blank"
-
+        if @UI.content.children[0] isnt @richContent.container
+            @UI.content.innerHTML = ""
+            @UI.content.appendChild @richContent.container
     onClickShare:()->
         if not @archive.share
             console.log @archive
@@ -164,6 +142,10 @@ class ArchiveDisplayer extends Leaf.Widget
         if not @archive.like
             @archive.unlikeArchive () => @render()
 
+    destroy:()->
+        super()
+        @richContent?.destroy()
+        @unsetArchive()
 Popup = require "/widget/popup"
 tm.use "baseView/archiveDisplayerListSelector"
 class ArchiveDisplayerListSelector extends Popup
@@ -202,6 +184,53 @@ class ArchiveDisplayerListSelector extends Popup
                 item.active()
     onClickCloseButton:()->
         @hide()
+class RichContent extends Leaf.EventEmitter
+    constructor:(@archive)->
+        @container = document.createElement "div"
+        @container.classList.add "rich-content"
+        @archive.sanitizedContent ?= sanitizer.sanitize @archive.displayContent or @archive.content
+        @container.innerHTML = @archive.sanitizedContent
+        @images = []
+        imgs = []
+        links = []
+        for el in @container.querySelectorAll("img,a")
+            if el.tagName.toLowerCase() is "img"
+                insideLink = false
+                p = el.parentElement
+                while p
+                    if p.tagName is "A"
+                        insideLink = true
+                    p = p.parentElement
+                if not insideLink
+                    imgs.push el
+            else if el.tagName is "A"
+                links.push el
+        for img in imgs
+            src = @decorateImageUrl img.getAttribute("src") or img.getAttribute("data-raw-src")
+            params = {
+                thumbSrc:@decorateImageUrl img.getAttribute("data-thumbnail-src")
+                originalSrc:@decorateImageUrl img.getAttribute("data-raw-src") or src
+                mediumSrc:@decorateImageUrl img.getAttribute("data-medium-src")
+            }
+            si = new ContentImage img,params
+            si.ownerContent = this
+            @images.push si
+            if img.parentElement
+                img.parentElement.replaceChild si.node,img
+            img.removeAttribute "src"
+        for link in links
+            link.setAttribute "target","_blank"
+    decorateImageUrl:(url)->
+        if @useResourceProxy
+            return "/remoteResource?url=#{encodeURIComponent(url)}&referer=#{@archive.originalLink}"
+        return url
+
+    destroy:()->
+        for si in @images
+            si.destroy()
+        @container = null
+
+
 class ArchiveDisplayerListSelectorItem extends Leaf.Widget
     constructor:(@list)->
         super "<li data-text='name'></li>"

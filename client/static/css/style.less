@@ -28,7 +28,7 @@ html *{
     background-color:#303030;
     border-bottom:1px solid #2a2a2a;
     position:fixed;
-    z-index:1000;
+    z-index:50;
     .button{
         border:none;
         box-shadow:none;
@@ -121,145 +121,6 @@ html *{
 @import "./view/search-view.less";
 @import "./view/list-view.less";
 
-.p2p-view{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    .debug-info{
-        text-align:center;
-        position:absolute;
-        width:100%;
-        top:0;
-        left:0;
-        display:none;
-    }
-    .flex-row;
-    .p2p-list{
-        max-width:360px;
-        min-width:180px;
-        background-color:@color-dark-bg;
-        color:@color-font-normal-white;
-        border-right:1px solid @color-dark-bg-shadow;
-        .p2p-node-list-item{
-            height:24px;
-            padding:3px 5px;
-            margin:2px;
-            .clickable;
-            img{
-                display:block;
-                float:left;
-                padding-right:4px;
-            }
-            .nickname{
-                
-            }
-            &.select{
-                color:white;
-                background-color:@comfortable-black;
-                box-shadow:inset 0 0 4px 0 rgba(0,0,0,0.3);
-                
-            }
-
-        }
-    }
-    .p2p-info-displayer{
-        height:100%;
-    }
-    .p2p-node-info-displayer{
-        .flex-row;
-        width:100%;
-        height:100%;
-        overflow:hidden;
-        .info{
-            overflow:hidden;
-            max-width:480px;
-            min-width:240px;
-            height:100%;
-            background-color:@color-dark-bg;
-            .box-sizing;
-            padding:10px 20px;
-            color:@color-font-normal-white;
-            .avatar{
-                padding:5px;
-                border-radius:4px;
-                background-color:white;
-                box-shadow:0 0 4px 0 rgba(0,0,0,0.7);
-                width:82px;
-                height:82px;
-            }
-            .nickname,.email,.publickey,.status{
-                padding-top:5px;
-                padding-left:5px;
-            }
-            
-            .publickey{
-                word-wrap:break-word;
-		text-overflow:ellipsis;
-		white-space:nowrap;
-                overflow:hidden;
-            }
-        }
-        .archive-list{
-            width:100%;
-            height:100%;
-            overflow:auto;
-            display:block;
-        }
-    }
-}
-.custom-view{
-    .flex-row;
-    height:100%;
-    width:100%;
-    .list-button{
-        display:block;
-    }
-    .custom-source-list{
-        .left-list;
-    }
-    @list-indent-width:20px;
-    .selector{
-        display:block;
-        padding-left:@list-indent-width;
-    }
-    .list-button{
-        display:block;
-        width:100%;
-        .clickable;
-        margin-top:1px;
-        padding-left:@list-indent-width;
-        background-color:@dark-white;
-        color:@comfortable-black;
-    }
-    .action{
-        display:block;
-    }
-    .container{
-        .custom-list-item{
-            .clickable;
-            .name{
-                margin-left:3px;
-            }
-            padding-left:@list-indent-width; 
-        }
-        .custom-group-item{
-            .name-container{
-                .name,input{
-                    margin-left:3px;
-                }
-            }
-            input{
-                display:none;
-            }
-            .actions{
-                display:none;
-            }
-            .container{
-                display:none;
-            }
-        }
-    }
-}
 
 
 
@@ -268,7 +129,7 @@ html *{
 
 .add-source-popup{
     @width:500px;
-    z-index:1001;
+    z-index:51;
     width:100%;
     height:100%; 
     position:absolute;
@@ -602,9 +463,9 @@ cube-loading-hint{
         position: absolute;
     }
     &.white .box .face{
-        box-shadow: inset 0 0 @size/10 @size/30 rgba(255, 255, 255, 0.35);
-        border: 0.5px solid #eee;
-        background-color: rgba(255, 255, 255, 0.05);
+        box-shadow: inset 0 0 @size/10 @size/30 rgba(255, 255, 255, 0.45);
+        border: 0.75px solid #eee;
+        background-color: rgba(255, 255, 255, 0.08);
     }
     &.white .text{
         color:#ddd;
@@ -662,7 +523,7 @@ cube-loading-hint{
     height:100%;
     pointer-events:none;
     background-color:rgba(0,0,0,0);
-    z-index:1002;
+    z-index:55;
     .transition(opacity,1000ms);
     mix-blend-mode: darken;
     .loading-hint{
@@ -680,12 +541,14 @@ cube-loading-hint{
     &.show{
         background-color:rgba(0,0,0,0.5);
         opacity:1;
+        display:block;
     }
+    display:none;
 }
 
 .source-detail{
     .popup-window;
-    z-index:1001;
+    z-index:52;
     width:80%;
     max-height:80%;
     height:1000px;
@@ -739,7 +602,7 @@ cube-loading-hint{
     width:80%;
     min-height:60%;
     overflow:auto;
-    z-index:1001;
+    z-index:52;
     top:0;
     left:0;
     display:none;
@@ -820,7 +683,7 @@ cube-loading-hint{
     background-color:#303030;
     display:table;
     position:absolute;
-    z-index:10000;
+    z-index:1000;
     width:100%;
     height:100%;
     top:0;
@@ -962,5 +825,34 @@ cube-loading-hint{
         display:inline-block;
         text-align:center;
         padding:8px 12px;
+    }
+}
+.image-displayer{
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    .flex;
+    justify-content:center;
+    align-items:center;
+    smart-image{
+        max-width:100%;
+        max-height:100%;
+    }
+    cube-loading-hint{
+        display:none;
+        position:relative;
+        .text{
+            padding-left:20px;
+        }
+    }
+    &.loading{
+        smart-image{
+            display:none;
+        }
+        cube-loading-hint{
+            display:block;
+        }
     }
 }

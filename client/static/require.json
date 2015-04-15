@@ -37,7 +37,7 @@
             },
             {
                 "path": "main.js",
-                "hash": "797a6e"
+                "hash": "e0e89b"
             },
             {
                 "path": "mobile.js",
@@ -81,7 +81,7 @@
             },
             {
                 "path": "test.js",
-                "hash": "944ec3"
+                "hash": "b47c12"
             },
             {
                 "path": "userConfig.js",
@@ -97,7 +97,7 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "61a220"
+                "hash": "e517f2"
             },
             {
                 "path": "lib/async.js",
@@ -125,7 +125,7 @@
             },
             {
                 "path": "lib/sanitizer.js",
-                "hash": "ea5381"
+                "hash": "4dab9c"
             },
             {
                 "path": "listView/listView.js",
@@ -165,7 +165,7 @@
             },
             {
                 "path": "sourceView/archiveList.js",
-                "hash": "61c59d"
+                "hash": "644b9f"
             },
             {
                 "path": "sourceView/archiveList2.js",
@@ -197,7 +197,7 @@
             },
             {
                 "path": "util/endlessListRenderer.js",
-                "hash": "525d82"
+                "hash": "867b98"
             },
             {
                 "path": "util/flag.js",
@@ -205,7 +205,7 @@
             },
             {
                 "path": "util/imageLoader.js",
-                "hash": "56548c"
+                "hash": "629f18"
             },
             {
                 "path": "util/messageCenter.js",
@@ -217,7 +217,7 @@
             },
             {
                 "path": "util/scrollChecker.js",
-                "hash": "080584"
+                "hash": "00abef"
             },
             {
                 "path": "util/serverConnection.js",
@@ -236,12 +236,16 @@
                 "hash": "a789f2"
             },
             {
+                "path": "view/imageDisplayer.js",
+                "hash": "1bd583"
+            },
+            {
                 "path": "view/toaster.js",
                 "hash": "8124e5"
             },
             {
                 "path": "widget/contentImage.js",
-                "hash": "e44c1e"
+                "hash": "c2f244"
             },
             {
                 "path": "widget/contextMenu.js",
@@ -253,15 +257,15 @@
             },
             {
                 "path": "widget/popup.js",
-                "hash": "4932f4"
+                "hash": "4b477e"
             },
             {
                 "path": "widget/smartImage.js",
-                "hash": "b5e9ef"
+                "hash": "869e8a"
             }
         ]
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.39"
+    "version": "0.3.0.4"
 }
