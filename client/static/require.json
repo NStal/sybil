@@ -37,7 +37,7 @@
             },
             {
                 "path": "main.js",
-                "hash": "60605b"
+                "hash": "adb0fd"
             },
             {
                 "path": "mobile.js",
@@ -89,7 +89,7 @@
             },
             {
                 "path": "view.js",
-                "hash": "fd37ed"
+                "hash": "136b2f"
             },
             {
                 "path": "viewSwitcher.js",
@@ -97,7 +97,11 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "e517f2"
+                "hash": "ac17e2"
+            },
+            {
+                "path": "components/backButtonChecker.js",
+                "hash": "0de125"
             },
             {
                 "path": "components/history.js",
@@ -201,7 +205,7 @@
             },
             {
                 "path": "util/endlessListRenderer.js",
-                "hash": "8d5ab7"
+                "hash": "a04ba6"
             },
             {
                 "path": "util/flag.js",
@@ -241,7 +245,7 @@
             },
             {
                 "path": "view/imageDisplayer.js",
-                "hash": "c0d68e"
+                "hash": "b76c74"
             },
             {
                 "path": "view/toaster.js",
@@ -261,7 +265,7 @@
             },
             {
                 "path": "widget/popup.js",
-                "hash": "4b477e"
+                "hash": "12c7a2"
             },
             {
                 "path": "widget/smartImage.js",
@@ -271,5 +275,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.14"
+    "version": "0.3.0.30"
 }

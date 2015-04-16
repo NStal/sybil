@@ -356,6 +356,7 @@
       this.images = [];
       imgs = [];
       links = [];
+      this.useResourceProxy = (App.userConfig.get("enableResourceProxy/" + this.archive.sourceGuid)) && true || false;
       _ref = this.container.querySelectorAll("img,a");
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         el = _ref[_i];

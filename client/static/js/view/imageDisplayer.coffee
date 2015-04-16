@@ -12,6 +12,8 @@ class ImageDisplayer extends Popup
         @UI.image.on "state",(state)=>
             if state is "loading"
                 @VM.imageState = "loading"
+            else if state is "fail"
+                @VM.imageState = "failed"
             else
                 @VM.imageState = "ready"
         @UI.image.onclick = ()=>

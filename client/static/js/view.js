@@ -80,7 +80,7 @@
         if (view.onSwitchTo) {
           view.onSwitchTo();
         }
-        if (!option.noHistory) {
+        if (!option.noHistory && oldView) {
           oldName = oldView.name;
           App.history.push(this, (function(_this) {
             return function() {

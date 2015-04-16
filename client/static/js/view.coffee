@@ -41,7 +41,7 @@ class ViewSwitcher extends Leaf.Widget
             @VM.title = name
             if view.onSwitchTo
                 view.onSwitchTo()
-            if not option.noHistory
+            if not option.noHistory and oldView
                 oldName = oldView.name
                 App.history.push this,()=>
                     @switchTo oldName,{noHistory:true}

@@ -27,6 +27,8 @@
         return function(state) {
           if (state === "loading") {
             return _this.VM.imageState = "loading";
+          } else if (state === "fail") {
+            return _this.VM.imageState = "failed";
           } else {
             return _this.VM.imageState = "ready";
           }

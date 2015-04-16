@@ -1,3 +1,4 @@
+App = require "/app"
 class Popup extends Leaf.Widget
     @zIndex = 500
     constructor:(template)->
@@ -13,8 +14,12 @@ class Popup extends Leaf.Widget
     hide:()->
         @mask$.remove()
         @remove()
+        App.history.remove this
+
     show:()->
         @appendTo document.body
         @mask$.appendTo document.body
         @node.style.zIndex = @zIndex
+        App.history.push this,()=>
+            @hide()
 module.exports = Popup

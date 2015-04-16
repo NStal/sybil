@@ -91,7 +91,7 @@ class EndlessListRenderer extends Leaf.EventEmitter
     restoreTrace:()->
         if not @traceHistory or not @tracingPack or typeof @tracingPack.top isnt "number"
             return
-        scrollTop = pack.top + @traceHistory.scrollTop - @traceHistory.top
+        scrollTop = @tracingPack.top + @traceHistory.scrollTop - @traceHistory.top
         @scrollable.scrollTop = scrollTop
     reset:()->
         @start = -1

@@ -193,6 +193,7 @@ class RichContent extends Leaf.EventEmitter
         @images = []
         imgs = []
         links = []
+        @useResourceProxy = (App.userConfig.get "enableResourceProxy/#{@archive.sourceGuid}") and true or false
         for el in @container.querySelectorAll("img,a")
             if el.tagName.toLowerCase() is "img"
                 insideLink = false

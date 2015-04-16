@@ -4589,10 +4589,11 @@ cube-loading-hint .box .face-back {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: auto;
 }
 .image-displayer smart-image {
   max-width: 100%;
-  max-height: 100%;
+  display: none;
 }
 .image-displayer cube-loading-hint {
   display: none;
@@ -4601,9 +4602,18 @@ cube-loading-hint .box .face-back {
 .image-displayer cube-loading-hint .text {
   padding-left: 20px;
 }
-.image-displayer.loading smart-image {
+.image-displayer .failure-message {
   display: none;
+  text-align: center;
+  color: red;
+  font-weight: 700;
 }
 .image-displayer.loading cube-loading-hint {
+  display: block;
+}
+.image-displayer.failed .failure-message {
+  display: block;
+}
+.image-displayer.ready smart-image {
   display: block;
 }

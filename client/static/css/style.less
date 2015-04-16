@@ -836,9 +836,10 @@ cube-loading-hint{
     .flex;
     justify-content:center;
     align-items:center;
+    overflow:auto;
     smart-image{
         max-width:100%;
-        max-height:100%;
+        display:none;
     }
     cube-loading-hint{
         display:none;
@@ -847,12 +848,20 @@ cube-loading-hint{
             padding-left:20px;
         }
     }
-    &.loading{
-        smart-image{
-            display:none;
-        }
-        cube-loading-hint{
-            display:block;
-        }
+    .failure-message{
+        display:none;
+        text-align:center;
+        color:red;
+        font-weight:700;
+    }
+    &.loading cube-loading-hint{
+        display:block;
+    }
+
+    &.failed .failure-message{
+        display:block;
+    }
+    &.ready smart-image{
+        display:block;
     }
 }

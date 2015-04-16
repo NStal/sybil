@@ -106,8 +106,6 @@ class SourceDetail extends Popup
         @UI.descriptionEditor$.hide()
         @UI.description$.show()
 
-#class SourceRuningState extends Leaf.Widget
-
 class SourceStatistic extends Leaf.Widget
     constructor:()->
         super "<canvas></canvas>"

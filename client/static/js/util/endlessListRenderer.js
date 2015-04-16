@@ -137,7 +137,7 @@
       if (!this.traceHistory || !this.tracingPack || typeof this.tracingPack.top !== "number") {
         return;
       }
-      scrollTop = pack.top + this.traceHistory.scrollTop - this.traceHistory.top;
+      scrollTop = this.tracingPack.top + this.traceHistory.scrollTop - this.traceHistory.top;
       return this.scrollable.scrollTop = scrollTop;
     };
 

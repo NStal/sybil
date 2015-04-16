@@ -29,7 +29,8 @@ SettingPanel = require "settingPanel"
 HintStack = require "hintStack"
 Toaster = require "/view/toaster"
 ImageDisplayer = require "/view/imageDisplayer"
-
+History = require "/components/history"
+BackButtonChecker = require "/components/backButtonChecker"
 
 require "/enhancement"
 
@@ -56,11 +57,13 @@ App.afterInitialLoad = (callback)->
         callback()
     else
         @once "connect",callback
+
+App.history = new History({debug:true})
+App.backButton = new BackButtonChecker(App.history)
 App.init = ()->
     # public components
-    App.history = new History({debug:true})
-    App.backButton = new BackButtonChecker(App.history)
-
+    App.history.active()
+    App.history.goto(window.location.toString())
     App.viewSwitcher = new ViewSwitcher()
     App.imageLoader = new ImageLoader()
     SmartImage.setLoader App.imageLoader
