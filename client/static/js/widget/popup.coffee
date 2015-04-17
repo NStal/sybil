@@ -14,9 +14,11 @@ class Popup extends Leaf.Widget
     hide:()->
         @mask$.remove()
         @remove()
+        @node$.removeClass "show"
         App.history.remove this
 
     show:()->
+        @node$.addClass "show"
         @appendTo document.body
         @mask$.appendTo document.body
         @node.style.zIndex = @zIndex

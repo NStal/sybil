@@ -15,7 +15,7 @@ if App.lastVersion isnt window.SybilMainContext.version
 window.App = App
 
 
-ImageLoader = require "/util/imageLoader"
+ImageLoader = require "/components/imageLoader"
 SmartImage = require "/widget/smartImage"
 
 View = require "view"

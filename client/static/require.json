@@ -5,7 +5,7 @@
         "files": [
             {
                 "path": "app.js",
-                "hash": "02e45f"
+                "hash": "fbeff9"
             },
             {
                 "path": "connectionManager.js",
@@ -37,7 +37,7 @@
             },
             {
                 "path": "main.js",
-                "hash": "adb0fd"
+                "hash": "3b527a"
             },
             {
                 "path": "mobile.js",
@@ -97,7 +97,7 @@
             },
             {
                 "path": "baseView/archiveDisplayer.js",
-                "hash": "ac17e2"
+                "hash": "6e2696"
             },
             {
                 "path": "components/backButtonChecker.js",
@@ -106,6 +106,10 @@
             {
                 "path": "components/history.js",
                 "hash": "d15a9b"
+            },
+            {
+                "path": "components/imageLoader.js",
+                "hash": "629f18"
             },
             {
                 "path": "lib/async.js",
@@ -245,7 +249,7 @@
             },
             {
                 "path": "view/imageDisplayer.js",
-                "hash": "b76c74"
+                "hash": "fc360a"
             },
             {
                 "path": "view/toaster.js",
@@ -253,7 +257,7 @@
             },
             {
                 "path": "widget/contentImage.js",
-                "hash": "c2f244"
+                "hash": "e0cb50"
             },
             {
                 "path": "widget/contextMenu.js",
@@ -265,7 +269,7 @@
             },
             {
                 "path": "widget/popup.js",
-                "hash": "12c7a2"
+                "hash": "bca350"
             },
             {
                 "path": "widget/smartImage.js",
@@ -275,5 +279,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.30"
+    "version": "0.3.0.21"
 }

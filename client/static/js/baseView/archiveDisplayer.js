@@ -386,11 +386,20 @@
         };
         si = new ContentImage(img, params);
         si.ownerContent = this;
+        si.index = this.images.length;
         this.images.push(si);
         if (img.parentElement) {
           img.parentElement.replaceChild(si.node, img);
         }
         img.removeAttribute("src");
+        si.on("display", (function(_this) {
+          return function(si) {
+            App.imageDisplayer.show();
+            return App.imageDisplayer.setSrcs(_this.images.map(function(si) {
+              return si.getOriginalSrc();
+            }), si.index);
+          };
+        })(this));
       }
       for (_k = 0, _len2 = links.length; _k < _len2; _k++) {
         link = links[_k];

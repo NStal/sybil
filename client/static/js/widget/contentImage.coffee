@@ -18,8 +18,8 @@ class ContentImage extends SmartImage
     onSetMediumSrc:(src)->
         @mediumSrc = src
         @updateDisplay()
-    onClickNode:()->
-        App.emit "originalImage",@originalSrc or @src
+#    onClickNode:()->
+#        App.emit "originalImage",@originalSrc or @src
     onSetOriginalSrc:(src)->
         @originalSrc = src
         @updateDisplay()
@@ -41,8 +41,9 @@ class ContentImage extends SmartImage
             @node.src = @mediumSrc or @originalSrc or @thumbSrc or @src
         else
             @node.src = @mediumSrc or @thumbSrc or @originalSrc or @src
-
+    getOriginalSrc:()->
+        return @originalSrc or @src or @mediumSrc or @thumbSrc
     onClickNode:()->
-        App.imageDisplayer.setSrc(@originalSrc or @src or @mediumSrc or @thumbSrc)
-        App.imageDisplayer.show()
+        console.debug "display","??"
+        @emit "display",this
 module.exports = ContentImage

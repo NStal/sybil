@@ -231,7 +231,7 @@ input:focus {
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
 }
 .blue-glow {
-  box-shadow: 0 0 5px 0 #00ccfc, 0 0 4px 0 rgba(255, 255, 255, 0.8), 0 0 2px 0 #ffffff;
+  box-shadow: 0 0 5px 0 #00ccfc, 0 0 4px 0 rgba(255, 255, 255, 0.8), 0 0 2px 0 white;
 }
 .no-select {
   -webkit-touch-callout: none;
@@ -4579,6 +4579,40 @@ cube-loading-hint .box .face-back {
   height: 100%;
   top: 0;
   left: 0;
+  display: block;
+}
+.image-displayer .buffers {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.image-displayer .buffers .image-buffer {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: move;
+  transform: translateX(-9999px);
+  transition: all 200ms;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.image-displayer .buffers .image-buffer img {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.image-displayer .buffers .image-buffer img,
+.image-displayer .buffers .image-buffer .loading-hint,
+.image-displayer .buffers .image-buffer .failure-message {
+  display: none;
+}
+.image-displayer .buffers .image-buffer.loading .loading-hint {
+  width: 100%;
+  height: 100%;
   display: flex;
   display: -webkit-flex;
   display: -moz-flex;
@@ -4587,33 +4621,30 @@ cube-loading-hint .box .face-back {
   -moz-flex-flow: column;
   flex-flow: column;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  overflow: auto;
+  justify-content: center;
 }
-.image-displayer smart-image {
-  max-width: 100%;
-  display: none;
+.image-displayer .buffers .image-buffer.loading .loading-hint cube-loading-hint {
+  width: 180px;
 }
-.image-displayer cube-loading-hint {
-  display: none;
-  position: relative;
+.image-displayer .buffers .image-buffer.ready img {
+  display: block;
 }
-.image-displayer cube-loading-hint .text {
-  padding-left: 20px;
-}
-.image-displayer .failure-message {
-  display: none;
-  text-align: center;
+.image-displayer .buffers .image-buffer.fail .failure-message {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexflex;
+  -webkit-flex-flow: column;
+  -moz-flex-flow: column;
+  flex-flow: column;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   color: red;
-  font-weight: 700;
-}
-.image-displayer.loading cube-loading-hint {
-  display: block;
-}
-.image-displayer.failed .failure-message {
-  display: block;
-}
-.image-displayer.ready smart-image {
-  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
 }

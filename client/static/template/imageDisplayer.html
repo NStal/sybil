@@ -1,7 +1,16 @@
-<div class="image-displayer" data-class="imageState">
-  <smart-image data-id="image"></smart-image>
-  <cube-loading-hint data-id="loadingHinht" class="white" hint="warpping..."></cube-loading-hint>
-  <div class="failure">
-    Fail to load image, click to return
+<div class="image-displayer">
+  <div class="buffers" data-id="buffers">
+    <template data-name="imageBuffer">
+      <div class="image-buffer" data-class="state">
+        <img data-id="image" alt="" />
+        <div class="loading-hint"> 
+          <cube-loading-hint class="white" data-id="loading-hint" hint="warpping.."></cube-loading-hint>
+        </div>
+        <div class="failure-message">
+          fail to load image
+        </div>
+
+      </div>
+    </template>
   </div>
 </div>

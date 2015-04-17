@@ -14,7 +14,7 @@
 
   window.App = App;
 
-  ImageLoader = require("/util/imageLoader");
+  ImageLoader = require("/components/imageLoader");
 
   SmartImage = require("/widget/smartImage");
 

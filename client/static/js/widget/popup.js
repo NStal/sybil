@@ -36,10 +36,12 @@
     Popup.prototype.hide = function() {
       this.mask$.remove();
       this.remove();
+      this.node$.removeClass("show");
       return App.history.remove(this);
     };
 
     Popup.prototype.show = function() {
+      this.node$.addClass("show");
       this.appendTo(document.body);
       this.mask$.appendTo(document.body);
       this.node.style.zIndex = this.zIndex;

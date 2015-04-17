@@ -37,10 +37,6 @@
       return this.updateDisplay();
     };
 
-    ContentImage.prototype.onClickNode = function() {
-      return App.emit("originalImage", this.originalSrc || this.src);
-    };
-
     ContentImage.prototype.onSetOriginalSrc = function(src) {
       this.originalSrc = src;
       return this.updateDisplay();
@@ -74,9 +70,13 @@
       }
     };
 
+    ContentImage.prototype.getOriginalSrc = function() {
+      return this.originalSrc || this.src || this.mediumSrc || this.thumbSrc;
+    };
+
     ContentImage.prototype.onClickNode = function() {
-      App.imageDisplayer.setSrc(this.originalSrc || this.src || this.mediumSrc || this.thumbSrc);
-      return App.imageDisplayer.show();
+      console.debug("display", "??");
+      return this.emit("display", this);
     };
 
     return ContentImage;

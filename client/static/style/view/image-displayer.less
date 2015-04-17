@@ -1,0 +1,61 @@
+.image-displayer{
+    position:absolute; 
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    display:block;
+    .buffers{
+        width:100%;
+        height:100%;
+        overflow:hidden;
+        position:absolute;
+        left:0;
+        top:0;
+        .image-buffer{
+            width:100%;
+            height:100%;
+            overflow:hidden;
+            cursor:move;
+            transform:translateX(-9999px);
+            transition:all 200ms;
+            position:absolute;
+            top:0;
+            left:0;
+            
+            img{
+                position:absolute;
+                left:0;
+                top:0;
+            }
+            img,.loading-hint,.failure-message{
+                display:none;
+            }
+            &.loading .loading-hint{
+                cube-loading-hint{
+                    width:180px;
+                }
+                width:100%;
+                height:100%;
+                .flex;
+                align-items:center;
+                justify-content:center;
+            }
+            &.ready img{
+                display:block;
+            }
+            &.fail .failure-message{
+                width:100%;
+                height:100%;
+                .flex;
+                align-items:center;
+                justify-content:center;
+                color:red;
+                position:absolute;
+                left:0;
+                right:0;
+            }
+            
+        }
+    }
+}

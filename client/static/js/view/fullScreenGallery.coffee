@@ -1,10 +1,3 @@
-App = require "/app"
-tm = require "/templateManager"
-SmartImage = require "/widget/smartImage"
-Popup = require "/widget/popup"
-CubeLoadingHint = require "/widget/cubeLoadingHint"
-ImageLoader = require "/util/imageLoader"
-tm.use "imageDisplayer"
 class Point
     constructor:(@x,@y)->
         return
@@ -72,7 +65,6 @@ class TouchManager extends Leaf.Widget
         return new Point(t.clientX,t.clientY)
     handleTouchStart:(e)->
         e.preventDefault()
-        e.stopImmediatePropagation()
         @lastPoint = @_averagePosition(e.touches)
         if e.touches.length is 1
             @startPoint = _touchToPoint
@@ -100,8 +92,6 @@ class TouchManager extends Leaf.Widget
     handleTouchCancel:(e)->
 #        @log "cancel"
     handleTouchEnd:(e)->
-        e.stopImmediatePropagation()
-        e.preventDefault()
         if e.touches.length > 0
             @lastPoint = @_averagePosition(e.touches)
         if e.touches.length > 1
@@ -111,23 +101,201 @@ class TouchManager extends Leaf.Widget
 # File provider interface for gallyer displayer to get file from
 class FileProvider extends Leaf.EventEmitter
     constructor:(srcs)->
-        super()
-        @files = []
         for src,index in srcs
             @files.push {src,index}
     at:(index)->
         return @files[index] or null
-    next:(file)->
+    next:(file)-
         return @at file.index + 1
     previous:(file)->
         return @at file.index - 1
+class GalleryDisplayer extends Leaf.Widget
+    constructor:()->
+        super App.tm.templates.fileDisplayer
+        @buffers = Leaf.Widget.makeList @UI.buffers
+        @resize()
+        @node$.css({
+            "perspective":"1000px"
+            transformStyle: "preserve-3d"
+        })
+    setFileProvider:(fp)->
+        if @fileProvider
+            @fileProvider.stopListenBy this
+        @fileProvider = fp
+        # file provider may partially changed some of the old file
+        # may still there.
+        # My strategies are try to set file index at 5
+        # if 5 not exists then at 6 7 3 4
+        @fileProvider.on "refresh",()=>
+            if not @isShown
+                return
+            # the buffer may be 3 4 5(current) 6 7
+            # make it [5 6 7 3 4]
+            after = []
+            before = []
+            target = before
+            current = @getCurrentBuffer()
+            for buffer in @buffers
+                if buffer is current
+                    target = after
+                target.push buffer.src
+            srcs = [].concat after,before
+            for src in srcs
+                file = @fileProvider.getFileBySrcs src
+                if not file
+                    continue
+                @clear()
+                @setFileByIndex(file.index)
+                return
+        @hide()
+    getCurrentBuffer:()->
+        return @buffers[@currentBufferCursor]
+    resize:()->
+        @width = @node$.width()
+        @height = @node$.height()
+        for buffer in @buffers
+            buffer.resize()
+    # setup -3 ~ index ~ +3 buffers (@bufferCount = 3)
+    initBuffers:(fileIndex)->
+        @resize()
+        @clear()
+        @bufferCount ?= 3
+        # init buffer
+        buffers = []
+        currentFile = @fileProvider.at fileIndex
+        @currentBufferCursor = 0
+        @buffers.push @createBuffer(currentFile)
+
+        # Try my best to buffer the next 3 files
+        # their may not be next three so,
+        # I will break if not any more available
+        # Note, I should always using provider.next(file)/.previous(file)
+        # to get the next file.
+        # Since some specific file may be jumped by the file provider.
+        # Get it by index is not that promising
+
+        cursor = currentFile
+        for after in [1..@bufferCount]
+            cursor = @fileProvider.next cursor
+            if not cursor
+                break
+            @buffers.push @createBuffer cursor
+        cursor = currentFile
+        for before in [@bufferCount..1]
+            cursor = @fileProvider.previous cursor
+            if not cursor
+                break
+            @buffers.unshift @createBuffer cursor
+            # add currentBufferCursor by 1
+            @currentBufferCursor += 1
+        @setupBufferPositions()
+    setupBufferPositions:(option = {})->
+        for buffer,index in @buffers
+            css = {
+                transform:"translateX(#{(index-@currentBufferCursor)*@width}px)"
+                left:0
+            }
+            if index not in [@currentBufferCursor - 1 .. @currentBufferCursor + 1]
+                buffer.node$.hide()
+            else
+                buffer.node$.show()
+            if not option.time or true
+                buffer.node$.css(css)
+            else
+                buffer.node$.animate(css,option.time)
+        if current = @getCurrentBuffer()
+            @emit "display",current.file
+    clear:()->
+        @buffers.length = 0
+        @currentBufferCursor = -1
+    createBuffer:(file)->
+        buffer = new ImageBuffer(this)
+        buffer.setFile file
+
+        return buffer
+    _adjustBuffers:()->
+        # push/unshift more buffer if not enough
+        # remove buffer if too much
+        last = @buffers[@buffers.length - 1]
+        first = @buffers[0]
+        after = @buffers.length - @currentBufferCursor - 1
+        before = @currentBufferCursor
+        if before < @bufferCount and first
+            cursor = first.file
+            for index in [1..@bufferCount - before]
+                cursor = @fileProvider.previous(cursor,{random:@config.playRandom})
+                if not cursor
+                    break
+                @buffers.unshift @createBuffer cursor
+                @currentBufferCursor += 1
+        else if before > @bufferCount
+            while before > @bufferCount
+                before -= 1
+                @buffers.shift()
+                @currentBufferCursor -= 1
+
+        if after < @bufferCount and last
+            cursor = last.file
+            for index in [1..@bufferCount - after]
+                cursor = @fileProvider.next(cursor,{random:@config.playRandom})
+                if not cursor
+                    break
+                @buffers.push @createBuffer cursor
+        else if after > @bufferCount
+            while after - @bufferCount > 0
+                after -= 1
+                @buffers.pop()
+
+    slideToNext:()->
+        if @currentBufferCursor is @buffers.length - 1
+            # already last one
+            return false
+        @_slideToIndex @currentBufferCursor + 1
+        return true
+    slideToPrevious:()->
+        if @currentBufferCursor is 0
+            # already the first one
+            return false
+        @_slideToIndex @currentBufferCursor-1
+        return true
+    _slideToIndex:(index)->
+        if index < 0 or index >= @buffers.length
+            throw new Error "slide to index #{index} is out of range of #{@buffers.length}"
+        if @buffers[@currentBufferCursor]
+            @buffers[@currentBufferCursor].deactive()
+        @currentBufferCursor = index
+        if @getCurrentBuffer()
+            @getCurrentBuffer().active()
+        @_adjustBuffers()
+        @setupBufferPositions({time:140})
+    setFileByIndex:(index)->
+        file = @fileProvider.at(index)
+        if not file
+            throw new Error "file doesn't contain index #{index}"
+        @currentFile = file
+        @initBuffers(index)
+    show:()->
+        if @isShown
+            return
+        @config.prepare()
+        @isShown = true
+        @node$.show()
+        App.history.push this,()=>
+            @hide()
+    hide:()->
+        App.history.remove this
+        @isShown = false
+        @player.stop()
+        @node$.hide()
+
 class ImageBuffer extends TouchManager
     @setLoader = (loader)->
         @loader = loader
-    constructor:(@displayer)->
+    constructor:()->
         ImageBuffer.loader ?= new ImageLoader()
         super()
-        @attachTo @UI.image
+        @UI.image.onload = @onload.bind(this)
+        @attachTo @node
         @resize()
         @on "imageDoubleClick",()=>
             @toggleFitBorder()
@@ -303,7 +471,6 @@ class ImageBuffer extends TouchManager
                 @displayer.toggleToolbar()
         ),700
     handleTouchEnd:(e)->
-        super(e)
         if e.touches.length > 0
             @lastPoint = @_averagePosition(e.touches)
         if e.touches.length > 1
@@ -347,200 +514,4 @@ class ImageBuffer extends TouchManager
             @scale ap,scale
             @lastDistance = distance
 
-class GalleryDisplayer extends Leaf.Widget
-    constructor:(template)->
-        super template
-        @buffers = Leaf.Widget.makeList @UI.buffers
-        @resize()
-        @node$.css({
-            "perspective":"1000px"
-            transformStyle: "preserve-3d"
-        })
-    ImageBuffer:ImageBuffer
-    setFileProvider:(fp,index)->
-        if @fileProvider
-            @fileProvider.stopListenBy this
-        @fileProvider = fp
-        # file provider may partially changed some of the old file
-        # may still there.
-        # My strategies are try to set file index at 5
-        # if 5 not exists then at 6 7 3 4
-        @fileProvider.on "refresh",()=>
-            if not @isShown
-                return
-            # the buffer may be 3 4 5(current) 6 7
-            # make it [5 6 7 3 4]
-            after = []
-            before = []
-            target = before
-            current = @getCurrentBuffer()
-            for buffer in @buffers
-                if buffer is current
-                    target = after
-                target.push buffer.src
-            srcs = [].concat after,before
-            for src in srcs
-                file = @fileProvider.getFileBySrcs src
-                if not file
-                    continue
-                @clear()
-                @setFileByIndex(file.index)
-                return
-        @initBuffers index or 0
-    getCurrentBuffer:()->
-        return @buffers[@currentBufferCursor]
-    resize:()->
-        @width = @node$.width()
-        @height = @node$.height()
-        console.debug "update width",@width,@height
-        for buffer in @buffers
-            buffer.resize()
-    # setup -3 ~ index ~ +3 buffers (@bufferCount = 3)
-    initBuffers:(fileIndex)->
-        @resize()
-        @clear()
-        @bufferCount ?= 3
-        # init buffer
-        buffers = []
-        currentFile = @fileProvider.at fileIndex
-        @currentBufferCursor = 0
-        @buffers.push @createBuffer(currentFile)
-
-        # Try my best to buffer the next 3 files
-        # their may not be next three so,
-        # I will break if not any more available
-        # Note, I should always using provider.next(file)/.previous(file)
-        # to get the next file.
-        # Since some specific file may be jumped by the file provider.
-        # Get it by index is not that promising
-
-        cursor = currentFile
-        for after in [1..@bufferCount]
-            cursor = @fileProvider.next cursor
-            if not cursor
-                break
-            @buffers.push @createBuffer cursor
-        cursor = currentFile
-        for before in [@bufferCount..1]
-            cursor = @fileProvider.previous cursor
-            if not cursor
-                break
-            @buffers.unshift @createBuffer cursor
-            # add currentBufferCursor by 1
-            @currentBufferCursor += 1
-        @setupBufferPositions()
-    setupBufferPositions:(option = {})->
-        for buffer,index in @buffers
-            console.debug @width,"is my width"
-            css = {
-                transform:"translateX(#{(index-@currentBufferCursor)*@width}px)"
-                left:0
-            }
-            if index not in [@currentBufferCursor - 1 .. @currentBufferCursor + 1]
-                buffer.node$.hide()
-            else
-                buffer.node$.show()
-            # ignore option.time use transition for now
-            if not option.time or true
-                buffer.node$.css(css)
-            else
-                buffer.node$.animate(css,option.time)
-        if current = @getCurrentBuffer()
-            @emit "display",current.file
-    clear:()->
-        @buffers.length = 0
-        @currentBufferCursor = -1
-    createBuffer:(file)->
-        ImageBuffer.prototype.template = @templates.imageBuffer
-        buffer = new @ImageBuffer(this)
-        buffer.setFile file
-
-        return buffer
-    _adjustBuffers:()->
-        # push/unshift more buffer if not enough
-        # remove buffer if too much
-        last = @buffers[@buffers.length - 1]
-        first = @buffers[0]
-        after = @buffers.length - @currentBufferCursor - 1
-        before = @currentBufferCursor
-        if before < @bufferCount and first
-            cursor = first.file
-            for index in [1..@bufferCount - before]
-                cursor = @fileProvider.previous(cursor)
-                if not cursor
-                    break
-                @buffers.unshift @createBuffer cursor
-                @currentBufferCursor += 1
-        else if before > @bufferCount
-            while before > @bufferCount
-                before -= 1
-                @buffers.shift()
-                @currentBufferCursor -= 1
-
-        if after < @bufferCount and last
-            cursor = last.file
-            for index in [1..@bufferCount - after]
-                cursor = @fileProvider.next(cursor)
-                if not cursor
-                    break
-                @buffers.push @createBuffer cursor
-        else if after > @bufferCount
-            while after - @bufferCount > 0
-                after -= 1
-                @buffers.pop()
-
-    slideToNext:()->
-        if @currentBufferCursor is @buffers.length - 1
-            # already last one
-            return false
-        @_slideToIndex @currentBufferCursor + 1
-        return true
-    slideToPrevious:()->
-        if @currentBufferCursor is 0
-            # already the first one
-            return false
-        @_slideToIndex @currentBufferCursor-1
-        return true
-    _slideToIndex:(index)->
-        if index < 0 or index >= @buffers.length
-            throw new Error "slide to index #{index} is out of range of #{@buffers.length}"
-        if @buffers[@currentBufferCursor]
-            @buffers[@currentBufferCursor].deactive()
-        @currentBufferCursor = index
-        if @getCurrentBuffer()
-            @getCurrentBuffer().active()
-        @_adjustBuffers()
-        @setupBufferPositions({time:140})
-    setFileByIndex:(index)->
-        file = @fileProvider.at(index)
-        if not file
-            throw new Error "file doesn't contain index #{index}"
-        @currentFile = file
-        @initBuffers(index)
-
-class StatefulImageBuffer extends ImageBuffer
-    constructor:(args...)->
-        @include CubeLoadingHint
-        super args...
-GalleryDisplayer::ImageBuffer = StatefulImageBuffer
-
-class ImageDisplayer extends Popup
-    constructor:()->
-        @include SmartImage
-        @include CubeLoadingHint
-        super App.templates.imageDisplayer
-        @gallery = new GalleryDisplayer(@node)
-        ImageBuffer.setLoader App.imageLoader
-
-        @UI.buffers.addEventListener "touchstart",(e)=>
-            e.stopImmediatePropagation()
-            e.preventDefault()
-            @hide()
-    setSrcs:(srcs,index)->
-        fileProvider = new FileProvider(srcs)
-        @gallery.setFileProvider fileProvider,index or 0
-    setSrc:(src)->
-        @setSrcs [src]
-    onClickNode:()->
-        @hide()
-module.exports = ImageDisplayer
+module.exports = GalleryDisplayer

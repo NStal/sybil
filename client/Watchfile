@@ -5,7 +5,7 @@
 //{directory} /css/style.less => /css/
 exports.watchList = [
     [/^.*\.coffee$/,'coffee -c {fullpath}']
-    ,[/^.*\.less$/,'lessc static/css/style.less > static/css/style.css']
-    ,[/^.*mobile\.less$/,'lessc static/css/mobile.less > static/css/mobile.css']
+    ,[/^.*\.less$/,'lessc --plugin=less-plugin-glob static/style/main.less > static/style/main.css']
+    ,[/^.*mobile\.less$/,'lessc --plugin=less-plugin-glob static/style/mobile.less > static/style/mobile.css']
     ,[/^.*\.js$/,"bash ./util/createRequireConfig.sh"]
 ]

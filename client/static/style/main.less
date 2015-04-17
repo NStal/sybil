@@ -463,6 +463,7 @@ cube-loading-hint{
         position: absolute;
     }
     &.white .box .face{
+        
         box-shadow: inset 0 0 @size/10 @size/30 rgba(255, 255, 255, 0.45);
         border: 0.75px solid #eee;
         background-color: rgba(255, 255, 255, 0.08);
@@ -827,41 +828,5 @@ cube-loading-hint{
         padding:8px 12px;
     }
 }
-.image-displayer{
-    position:absolute;
-    width:100%;
-    height:100%;
-    top:0;
-    left:0;
-    .flex;
-    justify-content:center;
-    align-items:center;
-    overflow:auto;
-    smart-image{
-        max-width:100%;
-        display:none;
-    }
-    cube-loading-hint{
-        display:none;
-        position:relative;
-        .text{
-            padding-left:20px;
-        }
-    }
-    .failure-message{
-        display:none;
-        text-align:center;
-        color:red;
-        font-weight:700;
-    }
-    &.loading cube-loading-hint{
-        display:block;
-    }
 
-    &.failed .failure-message{
-        display:block;
-    }
-    &.ready smart-image{
-        display:block;
-    }
-}
+@import "./view/*.less";

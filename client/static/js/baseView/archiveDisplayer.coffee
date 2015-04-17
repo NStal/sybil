@@ -5,6 +5,7 @@ Model = require "/model"
 SmartImage = require "/widget/smartImage"
 ContentImage = require "/widget/contentImage"
 tm = require "/templateManager"
+
 class ArchiveDisplayer extends Leaf.Widget
     constructor:(template)->
         @include ContentImage
@@ -215,10 +216,14 @@ class RichContent extends Leaf.EventEmitter
             }
             si = new ContentImage img,params
             si.ownerContent = this
+            si.index = @images.length
             @images.push si
             if img.parentElement
                 img.parentElement.replaceChild si.node,img
             img.removeAttribute "src"
+            si.on "display",(si)=>
+                App.imageDisplayer.show()
+                App.imageDisplayer.setSrcs (@images.map (si)->si.getOriginalSrc()),si.index
         for link in links
             link.setAttribute "target","_blank"
     decorateImageUrl:(url)->
