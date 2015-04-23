@@ -1,0 +1,161 @@
+.archive{
+    position:relative;
+    rich-information{
+        padding:1px 5px;
+    }
+    &.rich .rich-information{
+        display:block;
+    }
+    .rich-information{
+        display:none;
+    }
+    .header{
+	padding:0px 20px;
+        .box-sizing;
+        
+    }
+    .headline{
+        height:32px;
+        width:100%;
+        overflow:hidden;
+        word-wrap:nowrap;
+        white-space:nowrap;
+        padding:2px 0 4px;
+        box-sizing:content-box;
+        margin-bottom:5px;
+    }
+    .avatar{
+        &.show{
+            display:block;
+        }
+        display:none;
+        height:32px;
+        width:32px;
+        overflow:hidden;
+        float:left;
+        border-radius:100px;
+        box-shadow:0 0 0 1px rgba(0,0,0,0.23);
+        background-color:rgba(0,0,0,0.13);
+        vertical-align:sub;
+        margin-right:8px;
+        margin-left:4px;
+    }
+    .title{
+        .clickable;
+        .has-select;
+	font-size:24px;
+	line-height:32px;
+	color:@comfortable-black;
+	text-decoration:none;
+        float:left;
+        display:block;
+    }
+    .date,.source-name,.action-button,.share-info{
+	color:@clear-grey;
+	padding-right:20px;
+	padding-bottom:20px;
+    }
+    .share-info{
+        img{
+            margin-right:5px;
+        }
+    }
+    .action-button{
+        .clickable;
+    }
+    .content{
+	overflow:hidden;
+	line-height:30px;
+	font-size:16px;
+	padding:0 20px 10px;
+	max-width:900px; 
+        .readable;
+	a{
+	    color:grey;
+	    text-decoration:none;
+	    &:hover{
+		text-decoration:underline;
+	    }
+	}
+	p{
+	    padding:0.6em 0;
+	}
+        ul{
+            li{
+                list-style:none;
+                padding-left:16px;
+                border-left:4px solid #555;
+                margin-bottom:1px;
+            }
+        }
+        ol li{
+            list-style-position:inside;
+        }
+        img{
+            max-width:80%;
+            border-radius:6px;
+            box-shadow:0 0 3px 0 rgba(0,0,0,0.3);
+            padding:8px;
+            text-align:center;
+            margin:10px auto;
+            display:block;
+            background-color:white;
+        }
+        [alt='Fork me on GitHub']{
+            border:none;
+            background-color:rgba(0,0,0,0);
+            box-shadow:none;
+            position:absolute;
+            top:0;
+            right:0;
+            padding:0;
+            margin:0;
+        }
+    }
+    .tool-bar{
+        padding-left:20px;
+	.tool-button{
+            display:inline-block;
+            overflow:hidden;
+	    .clickable; 
+	    color:@clear-grey;
+	    padding:1px 8px 1px 0;
+            i{
+                padding-right:6px;
+                text-shadow:1px 1px #eee;
+            }
+            line-height:28px;
+	    &:hover{
+		color:@hint-color; 
+	    }
+	    &.active{
+		color:@comfortable-black;
+	    }
+	}
+        .like,.share{
+            display:none;
+        }
+    }
+
+}
+
+.archive-displayer-list-selector{
+    background-color:white;
+    color:black;
+    padding:10px;
+    border-radius:5px;
+    .light-shadow;
+    .close-button{
+        display:none;
+    }
+    ul{
+        li{
+            list-style:none;
+            padding:5px; 
+            .clickable;
+            &:hover{
+                text-decoration:underline;
+            }
+        }
+    }
+}

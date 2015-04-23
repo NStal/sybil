@@ -133,7 +133,7 @@
             },
             {
                 "path": "procedure/bufferedEndlessArchiveLoader.js",
-                "hash": "5796e7"
+                "hash": "8dbf61"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
@@ -259,5 +259,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.437"
+    "version": "0.3.0.443"
 }
