@@ -1,0 +1,104 @@
+.search-scene{
+    height:100%;
+    width:100%;
+    overflow:hidden;
+    position:relative;
+    .flex-row;
+    .box-sizing;
+    @search-list-width:500px;
+    .search-list{
+        height:100%;
+        min-width:@search-list-width - 100px;
+        max-width:@search-list-width;
+        .left-list;
+        background-color:@color-dark-bg;
+        color:@color-font-normal-white;
+        overflow:auto;
+        .header{
+            width:100%;
+            text-align:center;
+            padding:10px;
+            border-bottom:1px solid @color-dark-bg-shadow;
+            box-shadow:0 1px 0 0 @color-dark-bg-light;
+            font-size:16px;
+            .box-sizing;
+            input{
+                border:none;
+                border-bottom:1px solid @clear-grey;
+                background-color:rgba(0,0,0,0);
+                color:@color-font-normal-white;
+            }
+            button{
+                font-size:16px;
+                border:none;
+                background-color:transparent;
+                box-shadow:none;
+                color:@color-font-normal-white;
+                &:hover{
+                    color:@hint-color;
+                }
+            }
+            
+        }
+        .result-list{
+            overflow:hidden;
+        }
+        .search-list-item{
+            .title{
+                font-size:16px;
+                font-weight:200;
+                padding:5px 0;
+                .clickable;
+            }
+            .info{
+                display:none;
+                font-size:16px;
+                color:#888;
+                width:100%;
+                padding-bottom:5px;
+                overflow:hidden;
+                div{
+                    display:block;
+                    float:left; 
+                    padding-right:0.8em;
+                }
+            }
+            .prescene{
+                .readable;
+                font-size:16px;
+                color:#888;
+            }
+            border-bottom:1px solid @color-dark-bg-shadow;
+            box-shadow:0px 1px @color-dark-bg-light;
+            .box-sizing;
+            padding:10px 15px;
+            width:100%;
+        }
+        .loading-hint{
+            display:none;
+            margin:50px auto;
+            width:220px;
+        }
+        .no-more-hint{
+            text-align:center;
+            padding:5px;
+            display:none;
+        }
+    }
+    .archive-displayer{
+        z-index:0;
+        height:100%;
+        width:100%;
+        padding:10px;
+        float:left;
+        .box-sizing;
+        overflow:auto;
+        .wrapper{
+            padding:10px;
+            .box-sizing;
+            .archive;
+        }
+    }
+    
+    
+}

@@ -97,8 +97,10 @@ exports.register = (dep,callback)->
                 @data.iconBinary = buffer
                 @setState "returnIconBinary"
         atReturnIconBinary:(sole)->
-            DAY = 1000 * 60 * 60 * 24
-            @res.setHeader "Expires", new Date(Date.now() + DAY * 7).toGMTString()
+            DAYms = 1000 * 60 * 60 * 24
+            days = 14
+            @res.setHeader "Expires", new Date(Date.now() + DAYms * days).toGMTString()
+            @res.setHeader "Cache-Control",  "max-age=#{DAYms/1000 * days}, public"
             @res.end @data.iconBinary
             @emit "done"
         atReturnServerError:()->

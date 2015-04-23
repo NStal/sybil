@@ -3,4 +3,4 @@ version=`./util/updateVersion.sh`
 [ -z "$version" ] && version="unkown" && exit 1
 
 echo create require.json for $version
-leafjs-require ./static/js/ -r ./js/ -o ./static/require.json --excludes ./static/js/lib/jquery.js,./static/js/lib/leaf-require.js,./static/js/lib/leaf.js --set-version $version
+leafjs-require ./static/script/ -r ./script/ -o ./static/require.json --excludes ./static/script/lib/jquery.js,./static/script/lib/leaf-require.js,./static/script/lib/leaf.js --set-version $version

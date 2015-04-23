@@ -1,35 +1,11 @@
 {
     "name": "leaf-require",
     "js": {
-        "root": "./js/",
+        "root": "./script/",
         "files": [
             {
                 "path": "app.js",
                 "hash": "fbeff9"
-            },
-            {
-                "path": "connectionManager.js",
-                "hash": "ab2bdb"
-            },
-            {
-                "path": "coreData.js",
-                "hash": "b2217a"
-            },
-            {
-                "path": "enhancement.js",
-                "hash": "7aa698"
-            },
-            {
-                "path": "errors.js",
-                "hash": "04eca2"
-            },
-            {
-                "path": "hintStack.js",
-                "hash": "a36cb2"
-            },
-            {
-                "path": "i18n.js",
-                "hash": "5917c4"
             },
             {
                 "path": "init.js",
@@ -37,83 +13,99 @@
             },
             {
                 "path": "main.js",
-                "hash": "3b527a"
-            },
-            {
-                "path": "mobile.js",
-                "hash": "83b90a"
+                "hash": "8a3145"
             },
             {
                 "path": "model.js",
-                "hash": "ad7c89"
+                "hash": "7a5c0e"
             },
             {
-                "path": "modelSyncManager.js",
-                "hash": "710717"
+                "path": "common/errors.js",
+                "hash": "04eca2"
             },
             {
-                "path": "models.js",
-                "hash": "9bf968"
-            },
-            {
-                "path": "offlineHinter.js",
-                "hash": "0cd720"
-            },
-            {
-                "path": "p2pView.js",
-                "hash": "03bad3"
-            },
-            {
-                "path": "persistentDataStore.js",
-                "hash": "3718fc"
-            },
-            {
-                "path": "serverConnection.js",
-                "hash": "211027"
-            },
-            {
-                "path": "settingPanel.js",
-                "hash": "5e1cc1"
-            },
-            {
-                "path": "templateManager.js",
-                "hash": "dd5eca"
-            },
-            {
-                "path": "test.js",
-                "hash": "b47c12"
-            },
-            {
-                "path": "userConfig.js",
-                "hash": "356c80"
-            },
-            {
-                "path": "view.js",
-                "hash": "136b2f"
-            },
-            {
-                "path": "viewSwitcher.js",
-                "hash": "83b90a"
-            },
-            {
-                "path": "baseView/archiveDisplayer.js",
-                "hash": "6e2696"
-            },
-            {
-                "path": "components/backButtonChecker.js",
-                "hash": "0de125"
-            },
-            {
-                "path": "components/history.js",
+                "path": "common/history.js",
                 "hash": "d15a9b"
             },
             {
-                "path": "components/imageLoader.js",
-                "hash": "629f18"
+                "path": "common/i18n.js",
+                "hash": "a1b6f4"
             },
             {
-                "path": "lib/async.js",
+                "path": "common/model.js",
+                "hash": "8fca0c"
+            },
+            {
+                "path": "common/templateManager.js",
+                "hash": "1db9cd"
+            },
+            {
+                "path": "component/async.js",
                 "hash": "2ff89a"
+            },
+            {
+                "path": "component/backButtonChecker.js",
+                "hash": "a16efa"
+            },
+            {
+                "path": "component/dragContext.js",
+                "hash": "06711f"
+            },
+            {
+                "path": "component/endlessListRenderer.js",
+                "hash": "5f61c7"
+            },
+            {
+                "path": "component/flag.js",
+                "hash": "d833fa"
+            },
+            {
+                "path": "component/imageLoader.js",
+                "hash": "62d13d"
+            },
+            {
+                "path": "component/messageCenter.js",
+                "hash": "2e4e08"
+            },
+            {
+                "path": "component/moment.js",
+                "hash": "c46160"
+            },
+            {
+                "path": "component/scrollChecker.js",
+                "hash": "00abef"
+            },
+            {
+                "path": "component/serverConnection.js",
+                "hash": "6f9b03"
+            },
+            {
+                "path": "component/swipeChecker.js",
+                "hash": "6bdac1"
+            },
+            {
+                "path": "etc/enhancement.js",
+                "hash": "e2b605"
+            },
+            {
+                "path": "etc/mobile.js",
+                "hash": "83b90a"
+            },
+            {
+                "path": "etc/test.js",
+                "hash": "930b98"
+            },
+            {
+                "path": "facility/connectionManager.js",
+                "hash": "1c0d1e"
+            },
+            {
+                "path": "facility/modelSyncManager.js",
+                "hash": "85c073"
+            },
+            {
+                "path": "facility/userConfig.js",
+                "hash": "356c80"
             },
             {
                 "path": "lib/hammer.min.js",
@@ -128,10 +120,6 @@
                 "hash": "0a26bb"
             },
             {
-                "path": "lib/moment.js",
-                "hash": "c46160"
-            },
-            {
                 "path": "lib/parseUri.js",
                 "hash": "c81726"
             },
@@ -140,12 +128,12 @@
                 "hash": "4dab9c"
             },
             {
-                "path": "listView/listView.js",
-                "hash": "232b77"
+                "path": "module/coreData.js",
+                "hash": "130eff"
             },
             {
                 "path": "procedure/bufferedEndlessArchiveLoader.js",
-                "hash": "abc2f0"
+                "hash": "5796e7"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
@@ -156,88 +144,16 @@
                 "hash": "00d3d3"
             },
             {
-                "path": "searchView/searchView.js",
-                "hash": "4f6303"
-            },
-            {
-                "path": "sourceUtil/adapterTerminal.js",
-                "hash": "ac1d3c"
-            },
-            {
-                "path": "sourceUtil/addSourcePopup.js",
-                "hash": "025bb1"
-            },
-            {
-                "path": "sourceUtil/sourceAuthorizeTerminal.js",
-                "hash": "baad4f"
-            },
-            {
-                "path": "sourceUtil/subscribeAssistant.js",
-                "hash": "ba7c99"
-            },
-            {
-                "path": "sourceView/archiveList.js",
-                "hash": "40f849"
-            },
-            {
-                "path": "sourceView/archiveList2.js",
-                "hash": "e48321"
-            },
-            {
-                "path": "sourceView/sourceDetail.js",
-                "hash": "1558ab"
-            },
-            {
-                "path": "sourceView/sourceList.js",
-                "hash": "836f64"
-            },
-            {
-                "path": "sourceView/sourceList2.js",
-                "hash": "a55bd8"
-            },
-            {
-                "path": "sourceView/sourceView.js",
-                "hash": "9c4c5a"
-            },
-            {
                 "path": "util/delayWorker.js",
                 "hash": "d12cd2"
-            },
-            {
-                "path": "util/dragContext.js",
-                "hash": "06711f"
-            },
-            {
-                "path": "util/endlessListRenderer.js",
-                "hash": "a04ba6"
-            },
-            {
-                "path": "util/flag.js",
-                "hash": "cd346c"
-            },
-            {
-                "path": "util/imageLoader.js",
-                "hash": "629f18"
-            },
-            {
-                "path": "util/messageCenter.js",
-                "hash": "2e4e08"
             },
             {
                 "path": "util/resizeChecker.js",
                 "hash": "83b90a"
             },
             {
-                "path": "util/scrollChecker.js",
-                "hash": "00abef"
-            },
-            {
                 "path": "util/serverConnection.js",
                 "hash": "6f9b03"
-            },
-            {
-                "path": "util/swipeChecker.js",
-                "hash": "6bdac1"
             },
             {
                 "path": "util/task.js",
@@ -248,36 +164,100 @@
                 "hash": "a789f2"
             },
             {
+                "path": "view/hintStack.js",
+                "hash": "a36cb2"
+            },
+            {
                 "path": "view/imageDisplayer.js",
-                "hash": "fc360a"
+                "hash": "1492f9"
+            },
+            {
+                "path": "view/offlineHinter.js",
+                "hash": "320335"
+            },
+            {
+                "path": "view/sceneSwitcher.js",
+                "hash": "a44471"
+            },
+            {
+                "path": "view/settingPanel.js",
+                "hash": "7bbabc"
             },
             {
                 "path": "view/toaster.js",
-                "hash": "8124e5"
+                "hash": "37b234"
             },
             {
-                "path": "widget/contentImage.js",
-                "hash": "e0cb50"
+                "path": "view/base/archiveDisplayer.js",
+                "hash": "654b10"
             },
             {
-                "path": "widget/contextMenu.js",
-                "hash": "6e8766"
-            },
-            {
-                "path": "widget/cubeLoadingHint.js",
-                "hash": "04c27a"
-            },
-            {
-                "path": "widget/popup.js",
+                "path": "view/base/popup.js",
                 "hash": "bca350"
             },
             {
+                "path": "view/base/scene.js",
+                "hash": "776f41"
+            },
+            {
+                "path": "view/listScene/scene.js",
+                "hash": "798c1a"
+            },
+            {
+                "path": "view/searchScene/scene.js",
+                "hash": "a61eab"
+            },
+            {
+                "path": "view/sourceScene/archiveList.js",
+                "hash": "2f1fad"
+            },
+            {
+                "path": "view/sourceScene/scene.js",
+                "hash": "79e92e"
+            },
+            {
+                "path": "view/sourceScene/sourceDetail.js",
+                "hash": "c7b43a"
+            },
+            {
+                "path": "view/sourceScene/sourceList.js",
+                "hash": "2537a1"
+            },
+            {
+                "path": "view/sourceUtil/adapterTerminal.js",
+                "hash": "ca86ac"
+            },
+            {
+                "path": "view/sourceUtil/addSourcePopup.js",
+                "hash": "bf6cca"
+            },
+            {
+                "path": "view/sourceUtil/sourceAuthorizeTerminal.js",
+                "hash": "11d88e"
+            },
+            {
+                "path": "view/sourceUtil/subscribeAssistant.js",
+                "hash": "6035bb"
+            },
+            {
+                "path": "widget/contentImage.js",
+                "hash": "5c4ec9"
+            },
+            {
+                "path": "widget/contextMenu.js",
+                "hash": "5d99de"
+            },
+            {
+                "path": "widget/cubeLoadingHint.js",
+                "hash": "5cfcf4"
+            },
+            {
                 "path": "widget/smartImage.js",
-                "hash": "869e8a"
+                "hash": "85bd59"
             }
         ]
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.21"
+    "version": "0.3.0.437"
 }

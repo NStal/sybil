@@ -2,13 +2,13 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <script type="text/javascript" src="js/lib/leaf.js"></script>
-    <script type="text/javascript" src="js/lib/jquery.js"></script>
-    <script type="text/javascript" src="js/lib/leaf-require.js"></script>
-    <script type="text/javascript" src="js/lib/sanitizer.js"></script>
-    <script type="text/javascript" src="js/lib/parseUri.js"></script>
-    <script type="text/javascript" src="js/lib/md5.js"></script>
-    <script type="text/javascript" src="js/init.js"></script>
+    <script type="text/javascript" src="script/lib/leaf.js"></script>
+    <script type="text/javascript" src="script/lib/jquery.js"></script>
+    <script type="text/javascript" src="script/lib/leaf-require.js"></script>
+    <script type="text/javascript" src="script/lib/sanitizer.js"></script>
+    <script type="text/javascript" src="script/lib/parseUri.js"></script>
+    <script type="text/javascript" src="script/lib/md5.js"></script>
+    <script type="text/javascript" src="script/init.js"></script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="app-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
@@ -17,76 +17,20 @@
     <title>Sybil Reader</title>
   </head> 
   <body class="fancy-scroll">
-    
-    <div class="view-switcher">
-      <div data-id="title" class="option">
-        <i data-class="caretClass" class="icon fa"></i>
-        <span data-text="title" class="title clickable"></span>
-      </div>
-      <ul data-class="showSelector:show" class="view-selector" data-id="viewSelector"></ul>
-      <!--div class="button fa fa-gear" data-id="settingButton">
-        
-      </div-->
-    </div>
-    <div class="setting-panel">
-      <div class="wrapper">
-        
-        <div class="groups">
-          <h3>Settings</h3>
-          <div class="setting-groups" data-id="settingGroups">
-          </div>
-          
-          <button data-id="cancelButton" class="button">cancel</button>
-        </div>
-        <div class="entrys">
-          <h3 data-id="groupTitle" ></h3>
-          <div class="setting-entrys" data-id="settingEntrys">
-          </div>
-          <button data-id="applyButton" class="button">apply</button>
-          <button data-id="resetButton" class="button">reset</button>
-        </div>
-      </div>
-    </div>
-    <!--div class="view custom-view">
-        <widget data-widget="customSourceList"></widget>
-        <widget data-widget="customArchiveList"></widget>
-</div>
-<div class="view tag-view">
-  <widget data-widget="tagList"></widget>
-  <widget data-widget="tagArchiveList"></widget>
-    </div-->
-    <div class="view source-view"> 
+    <div class="scene source-scene"> 
       <widget data-widget="sourceList"></widget>
       <div class="source-list-overlay" data-id="sourceListOverlay"></div>
       <widget data-widget="archiveList"></widget>
-
     </div>
-    
-    <div class="view list-view">
+    <div class="scene list-scene">
       <widget data-widget="list"></widget>
       <widget data-widget="archives"></widget> 
       <widget data-widget="archiveDisplayer"></widget>
 
     </div>
-    <div class="view search-view fancy-scroll">
+    <div class="scene search-scene fancy-scroll">
       <widget data-widget="searchList"></widget>
       <widget data-widget="archiveDisplayer"></widget>
-    </div>
-    <div class="view p2p-view">
-      <div class="debug-info"> 
-        <span>This view is now only for p2p network debug use.</span>
-        <span>You can view p2p share at source view.</span>
-      </div>
-      <widget data-widget="p2pList"></widget>
-      <div class="p2p-info-displayer">
-        <widget data-widget="p2pNodeInfoDisplayer"></widget>
-        <widget data-widget="p2pFriendInfoDisplayer"></widget>
-      </div>
-    </div>
-    <div class="offline-hinter show">
-      
-      <cube-loading-hint class="loading-hint white" hint="disconnected, trying to recover..."></cube-loading-hint>
-      <!--span class="text">connection lost, trying to recover...</span-->
     </div>
     <div class="landing active">
       <div class="middle">

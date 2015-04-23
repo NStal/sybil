@@ -1,0 +1,35 @@
+@import "./css3function.less";
+@blink:{
+    0%{
+	opacity:0.2;
+    }
+    50%{
+	opacity:0.95;
+    }
+    100%{
+	opacity:0.2;
+    }
+};
+.keyframes(blink,@blink);
+
+
+
+@turn:{
+    0% {
+        .transform(rotate3d(0, 0, 0, 0deg));
+    }
+    25% {
+        
+        .transform(rotate3d(0, 1, 1, 180deg));
+    }
+    50% {
+        .transform(rotate3d(1, 1, 0, 0deg));
+    }
+    70% {
+        .transform(rotate3d(1, 0, 1, 180deg));
+    }
+    100% {
+        .transform(rotate3d(0, 0, 0, 0deg));
+    }
+};
+.keyframes(turn,@turn);
