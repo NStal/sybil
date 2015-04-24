@@ -235,7 +235,7 @@ class EndlessListRenderer extends Leaf.EventEmitter
         @wrapper.style.minHeight = "#{bufferViewPort.bottom + @bottomPadding}px"
         @lockContainer()
         # every thing is done!
-        if bufferViewPort.bottom <= viewPort.bottom or endBetterBe > @end
+        if bufferViewPort.bottom <= viewPort.bottom or endBetterBe > @end or expandBottomFix > 0
             @emit "requireMore"
 #        clearTimeout @destroyStaleTimer
 #        @destroyStaleTimer = setTimeout @destroyStale.bind(this),@destroyInterval

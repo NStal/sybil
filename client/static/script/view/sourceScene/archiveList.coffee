@@ -213,12 +213,12 @@ class ArchiveListController extends Leaf.Widget
             if @archiveBuffer.isDrain()
                 @context.UI.emptyHint$.show()
     updateFocusItem:()->
-        if @lastUpdateFocus
-            last = @lastUpdateFocus
-            @lastUpdateFocus = Date.now()
-            minInterval = 10
-            if Date.now() - last < minInterval
-                return
+#        if @lastUpdateFocus
+#            last = @lastUpdateFocus
+#            @lastUpdateFocus = Date.now()
+#            minInterval = 10
+#            if Date.now() - last < minInterval
+#                return
 
 
         height = @getFocusHeight()
