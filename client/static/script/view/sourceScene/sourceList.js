@@ -308,6 +308,7 @@
           if (_this.stale(sole)) {
             return;
           }
+          console.error("load folder core data", _this.folderCoreData);
           if (err) {
             _this.error(err);
             return;
@@ -689,9 +690,13 @@
     };
 
     SourceListItem.prototype.unsubscribe = function(callback) {
-      this.context.children.removeItem(this);
-      this.context.manager.removeSource(this.pack);
-      return this.context.reflow();
+      return this.source.unsubscribe((function(_this) {
+        return function() {
+          _this.context.children.removeItem(_this);
+          _this.context.manager.removeSource(_this.pack);
+          return _this.context.reflow();
+        };
+      })(this));
     };
 
     SourceListItem.prototype.showSourceDetail = function() {

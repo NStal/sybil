@@ -4,7 +4,6 @@ MessageCenter = (require "message-center").MessageCenter;
 ws = require "ws"
 WebSocket = ws
 http = require "http"
-
 console = require("../../common/logger").create("web-api")
 #sortArchive = (archives,what)->
 #    console.log "sort called!"
@@ -53,7 +52,7 @@ class WebApiServer extends EventEmitter
     destroyMessageCenter:(mc)->
         mc.removeAllListeners()
         mc.unsetConnection()
-
+        mc.observeWindow?.destroy()
         @emit "destroyMessageCenter",mc
         @messageCenters = @messageCenters.filter (item)->item isnt mc
         return true
@@ -68,6 +67,9 @@ class WebApiServer extends EventEmitter
             console.log "webApi get connection custom"
             mc = @createMessageCenter()
             mc.setConnection(connection)
+            connection.on "error",(err)=>
+                console.error "websocket error",err
+                @destroyMessageCenter(mc)
             connection.on "close",()=>
                 console.debug "connection close from client"
                 @destroyMessageCenter(mc)
@@ -80,6 +82,21 @@ class WebApiServer extends EventEmitter
         console.log @httpPort,@host,"listen"
         @httpServer.listen(@httpPort,@host)
     setupMessageCenter:(messageCenter)->
+        # setup server state observer
+        #observeWindow = new CoreState.ObserveWindow @sybil.coreState
+        #messageCenter.observeWindow = observeWindow
+        #bubble = (mc,win,event)->
+        #    win.on event,(info)=>
+        #        mc.fireEvent "observe/#{event}",info
+        #bubble messageCenter,observeWindow,"delete"
+        #bubble messageCenter,observeWindow,"init"
+        #bubble messageCenter,observeWindow,"change"
+        #messageCenter.registerApi "observe",(path,callback)->
+        #    callback null,observeWindow.observe(path)
+        #messageCenter.registerApi "stopObserve",(path,callback)->
+        #    callback null,observeWindow.stopObserve(path)
+
+        # setup normal API
         messageCenter.registerApi "getConfig",(name,callback)=>
             @sybil.getConfig name,(err,config)=>
                 callback err,config

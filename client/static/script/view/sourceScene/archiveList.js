@@ -345,15 +345,7 @@
     }
 
     ArchiveListController.prototype.updateFocusItem = function() {
-      var height, last, minInterval, pack;
-      if (this.lastUpdateFocus) {
-        last = this.lastUpdateFocus;
-        this.lastUpdateFocus = Date.now();
-        minInterval = 10;
-        if (Date.now() - last < minInterval) {
-          return;
-        }
-      }
+      var height, pack;
       height = this.getFocusHeight();
       pack = this.renderer.getPackByHeight(height);
       if (!(pack != null ? pack.isRealized : void 0)) {

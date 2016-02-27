@@ -21,7 +21,7 @@
             },
             {
                 "path": "common/errors.js",
-                "hash": "04eca2"
+                "hash": "fbf129"
             },
             {
                 "path": "common/history.js",
@@ -53,7 +53,7 @@
             },
             {
                 "path": "component/endlessListRenderer.js",
-                "hash": "5f61c7"
+                "hash": "efd1fa"
             },
             {
                 "path": "component/flag.js",
@@ -69,7 +69,11 @@
             },
             {
                 "path": "component/moment.js",
-                "hash": "c46160"
+                "hash": "461621"
+            },
+            {
+                "path": "component/portal.js",
+                "hash": "3a4f10"
             },
             {
                 "path": "component/scrollChecker.js",
@@ -97,11 +101,15 @@
             },
             {
                 "path": "facility/connectionManager.js",
-                "hash": "1c0d1e"
+                "hash": "a69449"
             },
             {
                 "path": "facility/modelSyncManager.js",
                 "hash": "85c073"
+            },
+            {
+                "path": "facility/serverState.js",
+                "hash": "e8844c"
             },
             {
                 "path": "facility/userConfig.js",
@@ -133,7 +141,7 @@
             },
             {
                 "path": "procedure/bufferedEndlessArchiveLoader.js",
-                "hash": "8dbf61"
+                "hash": "8d4fe5"
             },
             {
                 "path": "procedure/endlessArchiveLoader.js",
@@ -169,7 +177,7 @@
             },
             {
                 "path": "view/imageDisplayer.js",
-                "hash": "1492f9"
+                "hash": "3f7f9c"
             },
             {
                 "path": "view/offlineHinter.js",
@@ -209,7 +217,7 @@
             },
             {
                 "path": "view/sourceScene/archiveList.js",
-                "hash": "2f1fad"
+                "hash": "7db68b"
             },
             {
                 "path": "view/sourceScene/scene.js",
@@ -221,7 +229,7 @@
             },
             {
                 "path": "view/sourceScene/sourceList.js",
-                "hash": "2537a1"
+                "hash": "ac77b3"
             },
             {
                 "path": "view/sourceUtil/adapterTerminal.js",
@@ -259,5 +267,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.443"
+    "version": "0.3.0.547"
 }

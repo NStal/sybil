@@ -14,6 +14,7 @@ class Point
 class TouchManager extends Leaf.Widget
     constructor:()->
         super()
+        @acceptMouse = true
         @console = document.createElement("div")
         #document.body.appendChild @console
         @console.style.width = "100%"
@@ -44,7 +45,14 @@ class TouchManager extends Leaf.Widget
             @currentTarget.addEventListener "touchcancel",@handleTouchCancel.bind(this)
             @currentTarget.addEventListener "touchend",@handleTouchEnd.bind(this)
             @currentTarget.addEventListener "touchmove",@handleTouchMove.bind(this)
+            if @acceptMouse
 
+                @currentTarget.addEventListener "touchstart",@_transformMouseToTouch @handleTouchStart.bind(this)
+                @currentTarget.addEventListener "touchenter",@_transformMouseToTouch @handleTouchEnter.bind(this)
+                @currentTarget.addEventListener "touchleave",@_transformMouseToTouch @handleTouchLeave.bind(this)
+                @currentTarget.addEventListener "touchcancel",@_transformMouseToTouch @handleTouchCancel.bind(this)
+                @currentTarget.addEventListener "touchend",@_transformMouseToTouch @handleTouchEnd.bind(this)
+                @currentTarget.addEventListener "touchmove",@_transformMouseToTouch @handleTouchMove.bind(this)
     reset:()->
         if @currentTarget
             @currentTarget.removeEventListener("touchstart")
@@ -53,6 +61,10 @@ class TouchManager extends Leaf.Widget
             @currentTarget.removeEventListener("touchcancel")
             @currentTarget.removeEventListener("touchend")
             @currentTarget.removeEventListener("touchmove")
+    _transformMouseToTouch:(fn)->
+        return (e)->
+            e.touches = [e]
+            fn(e)
     _averagePosition:(list)->
         x = 0
         y = 0

@@ -50,7 +50,6 @@ App.afterInitialLoad = (callback)->
         callback()
     else
         @once "connect",callback
-
 App.history = new History({debug:true})
 App.backButton = new BackButtonChecker(App.history)
 App.imageLoader = new ImageLoader()
@@ -111,6 +110,7 @@ App.tm = App.templateManager
 App.messageCenter = new (require "/component/messageCenter")
 App.mc = App.messageCenter
 App.connectionManager = new (require "/facility/connectionManager")
+#App.serverState = new (require "/facility/serverState")
 App.userConfig = new (require "/facility/userConfig")
 App.modelSyncManager = new (require "/facility/modelSyncManager")
 

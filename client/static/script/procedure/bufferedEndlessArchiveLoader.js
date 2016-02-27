@@ -172,7 +172,9 @@
             _this.data.guids.push(archive.guid);
             _this.data.archives.push(archive);
           }
-          _this.emit("loadend", err);
+          if (archives.length > 0) {
+            _this.emit("loadend");
+          }
           if (archives.length < _this.querySize) {
             _this.data.drain = true;
             return _this.setState("drained");

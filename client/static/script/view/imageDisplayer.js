@@ -38,6 +38,7 @@
 
     function TouchManager() {
       TouchManager.__super__.constructor.call(this);
+      this.acceptMouse = true;
       this.console = document.createElement("div");
       this.console.style.width = "100%";
       this.console.style.height = "30px";
@@ -72,7 +73,15 @@
         this.currentTarget.addEventListener("touchleave", this.handleTouchLeave.bind(this));
         this.currentTarget.addEventListener("touchcancel", this.handleTouchCancel.bind(this));
         this.currentTarget.addEventListener("touchend", this.handleTouchEnd.bind(this));
-        return this.currentTarget.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.currentTarget.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        if (this.acceptMouse) {
+          this.currentTarget.addEventListener("touchstart", this._transformMouseToTouch(this.handleTouchStart.bind(this)));
+          this.currentTarget.addEventListener("touchenter", this._transformMouseToTouch(this.handleTouchEnter.bind(this)));
+          this.currentTarget.addEventListener("touchleave", this._transformMouseToTouch(this.handleTouchLeave.bind(this)));
+          this.currentTarget.addEventListener("touchcancel", this._transformMouseToTouch(this.handleTouchCancel.bind(this)));
+          this.currentTarget.addEventListener("touchend", this._transformMouseToTouch(this.handleTouchEnd.bind(this)));
+          return this.currentTarget.addEventListener("touchmove", this._transformMouseToTouch(this.handleTouchMove.bind(this)));
+        }
       }
     };
 
@@ -85,6 +94,13 @@
         this.currentTarget.removeEventListener("touchend");
         return this.currentTarget.removeEventListener("touchmove");
       }
+    };
+
+    TouchManager.prototype._transformMouseToTouch = function(fn) {
+      return function(e) {
+        e.touches = [e];
+        return fn(e);
+      };
     };
 
     TouchManager.prototype._averagePosition = function(list) {

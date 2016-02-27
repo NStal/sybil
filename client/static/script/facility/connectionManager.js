@@ -11,8 +11,11 @@
     __extends(ConnectionManager, _super);
 
     function ConnectionManager(address) {
+      var wsProtocol;
       ConnectionManager.__super__.constructor.call(this);
-      this.connectInterval = 1000;
+      wsProtocol = "ws:";
+      this.address = "" + wsProtocol + "//" + window.location.hostname + ":" + window.location.port + window.location.pathname;
+      this.retryInterval = 1000;
       this.connection = new ServerConnection();
       this.connection.on("connect", (function(_this) {
         return function() {
@@ -28,10 +31,17 @@
       })(this));
     }
 
+    ConnectionManager.prototype.suggestReconnect = function() {};
+
     ConnectionManager.prototype.ready = function() {
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return this.connection.ready.apply(this.connection, args);
+    };
+
+    ConnectionManager.prototype.atStartConnect = function() {
+      this.connection.close();
+      return this.connection;
     };
 
     ConnectionManager.prototype.start = function() {
@@ -47,7 +57,7 @@
 
     return ConnectionManager;
 
-  })(Leaf.EventEmitter);
+  })(Leaf.States);
 
   module.exports = ConnectionManager;
 

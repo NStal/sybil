@@ -1,8 +1,10 @@
 ServerConnection = require("/component/serverConnection")
-class ConnectionManager extends Leaf.EventEmitter
+class ConnectionManager extends Leaf.States
     constructor:(address)->
         super()
-        @connectInterval = 1000
+        wsProtocol = "ws:"
+        @address = "#{wsProtocol}//#{window.location.hostname}:#{window.location.port}#{window.location.pathname}"
+        @retryInterval = 1000
         @connection = new ServerConnection()
         @connection.on "connect",()=>
             @emit "connect"
@@ -10,8 +12,12 @@ class ConnectionManager extends Leaf.EventEmitter
             @emit "disconnect"
             console.debug "reconnect"
             setTimeout @connection.reconnect.bind(@connection),500
+    suggestReconnect:()->
     ready:(args...)->
         @connection.ready.apply @connection,args
+    atStartConnect:()->
+        @connection.close()
+        @connection
     start:()->
         if window.location.protocol is "https:"
             wsProtocol = "wss:"

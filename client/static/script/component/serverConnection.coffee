@@ -36,5 +36,4 @@ class ServerConnection extends Leaf.EventEmitter
             @websocket.close()
         @websocket = null
         @emit "disconnect"
-
 module.exports = ServerConnection

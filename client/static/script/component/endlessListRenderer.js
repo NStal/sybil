@@ -333,7 +333,7 @@
       this.resizeChecker.acknowledge(this.buffer.offsetHeight);
       this.wrapper.style.minHeight = "" + (bufferViewPort.bottom + this.bottomPadding) + "px";
       this.lockContainer();
-      if (bufferViewPort.bottom <= viewPort.bottom || endBetterBe > this.end) {
+      if (bufferViewPort.bottom <= viewPort.bottom || endBetterBe > this.end || expandBottomFix > 0) {
         this.emit("requireMore");
       }
       return this.emit("reflow", this.start, this.end);

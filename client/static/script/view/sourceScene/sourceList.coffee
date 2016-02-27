@@ -211,6 +211,7 @@ class SourceListManager extends Leaf.States
         @folderCoreData.load (err)=>
             if @stale sole
                 return
+            console.error "load folder core data",@folderCoreData
             if err
                 @error err
                 return
@@ -444,10 +445,10 @@ class SourceListItem extends SourceListItemBase
         @UI.sourceIcon.errorSrc = "/image/favicon-default.png"
         @UI.sourceIcon.src = "plugins/iconProxy?url=#{encodeURIComponent @source.uri}"
     unsubscribe:(callback)->
-#        @source.unsubscribe ()=>
-        @context.children.removeItem this
-        @context.manager.removeSource @pack
-        @context.reflow()
+        @source.unsubscribe ()=>
+            @context.children.removeItem this
+            @context.manager.removeSource @pack
+            @context.reflow()
     showSourceDetail:()->
         App.sourceScene.sourceDetail.setSource @source
         App.sourceScene.sourceDetail.show()

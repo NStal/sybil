@@ -1,1 +1,1 @@
-/home/wuminghan/workspace/leaf-require/leaf-require.js
+/home/wuminghan/workspace/leaf-require/browser/leaf-require.js
