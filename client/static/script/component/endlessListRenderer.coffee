@@ -219,7 +219,6 @@ class EndlessListRenderer extends Leaf.EventEmitter
         for pack,index in @packs[@end+1...@packs.length]
             if bufferViewPort.bottom > viewPort.bottom and @end > endBetterBe and expandBottomFix <= 0
                 break
-            console.debug "add by expand botto fix",expandBottomFix
             expandBottomFix -= 1
             @bufferList.push pack.realize()
             pack.calculateSize()

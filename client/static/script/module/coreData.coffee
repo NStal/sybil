@@ -14,7 +14,7 @@ class CoreData extends Leaf.EventEmitter
             if @data
                 callback new Errors.Duplication("data already exists")
                 return
-            @data = data
+            @data = data or {}
             if not @isReady
                 @isReady = true
                 @emit "ready"

@@ -33,7 +33,7 @@
             callback(new Errors.Duplication("data already exists"));
             return;
           }
-          _this.data = data;
+          _this.data = data || {};
           if (!_this.isReady) {
             _this.isReady = true;
             _this.emit("ready");

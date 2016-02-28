@@ -53,7 +53,7 @@
             },
             {
                 "path": "component/endlessListRenderer.js",
-                "hash": "efd1fa"
+                "hash": "e563c8"
             },
             {
                 "path": "component/flag.js",
@@ -61,7 +61,7 @@
             },
             {
                 "path": "component/imageLoader.js",
-                "hash": "62d13d"
+                "hash": "0a2490"
             },
             {
                 "path": "component/messageCenter.js",
@@ -137,7 +137,7 @@
             },
             {
                 "path": "module/coreData.js",
-                "hash": "130eff"
+                "hash": "c7bc21"
             },
             {
                 "path": "procedure/bufferedEndlessArchiveLoader.js",
@@ -267,5 +267,5 @@
     },
     "debug": false,
     "cache": false,
-    "version": "0.3.0.547"
+    "version": "0.3.0.562"
 }

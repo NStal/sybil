@@ -316,7 +316,6 @@
         if (bufferViewPort.bottom > viewPort.bottom && this.end > endBetterBe && expandBottomFix <= 0) {
           break;
         }
-        console.debug("add by expand botto fix", expandBottomFix);
         expandBottomFix -= 1;
         this.bufferList.push(pack.realize());
         pack.calculateSize();

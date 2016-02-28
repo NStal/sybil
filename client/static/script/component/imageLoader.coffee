@@ -6,7 +6,8 @@ class ImageLoader extends Leaf.EventEmitter
     class ImageLoaderWorker extends Leaf.States
         constructor:()->
             super()
-            @timeout = 1000 * 20
+            @timeout = 1000 * 60
+            @debug()
         load:(@src)->
             # need manually reset
 
@@ -77,7 +78,7 @@ class ImageLoader extends Leaf.EventEmitter
         @caches = {}
         @fails = {}
         @coherency = 0
-        @setCoherency(5)
+        @setCoherency(20)
     setCoherency:(count = 5)->
         @_initWorkers(5)
     _initWorkers:(count)->
@@ -109,7 +110,7 @@ class ImageLoader extends Leaf.EventEmitter
                 @_load worker,info
                 @_next()
                 return
-    _load:(worker,info)->
+    _load:(worker,info = {})->
         worker.reserve()
         if worker.isPending()
             worker.give("giveup")

@@ -20,7 +20,8 @@
 
       function ImageLoaderWorker() {
         ImageLoaderWorker.__super__.constructor.call(this);
-        this.timeout = 1000 * 20;
+        this.timeout = 1000 * 60;
+        this.debug();
       }
 
       ImageLoaderWorker.prototype.load = function(src) {
@@ -131,7 +132,7 @@
       this.caches = {};
       this.fails = {};
       this.coherency = 0;
-      this.setCoherency(5);
+      this.setCoherency(20);
     }
 
     ImageLoader.prototype.setCoherency = function(count) {
@@ -191,6 +192,9 @@
     };
 
     ImageLoader.prototype._load = function(worker, info) {
+      if (info == null) {
+        info = {};
+      }
       worker.reserve();
       if (worker.isPending()) {
         worker.give("giveup");

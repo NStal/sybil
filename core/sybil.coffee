@@ -2,7 +2,6 @@
 console = require("../common/logger").create(__filename)
 pathModule = require "path"
 fs = require("fs")
-#CoreState = require "core-state"
 # Setup some global vars to prevent relative requires
 # which is hard to manipulate, but also be careful don't
 # introduce too many of them.
@@ -26,11 +25,6 @@ class Sybil extends (require "events").EventEmitter
         @collectorController.on "subscribe",(source)=>
             console.log "subscribe source",source
             @emit "source",source
-        @coreState = new CoreState()
-        #timeMaintainer = @coreState.createMaintainer("info.time",Date.now())
-        #setInterval ()=>
-        #    timeMaintainer.setValue Date.now()
-        #,1000
     init:()->
 
         @initTasks = new (require "node-tasks")("init/db","init/collector","init/plugins")
